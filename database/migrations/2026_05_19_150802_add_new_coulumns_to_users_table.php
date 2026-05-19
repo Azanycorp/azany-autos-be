@@ -32,6 +32,7 @@ return new class extends Migration
             $table->boolean('kyc_verification')->default(false);
             $table->boolean('biometric_enabled')->default(false);
             $table->boolean('lock_screen_enabled')->default(false);
+            $table->softDeletes();
         });
     }
 

@@ -229,5 +229,5 @@ return [
     */
 
     'serialization' => 'json',
-
+    'auth_service_url' => env('AUTH_SERVICE_URL'),
 ];
