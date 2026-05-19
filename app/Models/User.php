@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\ShouldVerify;
+use App\Models\Country;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -35,6 +35,7 @@ use Laravel\Sanctum\HasApiTokens;
     'two_factor_enabled',
     'kyc_verification',
     'biometric_enabled',
+    'email_verified_at',
     'lock_screen_enabled',
 ])]
 
@@ -42,7 +43,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
- use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
+ use HasFactory, Notifiable, ShouldVerify, HasApiTokens, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
@@ -55,5 +56,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+     public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
     }
 }

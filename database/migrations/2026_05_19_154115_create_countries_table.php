@@ -19,6 +19,7 @@ return new class extends Migration
             $table->tinyInteger('is_allowed')->default(1);
             $table->string('currency_code')->nullable();
             $table->string('flag')->nullable();
+            $table->string('continent')->nullable();
             $table->timestamps();
         });
     }
