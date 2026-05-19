@@ -7,9 +7,11 @@ use App\Http\Resources\LoginResource;
 use App\Http\Resources\UserResource;
 use App\Mail\TwoFactorCodeMail;
 use App\Models\User;
+use Carbon\Carbon;
 use App\Services\Auth\HttpService;
 use App\Traits\HttpResponses;
 use App\Traits\ShouldVerify;
+use App\Mail\PasswordResetCodeMail;
 use App\Models\Verify;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -284,5 +286,76 @@ class AuthService
             'user' => new LoginResource($user),
             'token' => $token->plainTextToken,
         ]);
+    }
+
+    //forgot password section
+    public function resendCode($request)
+    {
+        $email = Auth::check() ? Auth::user()->email : $request->email;
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return $this->errorResponse('Oops! No record found with your entry.', 404);
+        }
+
+        $verificationCode = mt_rand(1000, 9999);
+        $expiry = now()->addMinutes(30);
+
+        $user->update([
+            'verification_code' => $verificationCode,
+            'verification_code_expire_at' => $expiry,
+        ]);
+
+        $user = User::find($user->id);
+
+        Mail::to($user->email)->send(new PasswordResetCodeMail($user, $verificationCode));
+
+        return $this->successResponse('A new code has been sent to you');
+    }
+
+    public function verifyUserIdentity($request)
+    {
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return $this->errorResponse('Oops! No record found with your entry.', 404);
+        }
+        $code = mt_rand(1000, 9999);
+        $user->update([
+            'verification_code' => $code,
+            'verification_code_expire_at' => Carbon::now()->addMinutes(30),
+        ]);
+
+        Mail::to($user->email)->send(new PasswordResetCodeMail($user, $code));
+        return $this->successResponse('A verification code has been sent to your email');
+    }
+
+    public function verifyCode($request)
+    {
+        $user = User::where('verification_code', $request->verification_code)->first();
+        if (!$user) {
+            return $this->errorResponse('Invalide code entered, please try it again.', 422);
+        }
+
+        if ($user->verification_code_expire_at < now()) {
+            return $this->errorResponse('error', ' Verification Code has Expired!', 404);
+        }
+        $user->update([
+            'verification_code' => null,
+            'verification_code_expire_at' => null,
+        ]);
+        return $this->successResponse("Code Verified");
+    }
+
+    public function changePassword($request)
+    {
+        $user = User::where('email', $request->email)->firstOrFail();
+
+        $user->update([
+            'password' => bcrypt($request->password)
+        ]);
+
+        return $this->successResponse('Password Reset successfully!');
     }
 }

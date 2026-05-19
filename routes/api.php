@@ -21,18 +21,7 @@ use Illuminate\Support\Facades\Route;
         Route::post('/verify-code', 'verifyCode');
         Route::post('/reset-password', 'changePassword');
         Route::post('/resend-code', 'resendCode');
-
-          Route::post('/verify-user', 'verifyUser');
-        Route::post('/verify-code', 'verifyCode');
-        Route::post('/reset-password', 'changePassword');
-        Route::post('/resend-code', 'resendCode');
     });
 
-  Route::controller(AuthenticationController::class)->group(function () {
-        Route::post('/forgot-password', 'resetPassword');
-        Route::post('/forgot-password-otp', 'verify');
-        Route::post('/reset-password', 'reset');
-        Route::post('/resendVerificationMail', 'resendVerificationEmail');
-    });
 
    
