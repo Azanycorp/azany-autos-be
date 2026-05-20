@@ -114,7 +114,7 @@ class AuthService
                         'country_id' => $user->country_id,
                         'password' => $request->password,
                         'signed_up_from' => 'Azanyautos',
-                        'type' => 'auto_buyer',
+                        'type' => 'azanyauto_buyer',
                         'email_verified_at' => now(),
                         'is_verified' => true,
                         'status' => UserStatus::ACTIVE->value,
