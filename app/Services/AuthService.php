@@ -5,21 +5,21 @@ namespace App\Services;
 use App\Enum\UserStatus;
 use App\Http\Resources\LoginResource;
 use App\Http\Resources\UserResource;
-use App\Mail\TwoFactorCodeMail;
+use App\Mail\PasswordResetCodeMail;
+use App\Mail\TwoFACodeMail;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Models\Verify;
 use App\Services\Auth\HttpService;
 use App\Traits\HttpResponses;
 use App\Traits\ShouldVerify;
-use App\Mail\PasswordResetCodeMail;
-use App\Models\Verify;
+use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
-    use ShouldVerify,HttpResponses;
+    use HttpResponses,ShouldVerify;
 
     public function __construct(
         private HttpService $httpService
@@ -36,7 +36,7 @@ class AuthService
         ]);
 
         $requestData['signed_up_from'] = 'Azanyautos';
-        $requestData['type'] = 'miv_user';
+        $requestData['type'] = 'azanyauto_buyer';
 
         $response = $this->httpService->register($requestData);
         if ($response->successful()) {
@@ -46,6 +46,9 @@ class AuthService
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'user_type' => $request->user_type,
+                'reg_number' => $request->reg_number,
+                'business_name' => $request->business_name,
+                'contact_person' => $request->contact_person,
                 'country_id' => $request->country_id,
                 'status' => UserStatus::PENDING->value,
                 'password' => bcrypt($request->password),
@@ -81,9 +84,12 @@ class AuthService
                 $verificationCode = mt_rand(1000, 9999);
                 $expiry = now()->addMinutes(30);
 
-                $user->sendVerificationEmail();
+                $user->update([
+                    'verification_code' => $verificationCode,
+                    'verification_code_expire_at' => $expiry,
+                ]);
 
-                Mail::to($user->email)->send(new TwoFactorCodeMail($user, $verificationCode));
+                Mail::to($user->email)->send(new TwoFACodeMail($user, $verificationCode));
 
                 return $this->successResponse('2FA code sent. Please verify.', [
                     'email' => $user->email,
@@ -91,7 +97,7 @@ class AuthService
                 ], Response::HTTP_ACCEPTED);
             }
 
-            return $this->issueToken($user,$request->email);
+            return $this->issueToken($user, $request->email);
 
         } elseif ($response->status() === 401) {
 
@@ -107,7 +113,7 @@ class AuthService
                         'country_id' => $user->country_id,
                         'password' => $request->password,
                         'signed_up_from' => 'Azanyautos',
-                        'type' => 'azanyautos_buyer',
+                        'type' => 'auto_buyer',
                         'email_verified_at' => now(),
                         'is_verified' => true,
                         'status' => UserStatus::ACTIVE->value,
@@ -116,7 +122,7 @@ class AuthService
 
                 if ($creationResponse->successful()) {
 
-                     $reloginResponse = $this->httpService->login($credentials);
+                    $reloginResponse = $this->httpService->login($credentials);
 
                     if ($reloginResponse->successful()) {
                         return $this->issueToken($user, $request->email);
@@ -124,7 +130,7 @@ class AuthService
                         return $this->errorResponse('Login failed, please try again.', [], $reloginResponse->status());
                     }
                 } else {
-                     return $this->errorResponse(
+                    return $this->errorResponse(
                         $creationResponse->json()['message'] ?? 'Failed to create account on auth service.',
                         [],
                         $creationResponse->status()
@@ -138,14 +144,14 @@ class AuthService
         }
     }
 
-     public function verifyOtp($request)
+    public function verifyOtp($request)
     {
         $verify = Verify::with('user')
             ->where('token', $request->code)
             ->where('expires_at', '>', now())
             ->first();
 
-        if (!$verify) {
+        if (! $verify) {
             return $this->errorResponse('Invalid verification code.', [], Response::HTTP_BAD_REQUEST);
         }
 
@@ -162,7 +168,7 @@ class AuthService
 
             $token = $user->createToken($user->email, ['*'], now()->addDays(5));
 
-            $data = (object)[
+            $data = (object) [
                 'user' => new UserResource($user),
                 'token' => $token->plainTextToken,
             ];
@@ -215,14 +221,14 @@ class AuthService
 
         $user->verify($verify, $request->password);
 
-        return $this->successResponse("Updated successfully", []);
+        return $this->successResponse('Updated successfully', []);
     }
 
     public function resendVerificationEmail($request)
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        if (!empty($user->email_verified_at)) {
+        if (! empty($user->email_verified_at)) {
             return $this->successResponse('Email already verified.', [], Response::HTTP_OK);
         }
 
@@ -240,12 +246,12 @@ class AuthService
     {
         return new UserResource(auth()->user());
     }
-  
+
     public function updatePassword($request)
     {
         $authUser = userAuth();
 
-        if (!Hash::check($request->old_password, $authUser->password)) {
+        if (! Hash::check($request->old_password, $authUser->password)) {
             return $this->errorResponse('Old password is incorrect.', 400);
         }
 
@@ -258,18 +264,20 @@ class AuthService
 
     public function verify2fa($request)
     {
-          $code = Verify::where('email', $request->email)
-            ->where('token', $token)
-            ->first();
+        $user = User::where('verification_code', $request->verification_code)->first();
 
-        if (!$code) {
+        if (! $user) {
             return $this->errorResponse('Invalide code entered, please try it again.', 403);
         }
 
         if ($user->verification_code_expire_at < now()) {
             return $this->errorResponse('error', ' Verification Code has Expired!', 404);
         }
-        $code->delete();
+
+        $user->update([
+            'verification_code' => null,
+            'verification_code_expire_at' => null,
+        ]);
 
         return $this->issueToken($user, $user->email);
     }
@@ -288,14 +296,14 @@ class AuthService
         ]);
     }
 
-    //forgot password section
+    // forgot password section
     public function resendCode($request)
     {
         $email = Auth::check() ? Auth::user()->email : $request->email;
 
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return $this->errorResponse('Oops! No record found with your entry.', 404);
         }
 
@@ -318,7 +326,7 @@ class AuthService
     {
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             return $this->errorResponse('Oops! No record found with your entry.', 404);
         }
         $code = mt_rand(1000, 9999);
@@ -328,13 +336,14 @@ class AuthService
         ]);
 
         Mail::to($user->email)->send(new PasswordResetCodeMail($user, $code));
+
         return $this->successResponse('A verification code has been sent to your email');
     }
 
     public function verifyCode($request)
     {
         $user = User::where('verification_code', $request->verification_code)->first();
-        if (!$user) {
+        if (! $user) {
             return $this->errorResponse('Invalide code entered, please try it again.', 422);
         }
 
@@ -345,7 +354,8 @@ class AuthService
             'verification_code' => null,
             'verification_code_expire_at' => null,
         ]);
-        return $this->successResponse("Code Verified");
+
+        return $this->successResponse('Code Verified');
     }
 
     public function changePassword($request)
@@ -353,7 +363,7 @@ class AuthService
         $user = User::where('email', $request->email)->firstOrFail();
 
         $user->update([
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
         ]);
 
         return $this->successResponse('Password Reset successfully!');
