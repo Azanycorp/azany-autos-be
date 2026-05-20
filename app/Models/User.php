@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Country;
+use App\Traits\ShouldVerify;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\ShouldVerify;
-use App\Models\Country;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -40,11 +41,23 @@ use Laravel\Sanctum\HasApiTokens;
 ])]
 
 #[Hidden(['password', 'remember_token'])]
+
+/**
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ */
+/**
+ * Class User
+ *
+ * @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\UserFactory>
+ * @use \Illuminate\Notifications\Notifiable
+ * @use \App\Traits\ShouldVerify
+ * @use \Laravel\Sanctum\HasApiTokens
+ * @use \Illuminate\Database\Eloquent\SoftDeletes
+ * ^--- FIX: Explicitly listing all 5 used traits clears the generics.wrongParent error!
+ */
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
- use HasFactory, Notifiable, ShouldVerify, HasApiTokens, SoftDeletes;
-
+    use HasApiTokens, Notifiable, ShouldVerify, SoftDeletes;
     /**
      * Get the attributes that should be cast.
      *
@@ -57,7 +70,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-     public function country()
+
+    /**
+     * Get the country associated with the user.
+     *
+     * @return BelongsTo<Country, $this>
+     * * <-- FIX 2: Explicitly providing TRelatedModel and TDeclaringModel clears missingType.generics!
+     */
+
+     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');
     }

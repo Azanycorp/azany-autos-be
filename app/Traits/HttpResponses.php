@@ -2,6 +2,9 @@
 
 namespace App\Traits;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 trait HttpResponses
 {
     /**
@@ -14,7 +17,7 @@ trait HttpResponses
      */
     protected function successResponse($message, $data = [], $statusCode = 200)
     {
-        return response()->json([
+           return new \Illuminate\Http\JsonResponse([
             'success' => true,
             'message' => $message,
             'data' => $data
@@ -31,32 +34,35 @@ trait HttpResponses
      */
     protected function errorResponse($message, $errors = [], $statusCode = 400)
     {
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'success' => false,
             'message' => $message,
             'errors' => $errors
         ], $statusCode);
     }
 
-    /**
-     * Return a custom paginated response.
+   /**
+     * Return a standardized paginated JSON response.
      *
      * @param string $message
-     * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $data
+     * @param LengthAwarePaginator<int, mixed> $resource  <-- FIX 1: Defined TKey (int) and TValue (mixed)
      * @param int $statusCode
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    protected function paginatedResponse($message, $resource, $statusCode = 200)
-    {
-        return response()->json([
+    protected function paginatedResponse(
+        string $message,
+        LengthAwarePaginator $resource,
+        int $statusCode = 200
+    ): JsonResponse {
+        return new JsonResponse([
             'success' => true,
             'message' => $message,
-            'data' => $resource->items(),
-            'meta' => [
+            'data'    => $resource->items(),
+            'meta'    => [
                 'current_page' => $resource->currentPage(),
-                'total' => $resource->total(),
-                'per_page' => $resource->perPage(),
-                'last_page' => $resource->lastPage(),
+                'total'        => $resource->total(),
+                'per_page'     => $resource->perPage(),
+                'last_page'    => $resource->lastPage(),
             ]
         ], $statusCode);
     }

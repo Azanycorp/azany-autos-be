@@ -2,24 +2,29 @@
 
 namespace App\Traits;
 
-use Exception;
 use App\Models\Verify;
 use App\Notifications\ResetPassword;
+use Exception;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * Trait ShouldVerify
+ *
+ * @mixin \App\Models\User
+ */
 trait ShouldVerify
 {
     private function generateVerifier(): Verify
     {
         return Verify::create([
-            'user_id' => $this->id,
-            'token' => rand(1000, 9999),
-            'email' => $this->email,
-            'expires_at' => now()->addMinutes(180)
+            'user_id'    => $this->id,
+            'token'      => rand(1000, 9999),
+            'email'      => $this->email,
+            'expires_at' => now()->addMinutes(180),
         ]);
     }
 
-    public function sendVerificationEmail()
+    public function sendVerificationEmail(): Verify
     {
         $verifyUser = $this->generateVerifier();
 
@@ -39,22 +44,35 @@ trait ShouldVerify
 
         Mail::html($content, function ($message) {
             $message->to($this->email)
-                    ->subject('Email Verification Request.');
+                ->subject('Email Verification Request.');
         });
 
         return $verifyUser;
     }
 
-    public function sendPasswordResetEmail()
+    public function sendPasswordResetEmail(): Verify|string
     {
         $verifyUser = $this->generateVerifier();
         try {
-            $verifyUser->user->notify(new ResetPassword($verifyUser));
+            $this->notify(new ResetPassword($verifyUser));
         } catch (Exception $e) {
             return $e->getMessage();
         }
+
         return $verifyUser;
     }
 
+    public function verify(Verify $verifier, string $password): void
+    {
+        // By removing the extra comments and using a clean @mixin statement at the top,
+        // your IDE natively understands what properties live on $this.
+        $this->password = bcrypt($password);
 
+        if (! $this->email_verified_at) {
+            $this->email_verified_at = now();
+        }
+
+        $this->save();
+        $verifier->delete();
+    }
 }

@@ -19,7 +19,7 @@ class PasswordResetCodeMail extends Mailable
      */
     public function __construct(
         public User $user,
-        public string $code
+        public string|int $code
     ) {}
 
     /**

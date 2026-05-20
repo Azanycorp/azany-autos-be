@@ -3,6 +3,11 @@
 namespace App\Services;
 
 use App\Enum\UserStatus;
+use App\Http\Requests\CodeRequest;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\ResetRequest;
+use App\Http\Requests\VerifyUserRequest;
 use App\Http\Resources\LoginResource;
 use App\Http\Resources\UserResource;
 use App\Mail\PasswordResetCodeMail;
@@ -11,22 +16,22 @@ use App\Models\User;
 use App\Models\Verify;
 use App\Services\Auth\HttpService;
 use App\Traits\HttpResponses;
-use App\Traits\ShouldVerify;
-use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
-    use HttpResponses,ShouldVerify;
+    use HttpResponses;
 
     public function __construct(
         private HttpService $httpService
     ) {}
 
-    public function register($request)
+    public function register(RegisterRequest $request): JsonResponse
     {
         $requestData = $request->only([
             'first_name',
@@ -67,19 +72,19 @@ class AuthService
         }
     }
 
-    public function login($request)
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only(['email', 'password']);
 
         if (! Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Credentials do not match'], 401);
+            return new JsonResponse(['message' => 'Credentials do not match'], 401);
         }
 
         $response = $this->httpService->login($credentials);
 
         if ($response->successful()) {
 
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->firstOrFail();
 
             if ($user->two_factor_enabled) {
                 $verificationCode = mt_rand(1000, 9999);
@@ -98,7 +103,7 @@ class AuthService
                 ], Response::HTTP_ACCEPTED);
             }
 
-            return $this->issueToken($user, $request->email);
+            return $this->issueToken($user);
 
         } elseif ($response->status() === 401) {
 
@@ -126,7 +131,7 @@ class AuthService
                     $reloginResponse = $this->httpService->login($credentials);
 
                     if ($reloginResponse->successful()) {
-                        return $this->issueToken($user, $request->email);
+                        return $this->issueToken($user);
                     } else {
                         return $this->errorResponse('Login failed, please try again.', [], $reloginResponse->status());
                     }
@@ -145,18 +150,17 @@ class AuthService
         }
     }
 
-    public function verifyOtp($request)
+    public function verifyOtp(Request $request): JsonResponse
     {
         $verify = Verify::with('user')
             ->where('token', $request->code)
             ->where('expires_at', '>', now())
-            ->first();
-
-        if (! $verify) {
-            return $this->errorResponse('Invalid verification code.', [], Response::HTTP_BAD_REQUEST);
-        }
+            ->firstOrFail();
 
         $user = $verify->user;
+        if (! $user) {
+            return $this->errorResponse('Associated user account could not be found.', [], Response::HTTP_NOT_FOUND);
+        }
         $response = $this->httpService->verifyCode($user->email);
 
         if ($response->successful()) {
@@ -180,25 +184,18 @@ class AuthService
         }
     }
 
-    public function resetPassword($request)
+    public function resetPassword(VerifyUserRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user) {
-            return $this->errorResponse('User not found', [], Response::HTTP_NOT_FOUND);
-        }
-
-        if (! method_exists($user, 'sendPasswordResetEmail')) {
-            return $this->errorResponse('Unable to send email at this time.', [], Response::HTTP_BAD_REQUEST);
-        }
+        $user = User::where('email', $request->email)->firstOrFail();
 
         $result = $user->sendPasswordResetEmail();
-        $message = is_string($result) ? $result : 'Reset email sent.';
+
+        $message = ($result instanceof Verify) ? 'Reset email sent.' : $result;
 
         return $this->successResponse($message, []);
     }
 
-    public function reset($request)
+    public function reset(ResetRequest $request): JsonResponse
     {
         $user = User::where('email', $request->email)->first();
 
@@ -225,54 +222,35 @@ class AuthService
         return $this->successResponse('Updated successfully', []);
     }
 
-    public function resendVerificationEmail($request)
+    public function resendVerificationEmail(VerifyUserRequest $request): JsonResponse
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        if (! empty($user->email_verified_at)) {
+        if (filled($user->email_verified_at)) {
             return $this->successResponse('Email already verified.', [], Response::HTTP_OK);
         }
 
-        if (! method_exists($user, 'sendVerificationEmail')) {
-            return $this->errorResponse('Unable to send verification email at this time.', [], Response::HTTP_BAD_REQUEST);
-        }
+        $user->sendVerificationEmail();
+        //$message = ($result instanceof Verify) ? 'Verification email resent.' : $result;
 
-        $result = $user->sendVerificationEmail();
-        $message = is_string($result) ? $result : 'Verification email resent.';
-
-        return $this->successResponse($message, [], Response::HTTP_OK);
+        return $this->successResponse('Verification email resent.', [], Response::HTTP_OK);
     }
 
-    public function profile()
+    public function profile(): UserResource
     {
         return new UserResource(auth()->user());
     }
 
-    public function updatePassword($request)
-    {
-        $authUser = userAuth();
-
-        if (! Hash::check($request->old_password, $authUser->password)) {
-            return $this->errorResponse('Old password is incorrect.', 400);
-        }
-
-        $authUser->update([
-            'password' => bcrypt($request->password),
-        ]);
-
-        return $this->successResponse(null, 'Password updated');
-    }
-
-    public function verify2fa($request)
+    public function verify2fa(CodeRequest $request): JsonResponse
     {
         $user = User::where('verification_code', $request->verification_code)->first();
 
         if (! $user) {
-            return $this->errorResponse('Invalide code entered, please try it again.', 403);
+            return $this->errorResponse('Invalide code entered, please try it again.', [], Response::HTTP_FORBIDDEN);
         }
 
         if ($user->verification_code_expire_at < now()) {
-            return $this->errorResponse('error', ' Verification Code has Expired!', 404);
+            return $this->errorResponse('Verification Code has Expired!', [], Response::HTTP_NOT_FOUND);
         }
 
         $user->update([
@@ -280,10 +258,10 @@ class AuthService
             'verification_code_expire_at' => null,
         ]);
 
-        return $this->issueToken($user, $user->email);
+        return $this->issueToken($user);
     }
 
-    protected function issueToken($user)
+    protected function issueToken(User $user): JsonResponse
     {
 
         $token = $user->createToken(
@@ -291,22 +269,16 @@ class AuthService
             ['*']
         );
 
-        return response()->json([
+        return new JsonResponse([
             'user' => new LoginResource($user),
             'token' => $token->plainTextToken,
         ]);
     }
 
     // forgot password section
-    public function resendCode($request)
+    public function resendCode(Request $request): JsonResponse
     {
-        $email = Auth::check() ? Auth::user()->email : $request->email;
-
-        $user = User::where('email', $email)->first();
-
-        if (! $user) {
-            return $this->errorResponse('Oops! No record found with your entry.', 404);
-        }
+        $user = User::where('email', $request->email)->firstOrFail();
 
         $verificationCode = mt_rand(1000, 9999);
         $expiry = now()->addMinutes(30);
@@ -316,24 +288,20 @@ class AuthService
             'verification_code_expire_at' => $expiry,
         ]);
 
-        $user = User::find($user->id);
-
         Mail::to($user->email)->send(new PasswordResetCodeMail($user, $verificationCode));
 
-        return $this->successResponse('A new code has been sent to you');
+        return $this->successResponse('A new code has been sent to you', [], Response::HTTP_OK);
     }
 
-    public function verifyUserIdentity($request)
+    public function verifyUserIdentity(Request $request): JsonResponse
     {
 
-        $user = User::where('email', $request->email)->first();
-        if (! $user) {
-            return $this->errorResponse('Oops! No record found with your entry.', 404);
-        }
+        $user = User::where('email', $request->email)->firstOrFail();
+
         $code = mt_rand(1000, 9999);
         $user->update([
             'verification_code' => $code,
-            'verification_code_expire_at' => Carbon::now()->addMinutes(30),
+            'verification_code_expire_at' => Date::now()->addMinutes(30),
         ]);
 
         Mail::to($user->email)->send(new PasswordResetCodeMail($user, $code));
@@ -341,7 +309,7 @@ class AuthService
         return $this->successResponse('A verification code has been sent to your email');
     }
 
-    public function verifyCode($request)
+    public function verifyCode(Request $request): JsonResponse
     {
         $user = User::where('verification_code', $request->verification_code)->first();
         if (! $user) {
@@ -359,7 +327,7 @@ class AuthService
         return $this->successResponse('Code Verified');
     }
 
-    public function changePassword($request)
+    public function changePassword(Request $request): JsonResponse
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
@@ -367,6 +335,6 @@ class AuthService
             'password' => bcrypt($request->password),
         ]);
 
-        return $this->successResponse('Password Reset successfully!');
+        return $this->successResponse('Password Reset successfully!', [], Response::HTTP_OK);
     }
 }

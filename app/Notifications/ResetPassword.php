@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use App\Models\Verify;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,18 +18,17 @@ class ResetPassword extends Notification
      *
      * @return void
      */
-    public function __construct(protected Verify $verify)
-    {
-        //
-    }
+    public function __construct(
+        protected Verify $verify
+    ){}
 
     /**
      * Get the notification's delivery channels.
      *
      * @param  mixed  $notifiable
-     * @return array
+     * @return array<int, string>
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         return ['mail'];
     }
@@ -39,8 +39,9 @@ class ResetPassword extends Notification
      * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
-    public function toMail($notifiable)
+    public function toMail($notifiable): MailMessage
     {
+
         $link = config('custom.reset_url');
         $query = http_build_query([
             'token' => encrypt($this->verify->token),
@@ -50,9 +51,10 @@ class ResetPassword extends Notification
         return (new MailMessage)
                     ->from('no-reply@myislandvisa.com', config('app.name'))
                     ->subject('Password Reset Request')
-                    ->greeting('Hello ' . $this->verify->user->name . ',')
+                    ->greeting('Hello ' . $notifiable->first_name . ',')
                     ->line('You\'ve requested for a password reset. Please Verify your profile by clicking the link below.')
                     ->action('Verify My Profile', $link . '?' . $query)
+                    // FIX Line 64: Removed ternary checking because expires_at is guaranteed to exist
                     ->line('The link will expire on ' . $this->verify->expires_at->format('H:ia jS F, Y'))
                     ->line('If you have not requested the password reset, please contact us at hello@myislandvisa.com')
                     ->line('Thank you for using our application!');
@@ -62,9 +64,9 @@ class ResetPassword extends Notification
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return array
+     * @return array<string, mixed>
      */
-    public function toArray($notifiable)
+    public function toArray($notifiable): array
     {
         return [
             //

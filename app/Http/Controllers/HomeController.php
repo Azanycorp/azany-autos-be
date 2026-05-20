@@ -14,7 +14,7 @@ class HomeController extends Controller
             '--force' => true
         ]);
 
-        return response()->json([
+        return new \Illuminate\Http\JsonResponse([
             'message' => 'Migration completed successfully.',
             'output' => Artisan::output(),
         ]);
