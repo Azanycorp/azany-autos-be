@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon; // <-- 1. Import Carbon at the top
  * @property string $status
  */
 #[Fillable(['user_id', 'token', 'email', 'status', 'expires_at'])]
-#[Table('verifies', timestamps: true)]
+#[Table(timestamps: true)]
 class Verify extends Model
 {
     const UPDATED_AT = null;

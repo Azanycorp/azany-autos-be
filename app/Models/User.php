@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
 #[Fillable([
     'name',
     'email',
@@ -39,9 +38,7 @@ use Laravel\Sanctum\HasApiTokens;
     'email_verified_at',
     'lock_screen_enabled',
 ])]
-
 #[Hidden(['password', 'remember_token'])]
-
 /**
  * @mixin \Illuminate\Database\Eloquent\Builder
  */

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enum\UserStatus;
+use App\Enum\UserType;
 use App\Http\Requests\CodeRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
@@ -16,9 +17,9 @@ use App\Models\User;
 use App\Models\Verify;
 use App\Services\Auth\HttpService;
 use App\Traits\HttpResponses;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Mail;
@@ -33,20 +34,19 @@ class AuthService
 
     public function register(RegisterRequest $request): JsonResponse
     {
-        $requestData = $request->only([
-            'first_name',
-            'last_name',
-            'email',
-            'country_id',
-            'password',
-        ]);
+        try {
+            $requestData = $request->only([
+                'first_name',
+                'last_name',
+                'email',
+                'country_id',
+                'password',
+            ]);
 
-        $requestData['signed_up_from'] = 'Azanyautos';
-        $requestData['type'] = 'azanyauto_buyer';
+            $requestData['signed_up_from'] = 'Azanyautos';
+            $requestData['type'] = UserType::AUTOBUYER->value;
 
-        $response = $this->httpService->register($requestData);
-        if ($response->successful()) {
-
+            $response = $this->httpService->register($requestData)->throw();
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -63,12 +63,19 @@ class AuthService
             $user->sendVerificationEmail();
 
             return $this->successResponse(
-                'Registration successful. Kindly check your inbox for instructions on how to verify your account. Thanks.',
                 new UserResource($user),
-                Response::HTTP_CREATED
+                'Registration successful. Kindly check your inbox for instructions on how to verify your account. Thanks.'
             );
-        } else {
-            return $this->errorResponse($response->json(), [], $response->status());
+
+        } catch (RequestException $e) {
+            return $this->errorResponse(
+                $e->response->json(),
+                null,
+                $e->response->status()
+            );
+
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, 'An unexpected error occurred during registration.', 500);
         }
     }
 
@@ -77,77 +84,58 @@ class AuthService
         $credentials = $request->only(['email', 'password']);
 
         if (! Auth::attempt($credentials)) {
-            return new JsonResponse(['message' => 'Credentials do not match'], 401);
+            return $this->errorResponse(null, 'Credentials do not match', 401);
         }
 
         $response = $this->httpService->login($credentials);
+        $user = User::where('email', $request->email)->firstOrFail();
 
         if ($response->successful()) {
-
-            $user = User::where('email', $request->email)->firstOrFail();
-
-            if ($user->two_factor_enabled) {
-                $verificationCode = mt_rand(1000, 9999);
-                $expiry = now()->addMinutes(30);
-
-                $user->update([
-                    'verification_code' => $verificationCode,
-                    'verification_code_expire_at' => $expiry,
-                ]);
-
-                Mail::to($user->email)->send(new TwoFACodeMail($user, $verificationCode));
-
-                return $this->successResponse('2FA code sent. Please verify.', [
-                    'email' => $user->email,
-                    '2fa_required' => true,
-                ], Response::HTTP_ACCEPTED);
-            }
-
-            return $this->issueToken($user);
-
-        } elseif ($response->status() === 401) {
-
-            $user = User::where('email', $request->email)->first();
-
-            if ($user) {
-
-                $creationResponse = $this->httpService->register(
-                    [
-                        'first_name' => $user->first_name,
-                        'last_name' => $user->last_name,
-                        'email' => $user->email,
-                        'country_id' => $user->country_id,
-                        'password' => $request->password,
-                        'signed_up_from' => 'Azanyautos',
-                        'type' => 'azanyauto_buyer',
-                        'email_verified_at' => now(),
-                        'is_verified' => true,
-                        'status' => UserStatus::ACTIVE->value,
-                    ]
-                );
-
-                if ($creationResponse->successful()) {
-
-                    $reloginResponse = $this->httpService->login($credentials);
-
-                    if ($reloginResponse->successful()) {
-                        return $this->issueToken($user);
-                    } else {
-                        return $this->errorResponse('Login failed, please try again.', [], $reloginResponse->status());
-                    }
-                } else {
-                    return $this->errorResponse(
-                        $creationResponse->json()['message'] ?? 'Failed to create account on auth service.',
-                        [],
-                        $creationResponse->status()
-                    );
-                }
-            }
-
-            return $this->errorResponse('Invalid credentials or user does not exist.', [], Response::HTTP_UNAUTHORIZED);
-        } else {
-            return $this->errorResponse($response->json()['message'], [], $response->status());
+            return $this->handleSuccessfulLogin($user);
         }
+        if ($response->status() === 401) {
+            return $this->syncUserWithAuthService($user, $request->password,$request->email);
+        }
+
+        return $this->errorResponse(null, $response->json()['message'] ?? 'Auth service failure', $response->status());
+    }
+
+    private function handleSuccessfulLogin(User $user): JsonResponse
+    {
+        if ($user->two_factor_enabled) {
+            $code = mt_rand(1000, 9999);
+            $user->update(['verification_code' => $code, 'verification_code_expire_at' => now()->addMinutes(30)]);
+            Mail::to($user->email)->send(new TwoFACodeMail($user, $code));
+
+            return $this->successResponse(null, '2FA code sent.');
+        }
+
+        return $this->issueToken($user);
+    }
+
+    private function syncUserWithAuthService(User $user, string $password, string $email): JsonResponse
+    {
+        $creation = $this->httpService->register(array_merge(
+            $user->only(['first_name', 'last_name', 'email', 'country_id']),
+            [
+                'password' => $password,
+                'signed_up_from' => 'Azanyautos',
+                'type' => UserType::AUTOBUYER->value,
+                'email_verified_at' => now(),
+                'is_verified' => true,
+                'status' => UserStatus::ACTIVE->value,
+            ]
+        ));
+
+        if ($creation->successful() && $this->httpService->login(['email' => $email, 'password' => $password])->successful()) {
+            return $this->issueToken($user);
+        }
+
+        return $this->errorResponse(
+            null,
+            $creation->json()['message'] ?? 'Synchronization failed.',
+            $creation->status()
+        );
     }
 
     public function verifyOtp(Request $request): JsonResponse
@@ -159,7 +147,7 @@ class AuthService
 
         $user = $verify->user;
         if (! $user) {
-            return $this->errorResponse('Associated user account could not be found.', [], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(null, 'Associated user account could not be found.', 404);
         }
         $response = $this->httpService->verifyCode($user->email);
 
@@ -178,9 +166,9 @@ class AuthService
                 'token' => $token->plainTextToken,
             ];
 
-            return $this->successResponse('Account verified successfully.', $data, Response::HTTP_OK);
+            return $this->successResponse($data, 'Account verified successfully.');
         } else {
-            return $this->errorResponse($response->json()['message'], [], $response->status());
+            return $this->errorResponse($response->json()['message'], null, $response->status());
         }
     }
 
@@ -192,7 +180,7 @@ class AuthService
 
         $message = ($result instanceof Verify) ? 'Reset email sent.' : $result;
 
-        return $this->successResponse($message, []);
+        return $this->successResponse($message);
     }
 
     public function reset(ResetRequest $request): JsonResponse
@@ -200,13 +188,13 @@ class AuthService
         $user = User::where('email', $request->email)->first();
 
         if (! $user) {
-            return $this->errorResponse('User not found', [], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(null, 'User not found', 404);
         }
 
         try {
             $token = decrypt($request->token);
         } catch (\Exception $e) {
-            return $this->errorResponse('Invalid token', [], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse(null, 'Invalid token', 403);
         }
 
         $verify = Verify::where('email', $request->email)
@@ -214,12 +202,12 @@ class AuthService
             ->first();
 
         if (! $verify) {
-            return $this->errorResponse('Invalid or expired token', [], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse(null, 'Invalid or expired token', 403);
         }
 
         $user->verify($verify, $request->password);
 
-        return $this->successResponse('Updated successfully', []);
+        return $this->successResponse(null, 'Updated successfully');
     }
 
     public function resendVerificationEmail(VerifyUserRequest $request): JsonResponse
@@ -227,13 +215,13 @@ class AuthService
         $user = User::where('email', $request->email)->firstOrFail();
 
         if (filled($user->email_verified_at)) {
-            return $this->successResponse('Email already verified.', [], Response::HTTP_OK);
+            return $this->successResponse(null, 'Email already verified.');
         }
 
         $user->sendVerificationEmail();
-        //$message = ($result instanceof Verify) ? 'Verification email resent.' : $result;
+        // $message = ($result instanceof Verify) ? 'Verification email resent.' : $result;
 
-        return $this->successResponse('Verification email resent.', [], Response::HTTP_OK);
+        return $this->successResponse(null, 'Verification email resent.');
     }
 
     public function profile(): UserResource
@@ -246,11 +234,11 @@ class AuthService
         $user = User::where('verification_code', $request->verification_code)->first();
 
         if (! $user) {
-            return $this->errorResponse('Invalide code entered, please try it again.', [], Response::HTTP_FORBIDDEN);
+            return $this->errorResponse(null, 'Invalid code entered, please try it again.', 403);
         }
 
         if ($user->verification_code_expire_at < now()) {
-            return $this->errorResponse('Verification Code has Expired!', [], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(null, 'Verification Code has Expired!', 422);
         }
 
         $user->update([
@@ -290,7 +278,7 @@ class AuthService
 
         Mail::to($user->email)->send(new PasswordResetCodeMail($user, $verificationCode));
 
-        return $this->successResponse('A new code has been sent to you', [], Response::HTTP_OK);
+        return $this->successResponse(null, 'A new code has been sent to you');
     }
 
     public function verifyUserIdentity(Request $request): JsonResponse
@@ -306,25 +294,25 @@ class AuthService
 
         Mail::to($user->email)->send(new PasswordResetCodeMail($user, $code));
 
-        return $this->successResponse('A verification code has been sent to your email');
+        return $this->successResponse(null, 'A verification code has been sent to your email');
     }
 
     public function verifyCode(Request $request): JsonResponse
     {
         $user = User::where('verification_code', $request->verification_code)->first();
         if (! $user) {
-            return $this->errorResponse('Invalide code entered, please try it again.', 422);
+            return $this->errorResponse(null, 'Invalid code entered, please try it again.', 422);
         }
 
         if ($user->verification_code_expire_at < now()) {
-            return $this->errorResponse('error', ' Verification Code has Expired!', 404);
+            return $this->errorResponse(null, 'Verification Code has Expired!', 422);
         }
         $user->update([
             'verification_code' => null,
             'verification_code_expire_at' => null,
         ]);
 
-        return $this->successResponse('Code Verified');
+        return $this->successResponse(null, 'Code Verified');
     }
 
     public function changePassword(Request $request): JsonResponse
@@ -335,6 +323,6 @@ class AuthService
             'password' => bcrypt($request->password),
         ]);
 
-        return $this->successResponse('Password Reset successfully!', [], Response::HTTP_OK);
+        return $this->successResponse(null, 'Password Reset successfully!');
     }
 }

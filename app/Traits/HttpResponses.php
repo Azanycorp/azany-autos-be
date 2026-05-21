@@ -3,67 +3,25 @@
 namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Response;
 
 trait HttpResponses
 {
-    /**
-     * Return a success JSON response.
-     *
-     * @param string $message
-     * @param mixed $data
-     * @param int $statusCode
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function successResponse($message, $data = [], $statusCode = 200)
+    protected function successResponse(mixed $data, ?string $message = null, int $code = Response::HTTP_OK): JsonResponse
     {
-           return new \Illuminate\Http\JsonResponse([
-            'success' => true,
-            'message' => $message,
-            'data' => $data
-        ], $statusCode);
-    }
-
-    /**
-     * Return an error JSON response.
-     *
-     * @param string $message
-     * @param mixed $errors
-     * @param int $statusCode
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function errorResponse($message, $errors = [], $statusCode = 400)
-    {
-        return new \Illuminate\Http\JsonResponse([
-            'success' => false,
-            'message' => $message,
-            'errors' => $errors
-        ], $statusCode);
-    }
-
-   /**
-     * Return a standardized paginated JSON response.
-     *
-     * @param string $message
-     * @param LengthAwarePaginator<int, mixed> $resource  <-- FIX 1: Defined TKey (int) and TValue (mixed)
-     * @param int $statusCode
-     * @return JsonResponse
-     */
-    protected function paginatedResponse(
-        string $message,
-        LengthAwarePaginator $resource,
-        int $statusCode = 200
-    ): JsonResponse {
         return new JsonResponse([
-            'success' => true,
+            'status' => true,
             'message' => $message,
-            'data'    => $resource->items(),
-            'meta'    => [
-                'current_page' => $resource->currentPage(),
-                'total'        => $resource->total(),
-                'per_page'     => $resource->perPage(),
-                'last_page'    => $resource->lastPage(),
-            ]
-        ], $statusCode);
+            'data' => $data,
+        ], $code);
+    }
+
+    protected function errorResponse(mixed $data, ?string $message = null, int $code = Response::HTTP_BAD_REQUEST): JsonResponse
+    {
+        return new JsonResponse([
+            'status' => false,
+            'message' => $message,
+            'data' => $data,
+        ], $code);
     }
 }

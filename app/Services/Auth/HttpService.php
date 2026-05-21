@@ -1,11 +1,8 @@
 <?php
-
 namespace App\Services\Auth;
-
 use Illuminate\Http\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-
 class HttpService
 {
     protected string $baseUrl;
