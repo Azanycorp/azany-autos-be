@@ -219,7 +219,6 @@ class AuthService
         }
 
         $user->sendVerificationEmail();
-        // $message = ($result instanceof Verify) ? 'Verification email resent.' : $result;
 
         return $this->successResponse(null, 'Verification email resent.');
     }
