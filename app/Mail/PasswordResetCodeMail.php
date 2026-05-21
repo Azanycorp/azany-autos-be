@@ -18,8 +18,7 @@ class PasswordResetCodeMail extends Mailable
      * PHP 8.3 Constructor Property Promotion with strict typing.
      */
     public function __construct(
-        public User $user,
-        public string|int $code
+        private mixed $user
     ) {}
 
     /**
@@ -40,8 +39,7 @@ class PasswordResetCodeMail extends Mailable
         return new Content(
             markdown: 'mail.password-reset-code',
             with: [
-                'code' => $this->code,
-                'user' => $this->user,
+                'user' => $this->user
             ],
         );
     }

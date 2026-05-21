@@ -54,7 +54,6 @@ class ResetPassword extends Notification
                     ->greeting('Hello ' . $notifiable->first_name . ',')
                     ->line('You\'ve requested for a password reset. Please Verify your profile by clicking the link below.')
                     ->action('Verify My Profile', $link . '?' . $query)
-                    // FIX Line 64: Removed ternary checking because expires_at is guaranteed to exist
                     ->line('The link will expire on ' . $this->verify->expires_at->format('H:ia jS F, Y'))
                     ->line('If you have not requested the password reset, please contact us at hello@myislandvisa.com')
                     ->line('Thank you for using our application!');

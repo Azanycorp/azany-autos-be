@@ -1,12 +1,12 @@
 @component('mail::message')
-# Hello {{ $user->first_name }},
+# Hello {{ $user['first_name'] }},
 
 You have requested to reset your password.
 
 Your password reset verification code is:
 
 @component('mail::panel')
-# {{ $code }}
+# {{ $user['verification_code'] }}
 @endcomponent
 
 This code will expire in 10 minutes.

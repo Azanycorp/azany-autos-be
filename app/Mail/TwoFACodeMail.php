@@ -18,8 +18,7 @@ class TwoFACodeMail extends Mailable
      * PHP 8.3 Constructor Property Promotion with strict typing.
      */
     public function __construct(
-        public User $user,
-        public string|int $code
+        private mixed $user
     ) {}
 
     /**
@@ -40,7 +39,6 @@ class TwoFACodeMail extends Mailable
         return new Content(
             markdown: 'mail.2fa-code',
             with: [
-                'code' => $this->code,
                 'user' => $this->user,
             ],
         );

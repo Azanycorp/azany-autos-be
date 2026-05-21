@@ -4,20 +4,31 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 #[FailOnUnknownFields]
 class ChangePasswordRequest extends FormRequest
 {
-  /**
+    /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, array<int, string>|string>
+     * @return array<string, array<int, mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'old_password' => ['required', 'string','min:6'],
-            'password' => ['required', 'string', 'confirmed']
+            'old_password' => ['required', 'string'],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised()
+            ],
         ];
     }
 }

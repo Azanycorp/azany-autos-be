@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enum\MailingEnum;
 use App\Enum\UserStatus;
 use App\Enum\UserType;
 use App\Http\Requests\CodeRequest;
@@ -22,7 +23,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
@@ -75,7 +75,7 @@ class AuthService
             );
 
         } catch (\Exception $e) {
-            return $this->errorResponse(null, 'An unexpected error occurred during registration.', 500);
+            return $this->errorResponse(null, 'An unexpected error occurred during registration.', 400);
         }
     }
 
@@ -94,7 +94,7 @@ class AuthService
             return $this->handleSuccessfulLogin($user);
         }
         if ($response->status() === 401) {
-            return $this->syncUserWithAuthService($user, $request->password,$request->email);
+            return $this->syncUserWithAuthService($user, $request->password, $request->email);
         }
 
         return $this->errorResponse(null, $response->json()['message'] ?? 'Auth service failure', $response->status());
@@ -103,9 +103,16 @@ class AuthService
     private function handleSuccessfulLogin(User $user): JsonResponse
     {
         if ($user->two_factor_enabled) {
-            $code = mt_rand(1000, 9999);
-            $user->update(['verification_code' => $code, 'verification_code_expire_at' => now()->addMinutes(30)]);
-            Mail::to($user->email)->send(new TwoFACodeMail($user, $code));
+            $verificationCode = generateUserVerificationCode();
+            $user->update(['verification_code' => $verificationCode, 'verification_code_expire_at' => now()->addMinutes(30)]);
+
+            $type = MailingEnum::TWO_FA_OTP;
+            $subject = 'Two-Factor Authentication Code';
+            $mail_class = TwoFACodeMail::class;
+            $data = [
+                'user' => $user,
+            ];
+            mailSend($type, $user, $subject, $mail_class, $data);
 
             return $this->successResponse(null, '2FA code sent.');
         }
@@ -215,7 +222,7 @@ class AuthService
         $user = User::where('email', $request->email)->firstOrFail();
 
         if (filled($user->email_verified_at)) {
-            return $this->successResponse(null, 'Email already verified.');
+            return $this->errorResponse(null, 'Email already verified.', 422);
         }
 
         $user->sendVerificationEmail();
@@ -223,9 +230,21 @@ class AuthService
         return $this->successResponse(null, 'Verification email resent.');
     }
 
-    public function profile(): UserResource
+    public function profile(): JsonResponse
     {
-        return new UserResource(auth()->user());
+        $auth = userAuth();
+        
+        if (! $auth) {
+            return $this->errorResponse(null, 'User not authenticated', 401);
+        }
+
+        $user = User::where('id', $auth->id)->first();
+
+        if (! $user) {
+            return $this->errorResponse(null, 'User does not exist', 404);
+        }
+
+        return $this->successResponse(new UserResource($user), 'User profile');
     }
 
     public function verify2fa(CodeRequest $request): JsonResponse
@@ -250,14 +269,10 @@ class AuthService
 
     protected function issueToken(User $user): JsonResponse
     {
-
-        $token = $user->createToken(
-            $user->email,
-            ['*']
-        );
+        $token = $user->createToken($user->email);
 
         return new JsonResponse([
-            'user' => new LoginResource($user),
+            'user' => (new LoginResource($user))->resolve(),
             'token' => $token->plainTextToken,
         ]);
     }
@@ -267,7 +282,7 @@ class AuthService
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        $verificationCode = mt_rand(1000, 9999);
+        $verificationCode = generateUserVerificationCode();
         $expiry = now()->addMinutes(30);
 
         $user->update([
@@ -275,23 +290,34 @@ class AuthService
             'verification_code_expire_at' => $expiry,
         ]);
 
-        Mail::to($user->email)->send(new PasswordResetCodeMail($user, $verificationCode));
+        $type = MailingEnum::RESET_OTP;
+        $subject = 'Password Reset Request';
+        $mail_class = PasswordResetCodeMail::class;
+        $data = [
+            'user' => $user,
+        ];
+        mailSend($type, $user, $subject, $mail_class, $data);
 
         return $this->successResponse(null, 'A new code has been sent to you');
     }
 
     public function verifyUserIdentity(Request $request): JsonResponse
     {
-
         $user = User::where('email', $request->email)->firstOrFail();
+        $verificationCode = generateUserVerificationCode();
 
-        $code = mt_rand(1000, 9999);
         $user->update([
-            'verification_code' => $code,
+            'verification_code' => $verificationCode,
             'verification_code_expire_at' => Date::now()->addMinutes(30),
         ]);
 
-        Mail::to($user->email)->send(new PasswordResetCodeMail($user, $code));
+        $type = MailingEnum::RESET_OTP;
+        $subject = 'Password Reset Request';
+        $mail_class = PasswordResetCodeMail::class;
+        $data = [
+            'user' => $user,
+        ];
+        mailSend($type, $user, $subject, $mail_class, $data);
 
         return $this->successResponse(null, 'A verification code has been sent to your email');
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\CodeRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
@@ -11,7 +10,6 @@ use App\Http\Requests\VerifyUserRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
 
 class AuthenticationController extends Controller
 {
@@ -29,11 +27,10 @@ class AuthenticationController extends Controller
         return $this->authService->login($request);
     }
 
-     public function verify2fa(CodeRequest $request): JsonResponse
+    public function verify2fa(CodeRequest $request): JsonResponse
     {
         return $this->authService->verify2fa($request);
     }
-
 
     public function verifyOtp(Request $request): JsonResponse
     {
@@ -55,7 +52,4 @@ class AuthenticationController extends Controller
     {
         return $this->authService->resendVerificationEmail($request);
     }
-
-
-
 }

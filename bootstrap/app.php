@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->renderable(function (NotFoundHttpException $e, $request) {
             // Handle JSON request 404's
             if ($request->json()) {
-                return response()->json(['message' => 'Resource not Found'], 404);
+                return $this->errorResponse(null, 'Resource not Found', 404);
             }
 
             throw $e;

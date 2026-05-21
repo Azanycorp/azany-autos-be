@@ -4,20 +4,31 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 #[FailOnUnknownFields]
 class UserResetPassRequest extends FormRequest
 {
-      /**
+     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, array<int, string>|string>
+     * @return array<string, array<int, mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'password' => ['required', 'confirmed', 'min:6'],
             'email' => ['required', 'email', 'exists:users,email'],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised()
+            ],
         ];
     }
 }

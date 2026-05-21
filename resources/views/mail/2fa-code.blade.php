@@ -1,10 +1,10 @@
 @component('mail::message')
-# Hello {{ $user->first_name }},
+# Hello {{ $user['first_name'] }},
 
 Your 2FA verification code is:
 
 @component('mail::panel')
-# {{ $code }}
+# {{ $user['verification_code'] }}
 @endcomponent
 
 This code will expire in 10 minutes.
