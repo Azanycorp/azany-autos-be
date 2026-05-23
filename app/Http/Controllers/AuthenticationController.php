@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 class AuthenticationController extends Controller
 {
     public function __construct(
-        private AuthService $authService
+        private readonly AuthService $authService
     ) {}
 
     public function register(RegisterRequest $request): JsonResponse

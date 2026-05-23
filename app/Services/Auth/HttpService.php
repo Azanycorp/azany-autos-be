@@ -1,125 +1,161 @@
 <?php
+
 namespace App\Services\Auth;
-use Illuminate\Http\Request;
+
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Http\Client\ConnectionException;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Throwable;
+
 class HttpService
 {
-    protected string $baseUrl;
-    protected int $timeout;
-    protected Request $request;
-
-    public function __construct(Request $request)
-    {
-        /** @var string $baseUrl */
-        $baseUrl = config('services.auth_service_url');
-
-        $this->baseUrl = $baseUrl;
-        $this->timeout = 60;
-        $this->request = $request;
-    }
+    public function __construct(private readonly Repository $repository) {}
 
     /**
-     * Handle the outbound HTTP client requests.
-     *
-     * @param string $method
-     * @param string $endpoint
      * @param array<string, mixed> $data
-     * @param array<string, string> $headers
-     * @return Response
      */
-    public function request(
-        string $method,
-        string $endpoint,
-        array $data = [],
-        array $headers = []
-    ): Response {
-        /** @var string $headerName */
-        $headerName = config('security.header_key');
+    public function request(string $method, string $endpoint, array $data = [], ?string $token = null): Response
+    {
+        $client = Http::withHeaders([
+            $this->repository->get('security.auth_header_key') => $this->repository->get('security.auth_header_value'),
+        ]);
 
-        $securityHeader = [
-            $headerName => (string) $this->request->header($headerName)
-        ];
+        if ($token) {
+            $client = $client->withToken($token);
+        }
 
-        $clientHeaders = array_merge([
-            'Accept' => 'application/json',
-        ], $securityHeader, $headers);
-
-        $client = Http::withHeaders($clientHeaders)
-            ->timeout($this->timeout);
-
-        /** @var Response */
-        return $client->{$method}($this->baseUrl . $endpoint, $data);
+        return match (strtolower($method)) {
+            'get' => $client->get($endpoint, $data),
+            'post' => $client->post($endpoint, $data),
+            'put' => $client->put($endpoint, $data),
+            'patch' => $client->patch($endpoint, $data),
+            'delete' => $client->delete($endpoint, $data),
+            default => throw new \InvalidArgumentException("Unsupported method [$method]"),
+        };
     }
 
     /**
-     * Authenticate user credentials.
-     *
-     * @param array<string, mixed> $data
-     * @param array<string, string> $headers
-     * @return Response
+     * @param RequestOptions|array<string, mixed>|null $options
      */
-    public function login(array $data, array $headers = []): Response
+    public function sendRequest(string $method, string $endpoint, RequestOptions|array|null $options = null): Response
     {
-        return $this->request('post', 'login', $data, $headers);
+        if (is_array($options)) {
+            $options = new RequestOptions(data: $options);
+        }
+
+        $options = $options ?? new RequestOptions;
+
+        try {
+            $client = Http::withHeaders(array_merge([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ], $options->getHeaders()))
+                ->timeout($options->getTimeout())
+                ->connectTimeout($options->getConnectTimeout())
+                ->retry(
+                    $options->getRetries(),
+                    $options->getRetryDelay(),
+                    function (
+                        Throwable $exception,
+                    ): bool {
+                        return $this->shouldRetry($exception);
+                    }
+                );
+
+            if ($options->getToken()) {
+                $client = $client->withToken($options->getToken());
+            }
+
+            return match (strtolower($method)) {
+                'get' => $client->get($endpoint, $options->getData()),
+                'post' => $client->post($endpoint, $options->getData()),
+                'put' => $client->put($endpoint, $options->getData()),
+                'patch' => $client->patch($endpoint, $options->getData()),
+                'delete' => $client->delete($endpoint, $options->getData()),
+                default => throw new \InvalidArgumentException("Unsupported method [$method]"),
+            };
+
+        } catch (Throwable $e) {
+            logger()->error("HTTP Request Timeout: {$method} {$endpoint}", [
+                'error' => $e->getMessage(),
+                'timeout' => $options->getTimeout(),
+            ]);
+
+            $body = json_encode([
+                'status' => false,
+                'message' => "An error occured: {$e->getMessage()}, Timeout: {$options->getTimeout()}",
+                'data' => null,
+            ]) ?: '{"status":false,"message":"An error occurred","data":null}';
+
+            return new Response(
+                new GuzzleResponse(
+                    status: 500,
+                    headers: ['Content-Type' => 'application/json'],
+                    body: $body
+                )
+            );
+        }
+    }
+
+    private function shouldRetry(Throwable $exception): bool
+    {
+        if ($exception instanceof ConnectionException) {
+            return true;
+        }
+
+        $code = $exception->getCode();
+
+        if ($code === 504) {
+            return false;
+        }
+
+        return $code >= 500;
     }
 
     /**
-     * Create a new remote user record.
-     *
-     * @param array<string, mixed> $data
-     * @param array<string, string> $headers
-     * @return Response
+     * @param RequestOptions|array<string, mixed>|null $options
      */
-    public function register(array $data, array $headers = []): Response
+    public function get(string $endpoint, RequestOptions|array|null $options = null): Response
     {
-        return $this->request('post', 'register', $data, $headers);
+        return $this->sendRequest('GET', $endpoint, $options);
     }
 
     /**
-     * Validate an account confirmation token.
-     *
-     * @param string $email
-     * @param array<string, string> $headers
-     * @return Response
+     * @param RequestOptions|array<string, mixed>|null $options
      */
-    public function verifyCode(string $email, array $headers = []): Response
+    public function post(string $endpoint, RequestOptions|array|null $options = null): Response
     {
-        return $this->request('post', 'verify-code', ['email' => $email], $headers);
+        return $this->sendRequest('POST', $endpoint, $options);
     }
 
     /**
-     * Purge a user record remotely.
-     *
-     * @param string $email
-     * @param array<string, string> $headers
-     * @return Response
+     * @param RequestOptions|array<string, mixed>|null $options
      */
-    public function deleteUserAccount(string $email, array $headers = []): Response
+    public function patch(string $endpoint, RequestOptions|array|null $options = null): Response
     {
-        return $this->request('delete', 'delete-account', ['email' => $email], $headers);
+        return $this->sendRequest('PATCH', $endpoint, $options);
     }
 
     /**
-     * Modify account authentication strings.
-     *
-     * @param array<string, mixed> $data
-     * @return Response
+     * @param RequestOptions|array<string, mixed>|null $options
      */
-    public function updatePassword(array $data): Response
+    public function put(string $endpoint, RequestOptions|array|null $options = null): Response
     {
-        return $this->request('post', 'change-password', $data);
+        return $this->sendRequest('PUT', $endpoint, $options);
     }
 
     /**
-     * Mutate account profile configurations.
-     *
-     * @param array<string, mixed> $data
-     * @param array<string, string> $headers
-     * @return Response
+     * @param RequestOptions|array<string, mixed>|null $options
      */
-    public function updateProfile(array $data, array $headers = []): Response
+    public function delete(string $endpoint, RequestOptions|array|null $options = null): Response
     {
-        return $this->request('patch', 'update-account', $data, $headers);
+        return $this->sendRequest('DELETE', $endpoint, $options);
+    }
+
+    public function isSuccessful(Response $response): bool
+    {
+        return $response->successful();
     }
 }

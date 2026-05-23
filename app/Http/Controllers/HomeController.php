@@ -4,19 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Artisan;
+use App\Services\HomeService;
 
 class HomeController extends Controller
 {
-     public function migrate(): JsonResponse
-    {
-        Artisan::call('migrate', [
-            '--force' => true
-        ]);
+    public function __construct(private readonly HomeService $homeService) {}
 
-        return new \Illuminate\Http\JsonResponse([
-            'message' => 'Migration completed successfully.',
-            'output' => Artisan::output(),
-        ]);
+    public function migrate(): JsonResponse
+    {
+        return $this->homeService->migrate();
     }
 }

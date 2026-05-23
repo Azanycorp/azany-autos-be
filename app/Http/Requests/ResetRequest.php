@@ -19,17 +19,7 @@ class ResetRequest extends FormRequest
         return [
             'email' => ['required', 'email', 'exists:users,email'],
             'token' => ['required', 'string'],
-            'password' => [
-                'required',
-                'string',
-                'confirmed', 
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised()
-            ]
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ];
     }
 }

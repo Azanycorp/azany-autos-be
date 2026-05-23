@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class ForgotPasswordController extends Controller
 {
-   public function __construct(
+    public function __construct(
         private AuthService $accountService
     ) {}
 
@@ -25,7 +25,7 @@ class ForgotPasswordController extends Controller
         return $this->accountService->verifyCode($request);
     }
 
-  public function changePassword(UserResetPassRequest $request): JsonResponse
+    public function changePassword(UserResetPassRequest $request): JsonResponse
     {
         return $this->accountService->changePassword($request);
     }

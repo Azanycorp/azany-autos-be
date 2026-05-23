@@ -15,10 +15,9 @@ class TwoFACodeMail extends Mailable
 
     /**
      * Create a new message instance.
-     * PHP 8.3 Constructor Property Promotion with strict typing.
      */
     public function __construct(
-        private mixed $user
+        private User $user
     ) {}
 
     /**
