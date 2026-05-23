@@ -37,7 +37,7 @@ class MailingService
                     continue;
                 }
 
-                $payload = $email->payload ?? [];
+                $payload = (array) ($email->payload ?? []);
 
                 if (blank($payload)) {
                     Log::error("Payload for mailable class {$email->mailable} is empty.");

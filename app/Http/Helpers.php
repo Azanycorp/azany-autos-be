@@ -1,18 +1,20 @@
 <?php
 
-use App\Enum\MailingEnum;
 use App\Models\Mailing;
 use App\Models\User;
 
 if (! function_exists('mailSend')) {
-   function mailSend(MailingEnum $type, User $recipient, string $subject, string $mail_class, mixed $payloadData = []): void
+    /**
+     * @param array<string, mixed> $payloadData
+     */
+    function mailSend(string $type, User $recipient, string $subject, string $mailClass, array $payloadData = []): void
     {
         $data = [
             'type' => $type,
             'email' => $recipient->email,
             'subject' => $subject,
             'body' => '',
-            'mailable' => $mail_class,
+            'mailable' => $mailClass,
             'scheduled_at' => now(),
             'payload' => array_merge($payloadData),
         ];

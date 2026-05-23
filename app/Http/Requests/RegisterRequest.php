@@ -25,18 +25,8 @@ class RegisterRequest extends FormRequest
             'contact_person' => ['nullable', 'string', 'max:50'],
             'business_name' => ['nullable', 'string', 'max:50'],
             'reg_number' => ['nullable', 'string', 'max:50'],
-            'email' => ['required', 'string', 'email', 'email:rfc,dns', 'max:50', 'unique:users'],
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised()
-            ],
+            'email' => ['required', 'string', 'email', 'email:rfc,dns', 'max:50', 'unique:users,email'],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'country_id' => ['required', 'integer', 'exists:countries,id'],
         ];
     }

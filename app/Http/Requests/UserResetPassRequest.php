@@ -18,17 +18,7 @@ class UserResetPassRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email', 'exists:users,email'],
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised()
-            ],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ];
     }
 }

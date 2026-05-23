@@ -4,21 +4,37 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+
+/**
+ * @property string $type
+ * @property string $email
+ * @property string $subject
+ * @property string|null $body
+ * @property string $mailable
+ * @property string $status
+ * @property array<string, mixed>|null $payload
+ * @property int $attempts
+ * @property int $max_attempts
+ * @property string|null $scheduled_at
+ * @property array<string, mixed>|null $error_response
+ */
+
 #[Fillable([
-     'type',
-        'email',
-        'subject',
-        'body',
-        'mailable',
-        'status',
-        'attempts',
-        'max_attempts',
-        'scheduled_at',
-        'error_response',
+    'type',
+    'email',
+    'subject',
+    'body',
+    'mailable',
+    'status',
+    'attempts',
+    'max_attempts',
+    'scheduled_at',
+    'error_response',
 ])]
+
 class Mailing extends Model
 {
-     protected function casts(): array
+    protected function casts(): array
     {
         return [
             'payload' => 'array',
@@ -26,6 +42,9 @@ class Mailing extends Model
         ];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public static function saveData(mixed $data): self
     {
         $mail = new self;

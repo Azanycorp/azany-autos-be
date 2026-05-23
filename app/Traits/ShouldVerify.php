@@ -8,12 +8,17 @@ use App\Models\User;
 use App\Models\Verify;
 use App\Notifications\ResetPassword;
 use Exception;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Trait ShouldVerify
  *
  * @mixin User
+ *
+ * @property int $id
+ * @property string $email
+ * @property string $first_name
+ * @property string $password
+ * @property \Carbon\CarbonInterface|null $email_verified_at
  */
 trait ShouldVerify
 {
@@ -29,47 +34,21 @@ trait ShouldVerify
         ]);
     }
 
-    // public function sendVerificationEmail(): Verify
-    // {
-    //     $verifyUser = $this->generateVerifier();
-
-    //     $expiresAt = $verifyUser->expires_at->format('H:ia jS F, Y');
-
-    //     $content = <<<EOD
-    //     Hello {$this->first_name},<br><br>
-
-    //     Copy code below to verify account.<br><br>
-
-    //     <strong>{$verifyUser->token}</strong><br><br>
-
-    //     The code will expire at {$expiresAt}.<br><br>
-
-    //     Thank you for using our application!
-    //     EOD;
-
-    //     Mail::html($content, function ($message) {
-    //         $message->to($this->email)
-    //             ->subject('Email Verification Request.');
-    //     });
-
-    //     return $verifyUser;
-    // }
-
     public function sendVerificationEmail(): Verify
     {
         $verifyUser = $this->generateVerifier();
         $user = $this;
-        $type = MailingEnum::EMAIL_VERIFICATION;
+        $type = MailingEnum::EMAIL_VERIFICATION->value;
         $subject = 'Email Verification Request.';
         $mail_class = VerifyAccountMail::class;
 
         $payload = [
-        'user' => [
-            'first_name' => $this->first_name,
-            'token'      => $verifyUser->token,
-            'expires_at' => $verifyUser->expires_at->toISOString(),
-        ]
-    ];
+            'user' => [
+                'first_name' => $user->first_name,
+                'token' => $verifyUser->token,
+                'expires_at' => $verifyUser->expires_at->toISOString(),
+            ]
+        ];
 
         mailSend($type, $user, $subject, $mail_class, $payload);
 
@@ -80,14 +59,17 @@ trait ShouldVerify
     {
         $verifyUser = $this->generateVerifier();
         $user = $this;
+
         try {
-            $type = MailingEnum::RESET_OTP;
+            
+            $type = MailingEnum::RESET_OTP->value;
             $subject = 'Password Reset Request';
             $mail_class = ResetPassword::class;
             $data = [
                 'user' => $verifyUser,
             ];
             mailSend($type, $user, $subject, $mail_class, $data);
+
         } catch (Exception $e) {
             return $e->getMessage();
         }

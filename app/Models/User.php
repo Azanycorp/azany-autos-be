@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Country;
 use App\Traits\ShouldVerify;
+use App\Traits\UserRelationships;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
+/**
+ * @property \Carbon\CarbonInterface|null $email_verified_at
+ */
 #[Fillable([
     'email',
     'password',
@@ -38,22 +43,10 @@ use Laravel\Sanctum\HasApiTokens;
     'lock_screen_enabled',
 ])]
 #[Hidden(['password', 'remember_token'])]
-/**
- * @mixin \Illuminate\Database\Eloquent\Builder
- */
-/**
- * Class User
- *
- * @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\UserFactory>
- * @use \Illuminate\Notifications\Notifiable
- * @use \App\Traits\ShouldVerify
- * @use \Laravel\Sanctum\HasApiTokens
- * @use \Illuminate\Database\Eloquent\SoftDeletes
- * ^--- FIX: Explicitly listing all 5 used traits clears the generics.wrongParent error!
- */
+
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable, ShouldVerify, SoftDeletes;
+    use HasApiTokens, Notifiable, ShouldVerify, SoftDeletes, UserRelationships;
     /**
      * Get the attributes that should be cast.
      *
@@ -64,18 +57,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_enabled' => 'boolean',
+            'kyc_verification' => 'boolean',
+            'biometric_enabled' => 'boolean',
+            'lock_screen_enabled' => 'boolean',
         ];
-    }
-
-    /**
-     * Get the country associated with the user.
-     *
-     * @return BelongsTo<Country, $this>
-     * * <-- FIX 2: Explicitly providing TRelatedModel and TDeclaringModel clears missingType.generics!
-     */
-
-     public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class, 'country_id');
     }
 }

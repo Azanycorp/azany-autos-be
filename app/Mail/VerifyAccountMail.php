@@ -17,7 +17,6 @@ class VerifyAccountMail extends Mailable
     public object $verificationData;
 
     /**
-     * PHP 8 Constructor Property Promotion
      * Unpacks the 'user' array key automatically into a localized variable
      */
     public function __construct(
