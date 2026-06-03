@@ -1,0 +1,64 @@
+name: Production Deployment
+ 
+on:
+  push:
+    branches: [deploy]  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v4 
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, json, tokenizer, openssl # Add any required extensions
+
+      - name: Install dependencies
+        run: |
+          composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+          composer dump-autoload --optimize
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Create remote directories
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} \
+              "mkdir -p ${{ secrets.VPS_BACKEND_PATH }}/{storage/framework/views,storage/framework/cache,bootstrap/cache,storage/logs}"
+
+      - name: Rsync application files
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.env' \
+            --exclude='node_modules' \
+            --exclude='storage' \
+            --exclude='tests' \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ \
+            ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_BACKEND_PATH }}/
+
+      - name: Set permissions
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} \
+              "chmod -R 755 ${{ secrets.VPS_BACKEND_PATH }}/storage \
+               && chmod -R 755 ${{ secrets.VPS_BACKEND_PATH }}/bootstrap/cache"
+
+      - name: Run deployment commands
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} \
+              "cd ${{ secrets.VPS_BACKEND_PATH }} && \
+                /opt/cpanel/ea-php84/root/usr/bin/php artisan config:clear && \
+                /opt/cpanel/ea-php84/root/usr/bin/php artisan view:clear && \
+                /opt/cpanel/ea-php84/root/usr/bin/php artisan cache:clear && \
+                /opt/cpanel/ea-php84/root/usr/bin/php artisan storage:link"
