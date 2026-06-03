@@ -58,7 +58,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no \
               ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} \
               "cd ${{ secrets.VPS_BACKEND_PATH }} && \
-                /opt/cpanel/ea-php84/root/usr/bin/php artisan config:clear && \
-                /opt/cpanel/ea-php84/root/usr/bin/php artisan view:clear && \
-                /opt/cpanel/ea-php84/root/usr/bin/php artisan cache:clear && \
-                /opt/cpanel/ea-php84/root/usr/bin/php artisan storage:link"
+              /opt/cpanel/ea-php84/root/usr/bin/php artisan config:clear && \
+              /opt/cpanel/ea-php84/root/usr/bin/php artisan view:clear && \
+              /opt/cpanel/ea-php84/root/usr/bin/php artisan cache:clear && \
+              /opt/cpanel/ea-php84/root/usr/bin/php artisan storage:link"
