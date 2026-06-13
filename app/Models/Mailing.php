@@ -6,17 +6,38 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * @property int $id
  * @property string $type
  * @property string $email
- * @property string $subject
+ * @property string|null $subject
  * @property string|null $body
  * @property string $mailable
+ * @property array<array-key, mixed> $payload
  * @property string $status
- * @property array<string, mixed>|null $payload
  * @property int $attempts
  * @property int $max_attempts
  * @property string|null $scheduled_at
- * @property array<string, mixed>|null $error_response
+ * @property array<array-key, mixed>|null $error_response
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereAttempts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereErrorResponse($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereMailable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereMaxAttempts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereScheduledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 
 #[Fillable([

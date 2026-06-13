@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\V1;
 
-use App\Http\Requests\CodeRequest;
-use App\Http\Requests\UserResetPassRequest;
-use App\Http\Requests\VerifyUserRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\CodeRequest;
+use App\Http\Requests\V1\UserResetPassRequest;
+use App\Http\Requests\V1\VerifyUserRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

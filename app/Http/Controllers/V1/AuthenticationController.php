@@ -1,10 +1,13 @@
 <?php
-namespace App\Http\Controllers;
-use App\Http\Requests\CodeRequest;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Requests\ResetRequest;
-use App\Http\Requests\VerifyUserRequest;
+
+namespace App\Http\Controllers\V1;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\CodeRequest;
+use App\Http\Requests\V1\LoginRequest;
+use App\Http\Requests\V1\RegisterRequest;
+use App\Http\Requests\V1\ResetRequest;
+use App\Http\Requests\V1\VerifyUserRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

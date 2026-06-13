@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\V1;
 
 use App\Enum\UserType;
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
