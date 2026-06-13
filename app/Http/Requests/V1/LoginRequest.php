@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
 
 #[FailOnUnknownFields]
-class CodeRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
-    /**
+  /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, array<int, string>|string>
@@ -16,7 +16,8 @@ class CodeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'verification_code' => ['required', 'exists:users,verification_code'],
+            'email' => ['required', 'string', 'email', 'exists:users,email'],
+            'password' => ['required', 'string'],
         ];
     }
 }
