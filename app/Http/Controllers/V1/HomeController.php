@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\V1;
 
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Services\HomeService;
+use Illuminate\Http\JsonResponse;
 
 class HomeController extends Controller
 {

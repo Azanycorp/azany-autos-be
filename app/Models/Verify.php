@@ -9,11 +9,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * @property Carbon $expires_at
- * @property Carbon $created_at
+ * @property int $id
+ * @property int $user_id
  * @property string $token
  * @property string $email
- * @property string $status
+ * @property \Carbon\CarbonImmutable $expires_at
+ * @property \Carbon\CarbonImmutable $created_at
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereUserId($value)
+ * @mixin \Eloquent
  */
 
 #[Fillable(['user_id', 'token', 'email', 'status', 'expires_at'])]

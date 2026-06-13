@@ -29,4 +29,4 @@ jobs:
         run: php artisan key:generate
 
       - name: Run Rector & PHP Stan
-        run: composer analyze
+        run: composer test
