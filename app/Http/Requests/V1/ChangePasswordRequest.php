@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 #[FailOnUnknownFields]
-class ResetRequest extends FormRequest
+class ChangePasswordRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -17,8 +17,7 @@ class ResetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'exists:users,email'],
-            'token' => ['required', 'string'],
+            'old_password' => ['required', 'string'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ];
     }

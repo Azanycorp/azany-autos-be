@@ -17,6 +17,7 @@
         "wendelladriel/laravel-validated-dto": "^4.6"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.7",
         "driftingly/rector-laravel": "*",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^3.0",
@@ -59,9 +60,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
-            "@php artisan test"
-        ],
-        "analyze": [
+            "@php artisan test",
             "@rector-dry",
             "@phpstan"
         ],

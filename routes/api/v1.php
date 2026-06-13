@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AuthenticationController;
-use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\V1\AuthenticationController;
+use App\Http\Controllers\V1\ForgotPasswordController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
