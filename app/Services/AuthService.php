@@ -121,7 +121,11 @@ class AuthService
             $verify = Verify::with('user')
                 ->where('token', $request->code)
                 ->where('expires_at', '>', now())
-                ->firstOrFail();
+                ->first();
+
+            if (! $verify) {
+                return $this->errorResponse(null, 'Invalid or expired verification code.', 404);
+            }
 
             $user = $verify->user;
 
