@@ -32,9 +32,11 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
             Route::prefix('vehicles')->group(function () {
                     Route::get('/', 'getVehicles');
                     Route::post('/add', 'addVehicle');
-                    Route::get('/{id}', 'getVehicle');
-                    Route::put('/{id}', 'updateVehicle');
-                    Route::delete('/{id}', 'deleteVehicle');
+                    Route::get('/details/{id}', 'getVehicle');
+                    Route::put('/update/{id}', 'updateVehicle');
+                    Route::delete('/delete-vehicle/{id}', 'deleteVehicle');
+                    Route::put('/update-status/{id}', 'updateVehicleStatus');
+                    Route::delete('/delete-image/{id}', 'deleteVehicleImage');
                 });
         });
 

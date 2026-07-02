@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enum\VehicleStatus;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
+use App\Models\VehicleImage;
 use App\Traits\HttpResponses;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -152,10 +153,27 @@ class DealerService
             'features' => $request->features,
         ]);
 
-  if ($request->hasFile('vehicle_images')) {
-            uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+        if ($request->hasFile('vehicle_images')) {
+                    uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+            }
+                return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
+    }
+
+    public function updateVehicleStatus($request, int $id): JsonResponse
+    {
+        $user = userAuth();
+
+        $vehicle = $user->vehicles->find($id);
+
+        if (! $vehicle) {
+            return $this->errorResponse(null, 'Vehicle not found', 404);
         }
-        return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
+
+        $vehicle->update([
+            'status' => $request->status,
+        ]);
+
+        return $this->successResponse(null, 'Vehicle status updated successfully');
     }
 
     public function deleteVehicle(int $id): JsonResponse
@@ -172,5 +190,18 @@ class DealerService
         $vehicle->delete();
 
         return $this->successResponse(null, 'Vehicle deleted successfully');
+    }
+
+    public function deleteVehicleImage($request, int $id): JsonResponse
+    {
+        $vehicle_image = VehicleImage::where('vehicle_id', $request->vehicle_id)->where('id', $id)->first();
+
+        if (! $vehicle_image) {
+            return $this->errorResponse(null, 'Vehicle image not found', 404);
+        }
+
+        $vehicle_image->delete();
+
+        return $this->successResponse(null, 'Image deleted successfully');
     }
 }

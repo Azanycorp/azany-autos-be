@@ -1,9 +1,14 @@
 <?php
 
 namespace App\Http\Requests\V1;
-
+use App\Enum\AccidentType;
+use App\Enum\DamageType;
+use App\Enum\FuelType;
+use App\Enum\ListingType;
+use App\Enum\TransmissionType;
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 #[FailOnUnknownFields]
 class VehicleRequest extends FormRequest
@@ -15,12 +20,12 @@ class VehicleRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-           'listing_type' => ['required', 'string', 'in:for_sale,for_rent'],
+         return [
+           'listing_type' => ['required', 'string', Rule::in(ListingType::values())],
            'country_id' => ['required', 'integer', 'exists:countries,id'],
            'city' => ['required', 'string'],
-           'fuel_type' => ['required', 'string', 'in:petrol,diesel,electric,hybrid'],
-           'transmission_type' => ['required', 'string', 'in:manual,automatic'],
+           'fuel_type' => ['required', 'string', Rule::in(FuelType::values())],
+           'transmission_type' => ['required', 'string', Rule::in(TransmissionType::values())],
            'condition' => ['required', 'string', 'in:new,used'],
            'kilometer_reading' => ['required', 'integer'],
            'engine_capacity' => ['required', 'string'],
@@ -30,9 +35,9 @@ class VehicleRequest extends FormRequest
            'year' => ['required', 'integer', 'digits:4'],
            'variant' => ['nullable', 'string'],
            'body_type' => ['required', 'string'],
-           'vin' => ['required', 'string', 'unique:vehicles,vin'],
-           'accident_history' => ['required', 'string', 'in:no_accidents,minor_accidents,major_accidents'],
-           'damage_history' => ['required', 'string', 'in:no_damage,minor_damage,major_damage'],
+            'vin' => ['required', 'string', 'unique:vehicles,vin'],
+           'accident_history' => ['required', 'string', Rule::in(AccidentType::values())],
+           'damage_history' => ['required', 'string', Rule::in(DamageType::values())],
            'service_history' => ['nullable', 'string'],
            'front_image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
            'back_image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
@@ -47,5 +52,6 @@ class VehicleRequest extends FormRequest
            'vehicle_images' => ['required', 'array'],
            'vehicle_images.*' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ];
+
     }
 }
