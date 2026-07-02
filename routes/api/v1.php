@@ -31,7 +31,7 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
 
             Route::prefix('vehicles')->group(function () {
                     Route::get('/', 'getVehicles');
-                    Route::post('/add', 'addVehicle');
+                    Route::post('/add', 'addVehicle')->name('addVehicle');
                     Route::get('/details/{id}', 'getVehicle');
                     Route::put('/update/{id}', 'updateVehicle');
                     Route::delete('/delete-vehicle/{id}', 'deleteVehicle');
