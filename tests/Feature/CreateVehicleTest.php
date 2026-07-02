@@ -65,7 +65,7 @@ class CreateVehicleTest extends TestCase
 
         $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
 
-        $response->assertStatus(200)
+          $response->assertOk()
                  ->assertJsonStructure([
                      'data' => [
                          'id', 'make', 'model', 'year', 'slug'

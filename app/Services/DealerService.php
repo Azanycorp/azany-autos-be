@@ -3,19 +3,22 @@
 namespace App\Services;
 
 use App\Enum\VehicleStatus;
+use App\Http\Requests\V1\UpdateVehicleRequest;
+use App\Http\Requests\V1\VehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Traits\HttpResponses;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DealerService
 {
     use HttpResponses;
 
-    public function addVehicle($request): JsonResponse
+    public function addVehicle(VehicleRequest $request): JsonResponse
     {
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
         $backPath = uploadImage($request->file('back_image'), 'vehicles');
@@ -60,6 +63,8 @@ class DealerService
                     'description' => $request->description,
                     'features' => $request->features,
                 ]);
+
+                /** @var \App\Models\Vehicle $vehicle */
                 uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
 
                 return $vehicle;
@@ -73,7 +78,7 @@ class DealerService
         }
     }
 
-    public function getVehicles($request): JsonResponse
+    public function getVehicles(Request $request): JsonResponse
     {
         $type = $request->query('type');
         $sort = $request->query('sort');
@@ -92,7 +97,7 @@ class DealerService
                     default => $q->latest(),
                 };
             }, fn ($q) => $q->latest())
-            ->paginate($request->query('per_page') ?? 25);
+            ->paginate(intval($request->query('per_page') ?? 25));
 
         return $this->withPagination(VehicleResource::collection($vehicles), 'Vehicles retrieved successfully');
     }
@@ -110,11 +115,11 @@ class DealerService
         return $this->successResponse(new VehicleResource($vehicle), 'Vehicle retrieved successfully');
     }
 
-    public function updateVehicle($request, int $id): JsonResponse
+    public function updateVehicle(UpdateVehicleRequest $request, int $id): JsonResponse
     {
         $user = userAuth();
 
-        $vehicle = $user->vehicles->find($id);
+        $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
         if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
@@ -171,7 +176,7 @@ class DealerService
         return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
     }
 
-    public function updateVehicleStatus($request, int $id): JsonResponse
+    public function updateVehicleStatus(Request $request, int $id): JsonResponse
     {
         $user = userAuth();
 
@@ -192,7 +197,7 @@ class DealerService
     {
         $user = userAuth();
 
-        $vehicle = $user->vehicles->find($id);
+        $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
         if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
@@ -204,9 +209,9 @@ class DealerService
         return $this->successResponse(null, 'Vehicle deleted successfully');
     }
 
-    public function deleteVehicleImage($request, int $id): JsonResponse
+    public function deleteVehicleImage(int $vehicle_id, int $id): JsonResponse
     {
-        $vehicle_image = VehicleImage::where('vehicle_id', $request->vehicle_id)->where('id', $id)->first();
+        $vehicle_image = VehicleImage::where('vehicle_id', $vehicle_id)->where('id', $id)->first();
 
         if (! $vehicle_image) {
             return $this->errorResponse(null, 'Vehicle image not found', 404);

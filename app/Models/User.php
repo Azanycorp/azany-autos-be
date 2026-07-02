@@ -2,26 +2,31 @@
 
 namespace App\Models;
 
-use App\Models\Country;
 use App\Traits\ShouldVerify;
 use App\Traits\UserRelationships;
+use Carbon\CarbonImmutable;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\hasMany;
+use Laravel\Sanctum\PersonalAccessToken;
+
 /**
  * @property int $id
  * @property string $email
- * @property \Carbon\CarbonImmutable|null $email_verified_at
+ * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property string $first_name
  * @property string|null $last_name
  * @property int $country_id
@@ -32,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\hasMany;
  * @property string|null $business_name
  * @property string|null $contact_person
  * @property string|null $verification_code
- * @property \Carbon\CarbonImmutable|null $verification_code_expire_at
+ * @property CarbonImmutable|null $verification_code_expire_at
  * @property string|null $profile_photo
  * @property string|null $state
  * @property string|null $city
@@ -42,12 +47,13 @@ use Illuminate\Database\Eloquent\Relations\hasMany;
  * @property bool $kyc_verification
  * @property bool $biometric_enabled
  * @property bool $lock_screen_enabled
- * @property \Carbon\CarbonImmutable|null $deleted_at
+ * @property CarbonImmutable|null $deleted_at
  * @property-read Country|null $country
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -83,6 +89,7 @@ use Illuminate\Database\Eloquent\Relations\hasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereZipCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 #[Fillable([
@@ -114,10 +121,11 @@ use Illuminate\Database\Eloquent\Relations\hasMany;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasApiTokens, Notifiable, ShouldVerify, SoftDeletes, UserRelationships;
+
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
 
-    use HasApiTokens, Notifiable, ShouldVerify, SoftDeletes, UserRelationships;
     /**
      * Get the attributes that should be cast.
      *
@@ -136,8 +144,11 @@ class User extends Authenticatable
         ];
     }
 
-    public function vehicles(): hasMany
+    /**
+     * @return HasMany<Vehicle, $this>
+     */
+    public function vehicles(): HasMany
     {
         return $this->hasMany(Vehicle::class);
-    }   
+    }
 }

@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\V1;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
@@ -37,7 +35,7 @@ class DealerController extends Controller
         return $this->dealerService->getVehicle($id);
     }
 
-    public function updateVehicle(int $id, UpdateVehicleRequest $request): JsonResponse
+    public function updateVehicle(UpdateVehicleRequest $request, int $id): JsonResponse
     {
         return $this->dealerService->updateVehicle($request, $id);
     }
@@ -54,6 +52,6 @@ class DealerController extends Controller
 
     public function deleteVehicleImage(Request $request, int $id): JsonResponse
     {
-        return $this->dealerService->deleteVehicleImage($request, $id);
+        return $this->dealerService->deleteVehicleImage((int) $request->vehicle_id, $id);
     }
 }

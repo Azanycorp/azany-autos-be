@@ -48,12 +48,18 @@ class Vehicle extends Model
         ];
     }
 
+    /**
+     * @return HasMany<VehicleImage, $this>
+     */
     public function vehicleImages(): HasMany
     {
         return $this->hasMany(VehicleImage::class);
     }
 
-     public function country(): BelongsTo
+    /**
+     * @return BelongsTo<Country, $this>
+     */
+    public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');
     }
