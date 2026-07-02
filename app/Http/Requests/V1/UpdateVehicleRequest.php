@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1;
 
 use App\Enum\AccidentType;
+use App\Enum\ConditionType;
 use App\Enum\DamageType;
 use App\Enum\FuelType;
 use App\Enum\ListingType;
@@ -27,7 +28,7 @@ class UpdateVehicleRequest extends FormRequest
            'city' => ['required', 'string'],
            'fuel_type' => ['required', 'string', Rule::in(FuelType::values())],
            'transmission_type' => ['required', 'string', Rule::in(TransmissionType::values())],
-           'condition' => ['required', 'string', 'in:new,used'],
+           'condition' => ['required', 'string', Rule::in(ConditionType::values())],
            'kilometer_reading' => ['required', 'integer'],
            'engine_capacity' => ['required', 'string'],
            'previous_owner' => ['nullable', 'string'],
