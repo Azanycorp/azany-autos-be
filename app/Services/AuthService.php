@@ -45,12 +45,12 @@ class AuthService
             ]);
 
             $requestData['signed_up_from'] = 'Azanyautos';
-            $requestData['type'] = UserType::AUTOBUYER->value;
+            $requestData['type'] = $request->user_type == UserType::AUTOBUYER->value ? UserType::AUTOBUYER->value : UserType::AUTODEALER->value;
 
             $this->httpService->post('register', new RequestOptions(
                 data: $requestData
             ));
-            
+
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -132,20 +132,20 @@ class AuthService
             if (! $user) {
                 return $this->errorResponse(null, 'Associated user account could not be found.', 404);
             }
-            
-            $response = $this->httpService->post('verify-code', new RequestOptions(
-                data: [
-                    'email' => $user->email
-                ]
-            ));
 
-            if ($response->failed()) {
-                return $this->errorResponse(
-                    null,
-                    $response->json()['message'] ?? 'An error occured.',
-                    400
-                );
-            }
+            // $response = $this->httpService->post('verify-code', new RequestOptions(
+            //     data: [
+            //         'email' => $user->email
+            //     ]
+            // ));
+
+            // if ($response->failed()) {
+            //     return $this->errorResponse(
+            //         null,
+            //         $response->json()['message'] ?? 'An error occured.',
+            //         400
+            //     );
+            // }
 
             $user->update([
                 'email_verified_at' => now(),
@@ -221,7 +221,7 @@ class AuthService
     public function profile(): JsonResponse
     {
         $auth = userAuth();
-        
+
         if (! $auth) {
             return $this->errorResponse(null, 'User not authenticated', 401);
         }

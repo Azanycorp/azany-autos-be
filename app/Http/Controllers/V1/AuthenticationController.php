@@ -18,7 +18,7 @@ class AuthenticationController extends Controller
         private readonly AuthService $authService
     ) {}
 
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request)
     {
         return $this->authService->register($request);
     }

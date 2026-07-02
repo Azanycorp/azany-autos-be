@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
+use Illuminate\Database\Eloquent\Relations\hasMany;
 /**
  * @property int $id
  * @property string $email
@@ -135,4 +135,9 @@ class User extends Authenticatable
             'verification_code_expire_at' => 'datetime',
         ];
     }
+
+    public function vehicles(): hasMany
+    {
+        return $this->hasMany(Vehicle::class);
+    }   
 }
