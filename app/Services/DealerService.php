@@ -7,6 +7,8 @@ use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Traits\HttpResponses;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DealerService
@@ -23,43 +25,52 @@ class DealerService
         $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
 
         $user = userAuth();
-        $new_vehicle = $user->vehicles()->create([
-            'make' => $request->make,
-            'model' => $request->model,
-            'year' => $request->year,
-            'price' => $request->price,
-            'slug' => str()->slug("{$request->make} {$request->model} {$request->year}").'-'.str()->random(6),
-            'status' => VehicleStatus::PENDING->value,
-            'listing_type' => $request->listing_type,
-            'country_id' => $request->country_id,
-            'city' => $request->city,
-            'fuel_type' => $request->fuel_type,
-            'transmission_type' => $request->transmission_type,
-            'condition' => $request->condition,
-            'kilometer_reading' => $request->kilometer_reading,
-            'engine_capacity' => $request->engine_capacity,
-            'previous_owner' => $request->previous_owner,
-            'variant' => $request->variant,
-            'body_type' => $request->body_type,
-            'vin' => $request->vin,
-            'accident_history' => $request->accident_history,
-            'damage_history' => $request->damage_history,
-            'service_history' => $request->service_history,
-            'front_image' => $frontPath,
-            'back_image' => $backPath,
-            'rear_image' => $rear_image,
-            'passenger_side_image' => $passenger_side_image,
-            'dashboard_image' => $dashboard_image,
-            'video_link' => $youtube_video,
-            'description' => $request->description,
-            'features' => $request->features,
-        ]);
 
-        if ($new_vehicle) {
-            uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $new_vehicle);
+        try {
+            $new_vehicle = DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
+
+                $vehicle = $user->vehicles()->create([
+                    'make' => $request->make,
+                    'model' => $request->model,
+                    'year' => $request->year,
+                    'price' => $request->price,
+                    'slug' => str()->slug("{$request->make} {$request->model} {$request->year}").'-'.str()->random(6),
+                    'status' => VehicleStatus::PENDING->value,
+                    'listing_type' => $request->listing_type,
+                    'country_id' => $request->country_id,
+                    'city' => $request->city,
+                    'fuel_type' => $request->fuel_type,
+                    'transmission_type' => $request->transmission_type,
+                    'condition' => $request->condition,
+                    'kilometer_reading' => $request->kilometer_reading,
+                    'engine_capacity' => $request->engine_capacity,
+                    'previous_owner' => $request->previous_owner,
+                    'variant' => $request->variant,
+                    'body_type' => $request->body_type,
+                    'vin' => $request->vin,
+                    'accident_history' => $request->accident_history,
+                    'damage_history' => $request->damage_history,
+                    'service_history' => $request->service_history,
+                    'front_image' => $frontPath,
+                    'back_image' => $backPath,
+                    'rear_image' => $rear_image,
+                    'passenger_side_image' => $passenger_side_image,
+                    'dashboard_image' => $dashboard_image,
+                    'video_link' => $youtube_video,
+                    'description' => $request->description,
+                    'features' => $request->features,
+                ]);
+                uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+
+                return $vehicle;
+            });
+
+            return $this->successResponse(new VehicleResource($new_vehicle), 'Vehicle added successfully');
+
+        } catch (Exception $e) {
+
+            return $this->errorResponse(null, 'Something went wrong while saving the vehicle listing.', 403);
         }
-
-        return $this->successResponse(new VehicleResource($new_vehicle), 'Vehicle added successfully');
     }
 
     public function getVehicles($request): JsonResponse
@@ -124,39 +135,40 @@ class DealerService
         $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : $vehicle->video_link;
 
         $vehicle->update([
-            'make' => $request->make,
-            'model' => $request->model,
-            'year' => $request->year,
-            'price' => $request->price,
-            'listing_type' => $request->listing_type,
-            'country_id' => $request->country_id,
-            'city' => $request->city,
-            'fuel_type' => $request->fuel_type,
-            'transmission_type' => $request->transmission_type,
-            'condition' => $request->condition,
-            'kilometer_reading' => $request->kilometer_reading,
-            'engine_capacity' => $request->engine_capacity,
-            'previous_owner' => $request->previous_owner,
-            'variant' => $request->variant,
-            'body_type' => $request->body_type,
-            'vin' => $request->vin,
-            'accident_history' => $request->accident_history,
-            'damage_history' => $request->damage_history,
-            'service_history' => $request->service_history,
+            'make' => $request->make ?? $vehicle->make,
+            'model' => $request->model ?? $vehicle->model,
+            'year' => $request->year ?? $vehicle->year,
+            'price' => $request->price ?? $vehicle->price,
+            'listing_type' => $request->listing_type ?? $vehicle->listing_type,
+            'country_id' => $request->country_id ?? $vehicle->country_id,
+            'city' => $request->city ?? $vehicle->city,
+            'fuel_type' => $request->fuel_type ?? $vehicle->fuel_type,
+            'transmission_type' => $request->transmission_type ?? $vehicle->transmission_type,
+            'condition' => $request->condition ?? $vehicle->condition,
+            'kilometer_reading' => $request->kilometer_reading ?? $vehicle->kilometer_reading,
+            'engine_capacity' => $request->engine_capacity ?? $vehicle->engine_capacity,
+            'previous_owner' => $request->previous_owner ?? $vehicle->previous_owner,
+            'variant' => $request->variant ?? $vehicle->variant,
+            'body_type' => $request->body_type ?? $vehicle->body_type,
+            'vin' => $request->vin ?? $vehicle->vin,
+            'accident_history' => $request->accident_history ?? $vehicle->accident_history,
+            'damage_history' => $request->damage_history ?? $vehicle->damage_history,
+            'service_history' => $request->service_history ?? $vehicle->service_history,
             'front_image' => $frontPath,
             'back_image' => $backPath,
             'rear_image' => $rear_image,
             'passenger_side_image' => $passenger_side_image,
             'dashboard_image' => $dashboard_image,
             'video_link' => $youtube_video,
-            'description' => $request->description,
-            'features' => $request->features,
+            'description' => $request->description ?? $vehicle->description,
+            'features' => $request->features ?? $vehicle->features,
         ]);
 
         if ($request->hasFile('vehicle_images')) {
-                    uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
-            }
-                return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
+            uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+        }
+
+        return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
     }
 
     public function updateVehicleStatus($request, int $id): JsonResponse
