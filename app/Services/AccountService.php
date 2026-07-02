@@ -7,7 +7,7 @@ use Illuminate\Http\JsonResponse;
 
 class AccountService
 {
-    use HttpResponses;  
+    use HttpResponses;
 
     public function profile(): JsonResponse
     {

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->bigInteger('user_id')->unsigned();
             $table->string('slug')->unique();
             $table->string('listing_type');
+            $table->string('status')->default('pending');
             $table->bigInteger('country_id')->unsigned();
             $table->string('city');
             $table->string('fuel_type');

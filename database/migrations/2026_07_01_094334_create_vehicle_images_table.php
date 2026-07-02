@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('vehicle_id')->unsigned();
             $table->text('image_path');
-            $table->text('public_path');
             $table->timestamps();
         });
     }

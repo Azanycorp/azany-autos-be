@@ -28,9 +28,13 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
     Route::controller(DealerController::class)
         ->group(function () {
             Route::get('/profile', 'profile');
-            
-            Route::prefix('vehicle')->group(function () {
+
+            Route::prefix('vehicles')->group(function () {
+                    Route::get('/', 'getVehicles');
                     Route::post('/add', 'addVehicle');
+                    Route::get('/{id}', 'getVehicle');
+                    Route::put('/{id}', 'updateVehicle');
+                    Route::delete('/{id}', 'deleteVehicle');
                 });
         });
 

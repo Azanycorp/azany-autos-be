@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'user_id',
@@ -43,5 +45,15 @@ class Vehicle extends Model
         return [
             'features' => 'array',
         ];
+    }
+
+    public function vehicleImages(): HasMany
+    {
+        return $this->hasMany(VehicleImage::class);
+    }
+
+     public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country_id');
     }
 }

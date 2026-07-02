@@ -44,6 +44,8 @@ class VehicleRequest extends FormRequest
            'description' => ['required', 'string'],
            'features' => ['required', 'array'],
            'features.*' => ['string'],
+           'vehicle_images' => ['required', 'array'],
+           'vehicle_images.*' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ];
     }
 }

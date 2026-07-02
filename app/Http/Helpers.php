@@ -40,34 +40,20 @@ if (! function_exists('userAuth')) {
     }
 }
 
-// if (! function_exists('uploadMultipleB2BProductImage')) {
-//     function uploadMultipleB2BProductImage($request, $file, $folder, $product): void
-//     {
-//         if ($request->hasFile($file)) {
-//             foreach ($request->file($file) as $image) {
-//                 $upload = uploadImageFile($image, $folder);
+if (! function_exists('uploadMultipleVehicleImages')) {
+    function uploadMultipleVehicleImages($request, $file, $folder, $vehicle): void
+    {
+        if ($request->hasFile($file)) {
+            foreach ($request->file($file) as $image) {
+                $upload = uploadImage($image, $folder);
 
-//                 $product->b2bProductImages()->create([
-//                     'image' => $upload['url'],
-//                     'public_id' => $upload['public_id'],
-//                 ]);
-//             }
-//         }
-//     }
-// }
-
-// if (! function_exists('uploadImageFile')) {
-//     function uploadImageFile($file, $folder = 'uploads')
-//     {
-//         $prefix = getFolderPrefix();
-//         $folderName = ltrim($folder, '/');
-//         $fullFolder = "{$prefix}/{$folderName}";
-
-//         $uploader = App::make(FileUploader::class);
-
-//         return $uploader->upload($file, $fullFolder);
-//     }
-// }
+                $vehicle->vehicleImages()->create([
+                    'image_path' => $upload
+                ]);
+            }
+        }
+    }
+}
 
 if (!function_exists('uploadImage')) {
     function uploadImage($file, $folder = 'uploads')
