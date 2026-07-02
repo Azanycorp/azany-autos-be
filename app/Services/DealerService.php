@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enum\VehicleStatus;
 use App\Http\Resources\VehicleResource;
+use App\Models\Vehicle;
 use App\Traits\HttpResponses;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -53,8 +54,8 @@ class DealerService
             'features' => $request->features,
         ]);
 
-        if($new_vehicle) {
-          uploadMultipleVehicleImages($request,'vehicle_images', 'vehicle_images', $new_vehicle);
+        if ($new_vehicle) {
+            uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $new_vehicle);
         }
 
         return $this->successResponse(new VehicleResource($new_vehicle), 'Vehicle added successfully');
@@ -62,10 +63,26 @@ class DealerService
 
     public function getVehicles($request): JsonResponse
     {
-        $user = userAuth();
-        $vehicles = $user->vehicles;
+        $type = $request->query('type');
+        $sort = $request->query('sort');
 
-        return $this->successResponse(VehicleResource::collection($vehicles), 'Vehicles retrieved successfully');
+        $user = userAuth();
+
+        $vehicles = Vehicle::with(['vehicleImages'])
+            ->where('user_id', $user->id)
+            ->when($type, fn ($q) => $q->where('status', $type))
+            ->when($sort, function ($q) use ($sort) {
+                match ($sort) {
+                    'price_asc' => $q->orderBy('price', 'asc'),
+                    'price_desc' => $q->orderBy('price', 'desc'),
+                    'newest' => $q->orderBy('condition', 'asc'),
+                    'oldest' => $q->orderBy('condition', 'desc'),
+                    default => $q->latest(),
+                };
+            }, fn ($q) => $q->latest())
+            ->paginate($request->query('per_page') ?? 25);
+
+        return $this->withPagination(VehicleResource::collection($vehicles), 'Vehicles retrieved successfully');
     }
 
     public function getVehicle(int $id): JsonResponse
@@ -89,6 +106,13 @@ class DealerService
 
         if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
+        }
+
+        if ($vehicle->vin !== $request->vin) {
+            $existingVehicle = Vehicle::where('vin', $request->vin)->first();
+            if ($existingVehicle) {
+                return $this->errorResponse(null, 'VIN already exists for another vehicle', 422);
+            }
         }
 
         $frontPath = $request->hasFile('front_image') ? uploadImage($request->file('front_image'), 'vehicles') : $vehicle->front_image;
@@ -128,6 +152,9 @@ class DealerService
             'features' => $request->features,
         ]);
 
+  if ($request->hasFile('vehicle_images')) {
+            uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+        }
         return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
     }
 
@@ -147,6 +174,3 @@ class DealerService
         return $this->successResponse(null, 'Vehicle deleted successfully');
     }
 }
-
-
-

@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
 use App\Services\AccountService;
 use App\Services\DealerService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class DealerController extends Controller
 {
@@ -36,7 +37,7 @@ class DealerController extends Controller
         return $this->dealerService->getVehicle($id);
     }
 
-    public function updateVehicle(int $id, VehicleRequest $request): JsonResponse
+    public function updateVehicle(int $id, UpdateVehicleRequest $request): JsonResponse
     {
         return $this->dealerService->updateVehicle($request, $id);
     }
