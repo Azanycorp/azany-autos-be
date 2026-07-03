@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('listing_type');
             $table->integer('auction_days')->default(0);
-            $table->string('auction_duration')->nullable();
+            $table->timestamp('auction_start_date')->nullable();
+            $table->timestamp('auction_end_date')->nullable();
             $table->string('status')->default('pending');
             $table->bigInteger('country_id')->unsigned();
             $table->string('city');

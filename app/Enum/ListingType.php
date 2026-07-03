@@ -4,8 +4,8 @@ namespace App\Enum;
 use Illuminate\Support\Collection;
 enum ListingType: string
 {
-    case FOR_SALE = 'for_sale';
-    case FOR_RENT = 'for_rent';
+    case SALE = 'direct_sale';
+    case AUCTION = 'auction';
 
      public static function values(): mixed
     {

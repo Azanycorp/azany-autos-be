@@ -3,6 +3,8 @@
 use App\Models\Mailing;
 use App\Models\User;
 use App\Models\Vehicle;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +34,19 @@ if (! function_exists('generateUserVerificationCode')) {
     function generateUserVerificationCode(): int
     {
         return mt_rand(1000, 9999);
+    }
+}
+
+if (! function_exists('calculateAuctionDuration')) {
+    /**
+     * Calculate the end date of an auction based on the number of days.
+     *
+     * @param int|string $days
+     * @return CarbonInterface
+     */
+    function calculateAuctionDuration(int|string $days): CarbonInterface
+    {
+        return now()->addDays((int) $days);
     }
 }
 
