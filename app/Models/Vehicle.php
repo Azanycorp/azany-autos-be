@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'slug',
     'status',
     'listing_type',
+    'auction_days',
+    'auction_duration',
     'country_id',
     'city',
     'fuel_type',

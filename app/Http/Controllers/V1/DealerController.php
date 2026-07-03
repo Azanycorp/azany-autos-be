@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Controllers\V1;
+
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
 use App\Services\AccountService;
@@ -53,5 +56,30 @@ class DealerController extends Controller
     public function deleteVehicleImage(Request $request, int $id): JsonResponse
     {
         return $this->dealerService->deleteVehicleImage((int) $request->vehicle_id, $id);
+    }
+
+    public function addCustomTag(TagRequest $request): JsonResponse
+    {
+        return $this->dealerService->addCustomTag($request);
+    }
+
+    public function getTags(): JsonResponse
+    {
+        return $this->dealerService->getTags();
+    }
+
+    public function getTag(int $id): JsonResponse
+    {
+        return $this->dealerService->getTag($id);
+    }
+
+    public function updateTag(Request $request, int $id): JsonResponse
+    {
+        return $this->dealerService->updateTag($request, $id);
+    }
+
+    public function deleteTag(int $id): JsonResponse
+    {
+        return $this->dealerService->deleteTag($id);
     }
 }

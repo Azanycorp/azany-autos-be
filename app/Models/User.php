@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\FeatureTag;
 use App\Traits\ShouldVerify;
 use App\Traits\UserRelationships;
 use Carbon\CarbonImmutable;
@@ -150,5 +151,12 @@ class User extends Authenticatable
     public function vehicles(): HasMany
     {
         return $this->hasMany(Vehicle::class);
+    }
+    /**
+     * @return HasMany<Vehicle, $this>
+     */
+    public function customTags(): HasMany
+    {
+        return $this->hasMany(FeatureTag::class);
     }
 }

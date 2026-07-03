@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Enum\VehicleStatus;
+use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
+use App\Http\Resources\TagResource;
 use App\Http\Resources\VehicleResource;
+use App\Models\FeatureTag;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Traits\HttpResponses;
@@ -64,7 +67,7 @@ class DealerService
                     'features' => $request->features,
                 ]);
 
-                /** @var \App\Models\Vehicle $vehicle */
+                /** @var Vehicle $vehicle */
                 uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
 
                 return $vehicle;
@@ -220,5 +223,76 @@ class DealerService
         $vehicle_image->delete();
 
         return $this->successResponse(null, 'Image deleted successfully');
+    }
+
+    public function addCustomTag(TagRequest $request): JsonResponse
+    {
+        $user = userAuth();
+        $tag = $user->customTags()->create([
+            'name' => $request->name,
+        ]);
+
+        return $this->successResponse(new TagResource($tag), 'Custom tag added successfully');
+    }
+
+    public function getTags(): JsonResponse
+    {
+        $user = userAuth();
+
+        $tags = FeatureTag::where('user_id', $user->id)->latest()->get();
+
+        return $this->successResponse(TagResource::collection($tags), 'Tags retrieved successfully');
+    }
+
+    public function getTag(int $id): JsonResponse
+    {
+        $user = userAuth();
+
+        $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $tag) {
+            return $this->errorResponse(null, 'Tag not found', 404);
+        }
+
+        return $this->successResponse(new TagResource($tag), 'Tag retrieved successfully');
+    }
+
+    public function updateTag(Request $request, int $id): JsonResponse
+    {
+        $user = userAuth();
+
+        $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $tag) {
+            return $this->errorResponse(null, 'Tag not found', 404);
+        }
+
+        if ($tag->name !== $request->name) {
+            $existingTag = FeatureTag::where('user_id', $user->id)->where('name', $request->name)->first();
+            if ($existingTag) {
+                return $this->errorResponse(null, 'Tag name already exists', 422);
+            }
+        }
+
+        $tag->update([
+            'name' => $request->name ?? $tag->name,
+        ]);
+
+        return $this->successResponse(new TagResource($tag), 'Tag updated successfully');
+    }
+
+    public function deleteTag(int $id): JsonResponse
+    {
+        $user = userAuth();
+
+        $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $tag) {
+            return $this->errorResponse(null, 'Tag not found', 404);
+        }
+
+        $tag->delete();
+
+        return $this->successResponse(null, 'Tag deleted successfully');
     }
 }

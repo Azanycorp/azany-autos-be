@@ -30,14 +30,23 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
             Route::get('/profile', 'profile');
 
             Route::prefix('vehicles')->group(function () {
-                    Route::get('/', 'getVehicles');
-                    Route::post('/add', 'addVehicle')->name('addVehicle');
-                    Route::get('/details/{id}', 'getVehicle');
-                    Route::put('/update/{id}', 'updateVehicle');
-                    Route::delete('/delete-vehicle/{id}', 'deleteVehicle');
-                    Route::put('/update-status/{id}', 'updateVehicleStatus');
-                    Route::delete('/delete-image/{id}', 'deleteVehicleImage');
-                });
+                Route::get('/', 'getVehicles');
+                Route::post('/add', 'addVehicle');
+                Route::get('/details/{id}', 'getVehicle');
+                Route::put('/update/{id}', 'updateVehicle');
+                Route::delete('/delete-vehicle/{id}', 'deleteVehicle');
+                Route::put('/update-status/{id}', 'updateVehicleStatus');
+                Route::delete('/delete-image/{id}', 'deleteVehicleImage');
+            });
+
+            Route::prefix('tags')->group(function () {
+                Route::get('/', 'getTags');
+                Route::post('/add', 'addCustomTag');
+                Route::get('/details/{id}', 'getTag');
+                Route::put('/update/{id}', 'updateTag');
+                Route::delete('/delete/{id}', 'deleteTag');
+            });
+
         });
 
 });
