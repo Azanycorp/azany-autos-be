@@ -78,9 +78,11 @@ class CreateVehicleTest extends TestCase
                 UploadedFile::fake()->image('extra2.jpg'),
             ],
         ];
-        $this->withoutExceptionHandling();
+        
         $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
-
+if ($response->status() !== 200) {
+        dump($response->json()); // This will print the exact middleware error message in your GitHub actions log
+    }
         $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
