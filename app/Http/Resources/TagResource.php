@@ -2,12 +2,10 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
 /**
- * @mixin FeatureTag
+ * @mixin \App\Models\FeatureTag
  */
 class TagResource extends JsonResource
 {

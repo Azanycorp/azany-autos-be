@@ -35,8 +35,6 @@ class CreateVehicleTest extends TestCase
             'price' => 25000,
             'listing_type' => ListingType::AUCTION->value,
             'auction_days' => 7,
-            'auction_start_date' => now(),
-            'auction_end_date' => now()->addDays(7),
             'country_id' => 1,
             'city' => 'Lagos',
             'fuel_type' => FuelType::PETROL->value,

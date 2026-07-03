@@ -153,7 +153,7 @@ class User extends Authenticatable
         return $this->hasMany(Vehicle::class);
     }
     /**
-     * @return HasMany<Vehicle, $this>
+     * @return HasMany<FeatureTag, $this>
      */
     public function customTags(): HasMany
     {
