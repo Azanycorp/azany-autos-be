@@ -25,6 +25,8 @@ class VehicleRequest extends FormRequest
            'listing_type' => ['required', 'string', Rule::in(ListingType::values())],
            'country_id' => ['required', 'integer', 'exists:countries,id'],
            'auction_days' => ['nullable', 'integer'],
+           'auction_start_date' => ['nullable'],
+           'auction_end_date' => ['nullable'],
            'city' => ['required', 'string'],
            'fuel_type' => ['required', 'string', Rule::in(FuelType::values())],
            'transmission_type' => ['required', 'string', Rule::in(TransmissionType::values())],

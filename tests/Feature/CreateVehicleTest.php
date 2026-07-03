@@ -50,6 +50,8 @@ class CreateVehicleTest extends TestCase
             'price' => 25000,
             'listing_type' => ListingType::AUCTION->value,
             'auction_days' => 7,
+            'auction_start_date' => now(),
+            'auction_end_date' => now()->addDays(7),
             'country_id' => $country->id,
             'city' => 'Lagos',
             'fuel_type' => FuelType::PETROL->value,
@@ -66,7 +68,6 @@ class CreateVehicleTest extends TestCase
             'service_history' => 'Full',
             'description' => 'A very clean vehicle.',
             'features' => ['Leather seats', 'Sunroof'],
-
             'front_image' => UploadedFile::fake()->image('front.jpg'),
             'back_image' => UploadedFile::fake()->image('back.jpg'),
             'rear_image' => UploadedFile::fake()->image('rear.jpg'),
@@ -78,11 +79,9 @@ class CreateVehicleTest extends TestCase
                 UploadedFile::fake()->image('extra2.jpg'),
             ],
         ];
-        
+
         $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
-if ($response->status() !== 200) {
-        dump($response->json()); // This will print the exact middleware error message in your GitHub actions log
-    }
+
         $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
