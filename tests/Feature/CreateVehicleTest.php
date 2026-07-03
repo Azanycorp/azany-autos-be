@@ -9,6 +9,7 @@ use App\Enum\FuelType;
 use App\Enum\ListingType;
 use App\Enum\TransmissionType;
 use App\Enum\UserType;
+use App\Enum\VehicleStatus;
 use App\Models\Country;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -48,7 +49,9 @@ class CreateVehicleTest extends TestCase
             'model' => 'Camry',
             'year' => '2024',
             'price' => 25000,
+            'slug' => str()->slug("new vehicle-" . str()->random(6)),                   
             'listing_type' => ListingType::AUCTION->value,
+            'status' => VehicleStatus::PENDING->value,
             'auction_days' => 7,
             'auction_start_date' => now(),
             'auction_end_date' => now()->addDays(7),
@@ -98,7 +101,7 @@ class CreateVehicleTest extends TestCase
             'make' => 'Toyota',
             'model' => 'Camry',
             'year' => '2024',
-            'status' => 'pending',
+            'status' => VehicleStatus::PENDING->value,
         ]);
 
         $vehicle = Vehicle::first();
