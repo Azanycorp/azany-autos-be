@@ -8,11 +8,15 @@ use App\Enum\DamageType;
 use App\Enum\FuelType;
 use App\Enum\ListingType;
 use App\Enum\TransmissionType;
+use App\Models\Country;
 use App\Models\User;
 use App\Models\Vehicle;
+use CloudinaryLabs\CloudinaryLaravel\CloudinaryEngine;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
 use Tests\TestCase;
 
 class CreateVehicleTest extends TestCase
@@ -25,6 +29,16 @@ class CreateVehicleTest extends TestCase
         Storage::fake('vehicles');
         Storage::fake('vehicle_images');
 
+        $mockedUploadResult = Mockery::mock(CloudinaryEngine::class);
+        $mockedUploadResult->shouldReceive('getSecurePath')
+            ->andReturn('https://res.cloudinary.com/fake-account/image/upload/v123/vehicles/fake_car.jpg');
+        $mockedUploadResult->shouldReceive('getPublicId')
+            ->andReturn('vehicles/fake_car');
+
+        Cloudinary::shouldReceive('upload')
+            ->andReturn($mockedUploadResult);
+
+        $country = Country::factory()->create();
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -35,7 +49,7 @@ class CreateVehicleTest extends TestCase
             'price' => 25000,
             'listing_type' => ListingType::AUCTION->value,
             'auction_days' => 7,
-            'country_id' => 1,
+            'country_id' => $country->id,
             'city' => 'Lagos',
             'fuel_type' => FuelType::PETROL->value,
             'transmission_type' => TransmissionType::AUTOMATIC->value,
@@ -61,28 +75,28 @@ class CreateVehicleTest extends TestCase
             'vehicle_images' => [
                 UploadedFile::fake()->image('extra1.jpg'),
                 UploadedFile::fake()->image('extra2.jpg'),
-            ]
+            ],
         ];
 
         $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
 
-          $response->assertOk()
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id', 'make', 'model', 'year', 'slug'
-                     ],
-                     'message'
-                 ])
-                 ->assertJsonFragment([
-                     'message' => 'Vehicle added successfully'
-                 ]);
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'make', 'model', 'year', 'slug',
+                ],
+                'message',
+            ])
+            ->assertJsonFragment([
+                'message' => 'Vehicle added successfully',
+            ]);
 
         $this->assertDatabaseHas('vehicles', [
             'user_id' => $user->id,
             'make' => 'Toyota',
             'model' => 'Camry',
             'year' => '2024',
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $vehicle = Vehicle::first();
