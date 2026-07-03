@@ -17,6 +17,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 use Mockery;
 use Tests\TestCase;
 
@@ -41,8 +42,7 @@ class CreateVehicleTest extends TestCase
 
         $country = Country::factory()->create();
         $user = User::factory()->create(['user_type' => UserType::AUTODEALER->value]);
-        $this->actingAs($user);
-
+        Sanctum::actingAs($user, ['*']);
         $payload = [
             'make' => 'Toyota',
             'model' => 'Camry',
