@@ -78,7 +78,7 @@ class CreateVehicleTest extends TestCase
                 UploadedFile::fake()->image('extra2.jpg'),
             ],
         ];
-
+        $this->withoutExceptionHandling();
         $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
 
         $response->assertOk()
