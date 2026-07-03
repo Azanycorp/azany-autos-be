@@ -8,6 +8,7 @@ use App\Enum\DamageType;
 use App\Enum\FuelType;
 use App\Enum\ListingType;
 use App\Enum\TransmissionType;
+use App\Enum\UserType;
 use App\Models\Country;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -39,7 +40,7 @@ class CreateVehicleTest extends TestCase
             ->andReturn($mockedUploadResult);
 
         $country = Country::factory()->create();
-        $user = User::factory()->create();
+        $user = User::factory()->create(['user_type' => UserType::AUTODEALER->value]);
         $this->actingAs($user);
 
         $payload = [
