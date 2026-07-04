@@ -86,7 +86,7 @@ class CreateVehicleTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
+        $response = $this->post('/api/v1/dealer/vehicles/add', $payload);
 
         $response->assertOk()
             ->assertJsonStructure([
