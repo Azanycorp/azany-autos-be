@@ -43,6 +43,7 @@ return new class extends Migration
             $table->text('passenger_side_image');
             $table->text('dashboard_image');
             $table->text('video_link')->nullable();
+            $table->decimal('reserved_price', 10, 2);
             $table->decimal('price', 10, 2);
             $table->text('description');
             $table->json('features');

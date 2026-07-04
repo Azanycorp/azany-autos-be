@@ -45,11 +45,13 @@ class CreateVehicleTest extends TestCase
         $user = User::factory()->create(['user_type' => UserType::AUTODEALER->value]);
         Sanctum::actingAs($user, ['*']);
         $payload = [
+            'user_id' => $user->id,
             'make' => 'Toyota',
             'model' => 'Camry',
             'year' => '2024',
-            'price' => 25000,
-            'slug' => str()->slug("new vehicle-" . str()->random(6)),                   
+            'reserved_price' => 25000,
+            'price' => 30000,
+            'slug' => str()->slug("new vehicle-" . str()->random(6)),
             'listing_type' => ListingType::AUCTION->value,
             'status' => VehicleStatus::PENDING->value,
             'auction_days' => 7,

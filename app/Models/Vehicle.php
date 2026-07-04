@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'passenger_side_image',
     'dashboard_image',
     'video_link',
+    'reserved_price',
     'price',
     'description',
     'features',

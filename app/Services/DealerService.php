@@ -39,6 +39,7 @@ class DealerService
                     'make' => $request->make,
                     'model' => $request->model,
                     'year' => $request->year,
+                    'reserved_price' => $request->reserved_price,
                     'price' => $request->price,
                     'slug' => str()->slug("{$request->make} {$request->model} {$request->year}").'-'.str()->random(6),
                     'status' => VehicleStatus::PENDING->value,
