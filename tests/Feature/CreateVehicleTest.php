@@ -29,6 +29,7 @@ class CreateVehicleTest extends TestCase
     /** @test */
     public function test_an_authenticated_user_can_successfully_add_a_vehicle()
     {
+        $this->withoutExceptionHandling();
         Storage::fake('vehicles');
         Storage::fake('vehicle_images');
 
