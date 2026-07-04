@@ -23,6 +23,9 @@ class DealerService
 
     public function addVehicle(VehicleRequest $request): JsonResponse
     {
+        if ($request->reserved_price > $request->price) {
+            return $this->errorResponse(null, 'Reserved price cannot be higher than the actual price.', 400);
+        }
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
         $backPath = uploadImage($request->file('back_image'), 'vehicles');
         $rear_image = uploadImage($request->file('rear_image'), 'vehicles');
