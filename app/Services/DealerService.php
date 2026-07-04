@@ -81,7 +81,7 @@ class DealerService
 
         } catch (Exception $e) {
 
-            return $this->errorResponse(null, 'Something went wrong while saving the vehicle listing.', 403);
+            return $this->errorResponse(null, $e->getMessage(), 500);
         }
     }
 
