@@ -119,21 +119,13 @@ if (! function_exists('uploadImage')) {
             ]);
 
             if (filled($uploadedImage->getSecurePath())) {
-                return [
-                    'url' => $uploadedImage->getSecurePath(),
-                    'public_id' => $uploadedImage->getPublicId(),
-                    'error' => null,
-                ];
+                return $uploadedImage->getSecurePath();
             }
         } catch (Exception $e) {
             Log::error('Cloudinary Upload Failed: '.$e->getMessage());
         }
 
-        return [
-            'url' => null,
-            'public_id' => null,
-            'error' => 'Image upload failed on all providers.',
-        ];
+        return 'Image upload failed on all providers.';
     }
 }
 
