@@ -78,6 +78,7 @@ class CreateVehicleTest extends TestCase
             'rear_image' => UploadedFile::fake()->image('rear.jpg'),
             'passenger_side_image' => UploadedFile::fake()->image('passenger.jpg'),
             'dashboard_image' => UploadedFile::fake()->image('dashboard.jpg'),
+            'video_link' => null,
 
             'vehicle_images' => [
                 UploadedFile::fake()->image('extra1.jpg'),
