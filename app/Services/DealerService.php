@@ -16,7 +16,6 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class DealerService
 {
@@ -81,11 +80,8 @@ class DealerService
             return $this->successResponse(new VehicleResource($new_vehicle), 'Vehicle added successfully');
 
         } catch (Exception $e) {
-Log::error('Vehicle Creation Failed: ' . $e->getMessage(), [
-        'exception' => $e,
-        'user_id' => $user->id ?? null
-    ]);
-            return $this->errorResponse(null, $e->getMessage(), 500);
+
+            return $this->errorResponse(null, 'Something went wrong while saving the vehicle listing.', 403);
         }
     }
 

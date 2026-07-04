@@ -29,7 +29,6 @@ class CreateVehicleTest extends TestCase
     /** @test */
     public function test_an_authenticated_user_can_successfully_add_a_vehicle()
     {
-        $this->withoutExceptionHandling();
         Storage::fake('vehicles');
         Storage::fake('vehicle_images');
 
@@ -46,15 +45,12 @@ class CreateVehicleTest extends TestCase
         $user = User::factory()->create(['user_type' => UserType::AUTODEALER->value]);
         Sanctum::actingAs($user, ['*']);
         $payload = [
-            'user_id' => $user->id,
             'make' => 'Toyota',
             'model' => 'Camry',
             'year' => '2024',
             'reserved_price' => 25000,
             'price' => 30000,
-            'slug' => str()->slug("new vehicle-" . str()->random(6)),
             'listing_type' => ListingType::AUCTION->value,
-            'status' => VehicleStatus::PENDING->value,
             'auction_days' => 7,
             'auction_start_date' => now(),
             'auction_end_date' => now()->addDays(7),
