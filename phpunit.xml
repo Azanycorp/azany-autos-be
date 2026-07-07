@@ -32,5 +32,6 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="CLOUDINARY_URL" value="cloudinary://fake_key:fake_secret@fake_cloud_name"/>
     </php>
 </phpunit>

@@ -4,7 +4,6 @@ namespace App\Enum;
 
 enum MailingEnum: string
 {
-    // Type
     case SIGN_UP_OTP = 'sign_up_otp';
 
     case LOGIN_OTP = 'login_otp';
