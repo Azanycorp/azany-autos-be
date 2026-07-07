@@ -2,6 +2,7 @@
 
 namespace App\Enum;
 use Illuminate\Support\Collection;
+
 enum ListingType: string
 {
     case SALE = 'direct_sale';

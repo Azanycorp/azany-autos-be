@@ -2,6 +2,7 @@
 
 namespace App\Enum;
 use Illuminate\Support\Collection;
+
 enum VehicleStatus: string
 {
     case ACTIVE = 'active';

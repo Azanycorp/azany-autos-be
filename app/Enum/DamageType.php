@@ -2,6 +2,7 @@
 
 namespace App\Enum;
 use Illuminate\Support\Collection;
+
 enum DamageType: string
 {
     case NO_DAMAGE = 'no_damage';

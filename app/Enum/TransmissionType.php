@@ -2,6 +2,7 @@
 
 namespace App\Enum;
 use Illuminate\Support\Collection;
+
 enum TransmissionType: string
 {
     case MANUAL = 'manual';
