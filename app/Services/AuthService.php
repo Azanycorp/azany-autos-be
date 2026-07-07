@@ -133,20 +133,6 @@ class AuthService
                 return $this->errorResponse(null, 'Associated user account could not be found.', 404);
             }
 
-            // $response = $this->httpService->post('verify-code', new RequestOptions(
-            //     data: [
-            //         'email' => $user->email
-            //     ]
-            // ));
-
-            // if ($response->failed()) {
-            //     return $this->errorResponse(
-            //         null,
-            //         $response->json()['message'] ?? 'An error occured.',
-            //         400
-            //     );
-            // }
-
             $user->update([
                 'email_verified_at' => now(),
                 'status' => UserStatus::ACTIVE->value,
@@ -216,23 +202,6 @@ class AuthService
         $user->sendVerificationEmail();
 
         return $this->successResponse(null, 'Verification email resent.');
-    }
-
-    public function profile(): JsonResponse
-    {
-        $auth = userAuth();
-
-        if (! $auth) {
-            return $this->errorResponse(null, 'User not authenticated', 401);
-        }
-
-        $user = User::where('id', $auth->id)->first();
-
-        if (! $user) {
-            return $this->errorResponse(null, 'User does not exist', 404);
-        }
-
-        return $this->successResponse(new UserResource($user), 'User profile');
     }
 
     public function verify2fa(CodeRequest $request): JsonResponse

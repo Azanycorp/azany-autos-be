@@ -27,7 +27,7 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
     Route::controller(DealerController::class)
         ->group(function () {
-            Route::get('/profile', 'profile');
+            Route::get('/profile/{user_id}', 'profile');
 
             Route::prefix('vehicles')->group(function () {
                 Route::get('/', 'getVehicles');

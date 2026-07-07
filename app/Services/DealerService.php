@@ -9,10 +9,12 @@ use App\Http\Requests\V1\VehicleRequest;
 use App\Http\Resources\TagResource;
 use App\Http\Resources\VehicleResource;
 use App\Models\FeatureTag;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Traits\HttpResponses;
 use Exception;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +28,11 @@ class DealerService
         if ($request->reserved_price > $request->price) {
             return $this->errorResponse(null, 'Reserved price cannot be higher than the actual price.', 400);
         }
+        $user = User::where('id', $request->user_id)->first();
+
+        if (! $user) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
         $backPath = uploadImage($request->file('back_image'), 'vehicles');
         $rear_image = uploadImage($request->file('rear_image'), 'vehicles');
@@ -33,10 +40,8 @@ class DealerService
         $dashboard_image = uploadImage($request->file('dashboard_image'), 'vehicles');
         $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
 
-        $user = userAuth();
-
         try {
-            $new_vehicle = DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
+            return DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
 
                 $vehicle = $user->vehicles()->create([
                     'make' => $request->make,
@@ -77,10 +82,8 @@ class DealerService
                 /** @var Vehicle $vehicle */
                 uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
 
-                return $vehicle;
+                return $this->successResponse(new VehicleResource($vehicle), 'Vehicle added successfully');
             });
-
-            return $this->successResponse(new VehicleResource($new_vehicle), 'Vehicle added successfully');
 
         } catch (Exception $e) {
 
@@ -93,7 +96,7 @@ class DealerService
         $type = $request->query('type');
         $sort = $request->query('sort');
 
-        $user = userAuth();
+        $user = $request->user();
 
         $vehicles = Vehicle::with(['vehicleImages'])
             ->where('user_id', $user->id)
@@ -114,7 +117,7 @@ class DealerService
 
     public function getVehicle(int $id): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
 
         $vehicle = $user->vehicles->find($id);
 
@@ -127,7 +130,7 @@ class DealerService
 
     public function updateVehicle(UpdateVehicleRequest $request, int $id): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -188,7 +191,7 @@ class DealerService
 
     public function updateVehicleStatus(Request $request, int $id): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
 
         $vehicle = $user->vehicles->find($id);
 
@@ -205,7 +208,7 @@ class DealerService
 
     public function deleteVehicle(int $id): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -234,7 +237,8 @@ class DealerService
 
     public function addCustomTag(TagRequest $request): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
+
         $tag = $user->customTags()->create([
             'name' => $request->name,
         ]);
@@ -244,7 +248,7 @@ class DealerService
 
     public function getTags(): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
 
         $tags = FeatureTag::where('user_id', $user->id)->latest()->get();
 
@@ -253,7 +257,7 @@ class DealerService
 
     public function getTag(int $id): JsonResponse
     {
-        $user = userAuth();
+      $user = request()->user();
 
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -266,7 +270,7 @@ class DealerService
 
     public function updateTag(Request $request, int $id): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
 
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -290,7 +294,11 @@ class DealerService
 
     public function deleteTag(int $id): JsonResponse
     {
-        $user = userAuth();
+        $user = request()->user();
+
+        if (! $user) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
 
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 

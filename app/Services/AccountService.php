@@ -9,15 +9,9 @@ class AccountService
 {
     use HttpResponses;
 
-    public function profile(): JsonResponse
+    public function profile(int $user_id): JsonResponse
     {
-        $auth = userAuth();
-
-        if (! $auth) {
-            return $this->errorResponse(null, 'User not authenticated', 401);
-        }
-
-        $user = User::where('id', $auth->id)->first();
+        $user = User::where('id', $user_id)->first();
 
         if (! $user) {
             return $this->errorResponse(null, 'User does not exist', 404);
