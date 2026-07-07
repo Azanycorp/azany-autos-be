@@ -18,7 +18,8 @@ class DealerController extends Controller
     public function __construct(
         private readonly AccountService $accountService,
         private readonly DealerService $dealerService
-    ) {}
+    ) {
+    }
 
     public function profile(int $userId): JsonResponse
     {
@@ -57,12 +58,12 @@ class DealerController extends Controller
 
     public function deleteVehicleImage(Request $request, int $id): JsonResponse
     {
-        return $this->dealerService->deleteVehicleImage((int) $request->vehicle_id, $id);
+        return $this->dealerService->deleteVehicleImage($request, $id);
     }
 
-    public function addCustomTag(TagRequest $request): JsonResponse
+    public function addCustomTag(TagRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->dealerService->addCustomTag($request);
+        return $this->dealerService->addCustomTag($request, $user);
     }
 
     public function getTags(int $userId): JsonResponse
@@ -70,18 +71,18 @@ class DealerController extends Controller
         return $this->dealerService->getTags($userId);
     }
 
-    public function getTag(Request $request, int $id): JsonResponse
+    public function getTag(int $id, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->dealerService->getTag($request, $id);
+        return $this->dealerService->getTag($id, $user);
     }
 
-    public function updateTag(Request $request, int $id): JsonResponse
+    public function updateTag(Request $request, int $id, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->dealerService->updateTag($request, $id);
+        return $this->dealerService->updateTag($request, $id, $user);
     }
 
-    public function deleteTag(Request $request, int $id): JsonResponse
+    public function deleteTag(int $id, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->dealerService->deleteTag($request, $id);
+        return $this->dealerService->deleteTag($id, $user);
     }
 }

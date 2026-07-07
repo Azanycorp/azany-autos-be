@@ -9,11 +9,11 @@ class AccountService
 {
     use HttpResponses;
 
-    public function profile(int $user_id): JsonResponse
+    public function profile(int $userId): JsonResponse
     {
-        $user = User::where('id', $user_id)->first();
+        $user = User::where('id', $userId)->first();
 
-        if (! $user) {
+        if (!$user) {
             return $this->errorResponse(null, 'User does not exist', 404);
         }
 

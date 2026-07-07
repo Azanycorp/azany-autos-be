@@ -29,7 +29,7 @@ class DealerService
         }
         $user = User::where('id', $request->user_id)->first();
 
-        if (! $user) {
+        if (!$user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
@@ -48,7 +48,7 @@ class DealerService
                     'year' => $request->year,
                     'reserved_price' => $request->reserved_price,
                     'price' => $request->price,
-                    'slug' => str()->slug("{$request->make} {$request->model} {$request->year}").'-'.str()->random(6),
+                    'slug' => str()->slug("{$request->make} {$request->model} {$request->year}") . '-' . str()->random(6),
                     'status' => VehicleStatus::PENDING->value,
                     'listing_type' => $request->listing_type,
                     'country_id' => $request->country_id,
@@ -99,7 +99,7 @@ class DealerService
 
         $vehicles = Vehicle::with(['vehicleImages'])
             ->where('user_id', $user->id)
-            ->when($type, fn ($q) => $q->where('status', $type))
+            ->when($type, fn($q) => $q->where('status', $type))
             ->when($sort, function ($q) use ($sort) {
                 match ($sort) {
                     'price_asc' => $q->orderBy('price', 'asc'),
@@ -108,7 +108,7 @@ class DealerService
                     'oldest' => $q->orderBy('condition', 'desc'),
                     default => $q->latest(),
                 };
-            }, fn ($q) => $q->latest())
+            }, fn($q) => $q->latest())
             ->paginate(intval($request->query('per_page') ?? 25));
 
         return $this->withPagination(VehicleResource::collection($vehicles), 'Vehicles retrieved successfully');
@@ -120,7 +120,7 @@ class DealerService
 
         $vehicle = $user->vehicles->find($id);
 
-        if (! $vehicle) {
+        if (!$vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -133,7 +133,7 @@ class DealerService
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (! $vehicle) {
+        if (!$vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -194,7 +194,7 @@ class DealerService
 
         $vehicle = $user->vehicles->find($id);
 
-        if (! $vehicle) {
+        if (!$vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -211,7 +211,7 @@ class DealerService
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (! $vehicle) {
+        if (!$vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -221,23 +221,23 @@ class DealerService
         return $this->successResponse(null, 'Vehicle deleted successfully');
     }
 
-    public function deleteVehicleImage(int $vehicle_id, int $id): JsonResponse
+    public function deleteVehicleImage(Request $request, int $id): JsonResponse
     {
-        $vehicle_image = VehicleImage::where('vehicle_id', $vehicle_id)->where('id', $id)->first();
+        $vehicleImage = VehicleImage::where('vehicle_id', $request->vehicle_id)
+            ->where('id', $id)
+            ->first();
 
-        if (! $vehicle_image) {
+        if (!$vehicleImage) {
             return $this->errorResponse(null, 'Vehicle image not found', 404);
         }
 
-        $vehicle_image->delete();
+        $vehicleImage->delete();
 
         return $this->successResponse(null, 'Image deleted successfully');
     }
 
-    public function addCustomTag(TagRequest $request): JsonResponse
+    public function addCustomTag(TagRequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
-
         $tag = $user->customTags()->create([
             'name' => $request->name,
         ]);
@@ -245,11 +245,11 @@ class DealerService
         return $this->successResponse(new TagResource($tag), 'Custom tag added successfully');
     }
 
-    public function getTags(int $user_id): JsonResponse
+    public function getTags(int $userId): JsonResponse
     {
-        $user = User::where('id', $user_id)->first();
+        $user = User::where('id', $userId)->first();
 
-        if (! $user) {
+        if (!$user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
 
@@ -258,26 +258,24 @@ class DealerService
         return $this->successResponse(TagResource::collection($tags), 'Tags retrieved successfully');
     }
 
-    public function getTag(Request $request, int $id): JsonResponse
+    public function getTag(int $id, User $user): JsonResponse
     {
-        $user = $request->user();
+        $tag = FeatureTag::where('user_id', $user->id)
+            ->where('id', $id)
+            ->first();
 
-        $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
-
-        if (! $tag) {
+        if (!$tag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
         return $this->successResponse(new TagResource($tag), 'Tag retrieved successfully');
     }
 
-    public function updateTag(Request $request, int $id): JsonResponse
+    public function updateTag(Request $request, int $id, User $user): JsonResponse
     {
-        $user = $request->user();
-
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (! $tag) {
+        if (!$tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
@@ -295,17 +293,15 @@ class DealerService
         return $this->successResponse(new TagResource($tag), 'Tag updated successfully');
     }
 
-    public function deleteTag(Request $request, int $id): JsonResponse
+    public function deleteTag(int $id, User $user): JsonResponse
     {
-        $user = $request->user();
-
-        if (! $user) {
+        if (!$user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
 
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (! $tag) {
+        if (!$tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
