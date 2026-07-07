@@ -20,9 +20,9 @@ class DealerController extends Controller
         private readonly DealerService $dealerService
     ) {}
 
-    public function profile(int $user_id): JsonResponse
+    public function profile(int $userId): JsonResponse
     {
-        return $this->accountService->profile($user_id);
+        return $this->accountService->profile($userId);
     }
 
     public function addVehicle(VehicleRequest $request): JsonResponse
@@ -65,9 +65,9 @@ class DealerController extends Controller
         return $this->dealerService->addCustomTag($request);
     }
 
-    public function getTags(int $user_id): JsonResponse
+    public function getTags(int $userId): JsonResponse
     {
-        return $this->dealerService->getTags($user_id);
+        return $this->dealerService->getTags($userId);
     }
 
     public function getTag(Request $request, int $id): JsonResponse
