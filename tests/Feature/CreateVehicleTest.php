@@ -20,7 +20,7 @@ use function Pest\Laravel\actingAs; // Imported the helper function directly
 
 uses(RefreshDatabase::class);
 
-test('an authenticated user can successfully add a vehicle', function () {
+it('an authenticated user can successfully add a vehicle', function () {
     Storage::fake('vehicles');
     Storage::fake('vehicle_images');
 
