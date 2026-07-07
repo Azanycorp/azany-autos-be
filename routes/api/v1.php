@@ -40,7 +40,7 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
             });
 
             Route::prefix('tags')->group(function () {
-                Route::get('/', 'getTags');
+                Route::get('/{user_id}', 'getTags');
                 Route::post('/add', 'addCustomTag');
                 Route::get('/details/{id}', 'getTag');
                 Route::put('/update/{id}', 'updateTag');

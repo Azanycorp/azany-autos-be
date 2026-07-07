@@ -14,7 +14,6 @@ use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Traits\HttpResponses;
 use Exception;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +79,7 @@ class DealerService
                 ]);
 
                 /** @var Vehicle $vehicle */
-                uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+                uploadMultipleImages($request, 'vehicle_images', 'vehicle_images', $vehicle, 'vehicleImages', 'image_path');
 
                 return $this->successResponse(new VehicleResource($vehicle), 'Vehicle added successfully');
             });
@@ -115,9 +114,9 @@ class DealerService
         return $this->withPagination(VehicleResource::collection($vehicles), 'Vehicles retrieved successfully');
     }
 
-    public function getVehicle(int $id): JsonResponse
+    public function getVehicle(Request $request, int $id): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         $vehicle = $user->vehicles->find($id);
 
@@ -130,7 +129,7 @@ class DealerService
 
     public function updateVehicle(UpdateVehicleRequest $request, int $id): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -183,7 +182,7 @@ class DealerService
         ]);
 
         if ($request->hasFile('vehicle_images')) {
-            uploadMultipleVehicleImages($request, 'vehicle_images', 'vehicle_images', $vehicle);
+            uploadMultipleImages($request, 'vehicle_images', 'vehicle_images', $vehicle, 'vehicleImages', 'image_path');
         }
 
         return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
@@ -191,7 +190,7 @@ class DealerService
 
     public function updateVehicleStatus(Request $request, int $id): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         $vehicle = $user->vehicles->find($id);
 
@@ -206,9 +205,9 @@ class DealerService
         return $this->successResponse(null, 'Vehicle status updated successfully');
     }
 
-    public function deleteVehicle(int $id): JsonResponse
+    public function deleteVehicle(Request $request, int $id): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -237,7 +236,7 @@ class DealerService
 
     public function addCustomTag(TagRequest $request): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         $tag = $user->customTags()->create([
             'name' => $request->name,
@@ -246,18 +245,22 @@ class DealerService
         return $this->successResponse(new TagResource($tag), 'Custom tag added successfully');
     }
 
-    public function getTags(): JsonResponse
+    public function getTags(int $user_id): JsonResponse
     {
-        $user = request()->user();
+        $user = User::where('id', $user_id)->first();
+
+        if (! $user) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
 
         $tags = FeatureTag::where('user_id', $user->id)->latest()->get();
 
         return $this->successResponse(TagResource::collection($tags), 'Tags retrieved successfully');
     }
 
-    public function getTag(int $id): JsonResponse
+    public function getTag(Request $request, int $id): JsonResponse
     {
-      $user = request()->user();
+        $user = $request->user();
 
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -270,7 +273,7 @@ class DealerService
 
     public function updateTag(Request $request, int $id): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
@@ -292,9 +295,9 @@ class DealerService
         return $this->successResponse(new TagResource($tag), 'Tag updated successfully');
     }
 
-    public function deleteTag(int $id): JsonResponse
+    public function deleteTag(Request $request, int $id): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);

@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -57,15 +58,47 @@ if (! function_exists('userAuth')) {
     }
 }
 
-if (! function_exists('uploadMultipleVehicleImages')) {
-    function uploadMultipleVehicleImages(Request $request, string $file, string $folder, Vehicle $vehicle): void
-    {
-        if ($request->hasFile($file)) {
-            foreach ($request->file($file) as $image) {
+// if (! function_exists('uploadMultipleVehicleImages')) {
+//     function uploadMultipleVehicleImages(Request $request, string $file, string $folder, Vehicle $vehicle): void
+//     {
+//         if ($request->hasFile($file)) {
+//             foreach ($request->file($file) as $image) {
+//                 $upload = uploadImage($image, $folder);
+
+//                 $vehicle->vehicleImages()->create([
+//                     'image_path' => $upload,
+//                 ]);
+//             }
+//         }
+//     }
+// }
+
+if (! function_exists('uploadMultipleImages')) {
+    /**
+     * Upload multiple images and attach them dynamically to a model's relationship.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param string $inputKey The name of the input field (e.g., 'vehicle_images')
+     * @param string $folder The cloud storage folder destination
+     * @param Model $model The Eloquent model instance (Vehicle, Product, etc.)
+     * @param string $relationship The model relationship name (e.g., 'vehicleImages', 'images')
+     * @param string $columnName The database column name to save the path into (defaults to 'image_path')
+     * @return void
+     */
+    function uploadMultipleImages(
+        Request $request,
+        string $inputKey,
+        string $folder,
+        Model $model,
+        string $relationship,
+        string $columnName = 'image_path'
+    ): void {
+        if ($request->hasFile($inputKey)) {
+            foreach ($request->file($inputKey) as $image) {
                 $upload = uploadImage($image, $folder);
 
-                $vehicle->vehicleImages()->create([
-                    'image_path' => $upload,
+                $model->{$relationship}()->create([
+                    $columnName => $upload,
                 ]);
             }
         }
@@ -93,7 +126,6 @@ if (! function_exists('uploadImage')) {
             }
 
             $base64 = base64_encode($fileContents);
-          //  $base64 = (string) base64_encode(file_get_contents($file->getRealPath()));
 
             $uploadFile = $imageKit->uploadFile([
                 'file' => "data:image/*;base64,{$base64}",

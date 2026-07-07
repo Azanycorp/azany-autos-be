@@ -35,9 +35,9 @@ class DealerController extends Controller
         return $this->dealerService->getVehicles($request);
     }
 
-    public function getVehicle(int $id): JsonResponse
+    public function getVehicle(Request $request, int $id): JsonResponse
     {
-        return $this->dealerService->getVehicle($id);
+        return $this->dealerService->getVehicle($request, $id);
     }
 
     public function updateVehicle(UpdateVehicleRequest $request, int $id): JsonResponse
@@ -45,9 +45,9 @@ class DealerController extends Controller
         return $this->dealerService->updateVehicle($request, $id);
     }
 
-    public function deleteVehicle(int $id): JsonResponse
+    public function deleteVehicle(Request $request, int $id): JsonResponse
     {
-        return $this->dealerService->deleteVehicle($id);
+        return $this->dealerService->deleteVehicle($request, $id);
     }
 
     public function updateVehicleStatus(Request $request, int $id): JsonResponse
@@ -65,14 +65,14 @@ class DealerController extends Controller
         return $this->dealerService->addCustomTag($request);
     }
 
-    public function getTags(): JsonResponse
+    public function getTags(int $user_id): JsonResponse
     {
-        return $this->dealerService->getTags();
+        return $this->dealerService->getTags($user_id);
     }
 
-    public function getTag(int $id): JsonResponse
+    public function getTag(Request $request, int $id): JsonResponse
     {
-        return $this->dealerService->getTag($id);
+        return $this->dealerService->getTag($request, $id);
     }
 
     public function updateTag(Request $request, int $id): JsonResponse
@@ -80,8 +80,8 @@ class DealerController extends Controller
         return $this->dealerService->updateTag($request, $id);
     }
 
-    public function deleteTag(int $id): JsonResponse
+    public function deleteTag(Request $request, int $id): JsonResponse
     {
-        return $this->dealerService->deleteTag($id);
+        return $this->dealerService->deleteTag($request, $id);
     }
 }
