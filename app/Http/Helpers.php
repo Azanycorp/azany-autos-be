@@ -58,21 +58,6 @@ if (! function_exists('userAuth')) {
     }
 }
 
-// if (! function_exists('uploadMultipleVehicleImages')) {
-//     function uploadMultipleVehicleImages(Request $request, string $file, string $folder, Vehicle $vehicle): void
-//     {
-//         if ($request->hasFile($file)) {
-//             foreach ($request->file($file) as $image) {
-//                 $upload = uploadImage($image, $folder);
-
-//                 $vehicle->vehicleImages()->create([
-//                     'image_path' => $upload,
-//                 ]);
-//             }
-//         }
-//     }
-// }
-
 if (! function_exists('uploadMultipleImages')) {
     /**
      * Upload multiple images and attach them dynamically to a model's relationship.
