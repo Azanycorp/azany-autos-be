@@ -295,10 +295,6 @@ class DealerService
 
     public function deleteTag(int $id, User $user): JsonResponse
     {
-        if (!$user) {
-            return $this->errorResponse(null, 'User not found', 404);
-        }
-
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
         if (!$tag instanceof FeatureTag) {
