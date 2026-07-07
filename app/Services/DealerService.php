@@ -279,15 +279,15 @@ class DealerService
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
-        if ($tag->name !== $request->string('name')) {
-            $existingTag = FeatureTag::where('user_id', $user->id)->where('name', $request->string('name'))->first();
-            if ($existingTag instanceof FeatureTag) {
+        if ($tag->name !== $request->name) {
+            $existingTag = FeatureTag::where('user_id', $user->id)->where('name', $request->name)->first();
+            if ($existingTag) {
                 return $this->errorResponse(null, 'Tag name already exists', 422);
             }
         }
 
         $tag->update([
-            'name' => $request->string('name') ?? $tag->name,
+            'name' => $request->name ?? $tag->name,
         ]);
 
         return $this->successResponse(new TagResource($tag), 'Tag updated successfully');
