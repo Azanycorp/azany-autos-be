@@ -50,6 +50,7 @@ class AuthService
             $this->httpService->post('register', new RequestOptions(
                 data: $requestData
             ));
+            $currency_code = getCurrencyCodeByCountryId($request->country_id);
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -60,6 +61,7 @@ class AuthService
                 'business_name' => $request->business_name,
                 'contact_person' => $request->contact_person,
                 'country_id' => $request->country_id,
+                'default_currency' => $currency_code,
                 'status' => UserStatus::PENDING->value,
                 'password' => bcrypt($request->password),
             ]);

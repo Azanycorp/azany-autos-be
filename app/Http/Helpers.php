@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Country;
 use App\Models\Mailing;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -156,3 +157,21 @@ if (! function_exists('imageKitClient')) {
         );
     }
 }
+
+if (! function_exists('getCurrencyCodeByCountryId')) {
+    function getCurrencyCodeByCountryId($countryId): string
+    {
+        if (! $countryId) {
+            return 'USD';
+        }
+
+        $country = Country::select('id', 'sortname', 'currency_code')->find($countryId);
+
+        if (! $country) {
+            return 'USD';
+        }
+
+        return $country->currency_code ?: 'USD';
+    }
+}
+

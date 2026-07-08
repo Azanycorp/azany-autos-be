@@ -99,6 +99,7 @@ use Laravel\Sanctum\PersonalAccessToken;
     'first_name',
     'last_name',
     'country_id',
+    'default_currency',
     'status',
     'user_type',
     'phone',
