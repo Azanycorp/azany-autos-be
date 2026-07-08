@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\LocationRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
@@ -84,5 +85,35 @@ class DealerController extends Controller
     public function deleteTag(int $id, #[CurrentUser] User $user): JsonResponse
     {
         return $this->dealerService->deleteTag($id, $user);
+    }
+
+    public function addNewLocation(LocationRequest $request, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->addNewLocation($request, $user);
+    }
+
+    public function getAllLocations(int $userId): JsonResponse
+    {
+        return $this->dealerService->getAllLocations($userId);
+    }
+
+    public function getLocation(int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->getLocation($id, $user);
+    }
+
+    public function updateLocation(Request $request, int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->updateLocation($request, $id, $user);
+    }
+
+    public function makeLocationDefault(int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->makeLocationDefault($id, $user);
+    }
+
+    public function deleteLocation(int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->deleteLocation($id, $user);
     }
 }

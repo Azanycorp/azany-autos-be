@@ -3,12 +3,15 @@
 namespace App\Services;
 
 use App\Enum\VehicleStatus;
+use App\Http\Requests\V1\LocationRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
+use App\Http\Resources\InspectionLocationResource;
 use App\Http\Resources\TagResource;
 use App\Http\Resources\VehicleResource;
 use App\Models\FeatureTag;
+use App\Models\InspectionLocation;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
@@ -29,7 +32,7 @@ class DealerService
         }
         $user = User::where('id', $request->user_id)->first();
 
-        if (!$user) {
+        if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
@@ -48,7 +51,7 @@ class DealerService
                     'year' => $request->year,
                     'reserved_price' => $request->reserved_price,
                     'price' => $request->price,
-                    'slug' => str()->slug("{$request->make} {$request->model} {$request->year}") . '-' . str()->random(6),
+                    'slug' => str()->slug("{$request->make} {$request->model} {$request->year}").'-'.str()->random(6),
                     'status' => VehicleStatus::PENDING->value,
                     'listing_type' => $request->listing_type,
                     'country_id' => $request->country_id,
@@ -99,7 +102,7 @@ class DealerService
 
         $vehicles = Vehicle::with(['vehicleImages'])
             ->where('user_id', $user->id)
-            ->when($type, fn($q) => $q->where('status', $type))
+            ->when($type, fn ($q) => $q->where('status', $type))
             ->when($sort, function ($q) use ($sort) {
                 match ($sort) {
                     'price_asc' => $q->orderBy('price', 'asc'),
@@ -108,7 +111,7 @@ class DealerService
                     'oldest' => $q->orderBy('condition', 'desc'),
                     default => $q->latest(),
                 };
-            }, fn($q) => $q->latest())
+            }, fn ($q) => $q->latest())
             ->paginate(intval($request->query('per_page') ?? 25));
 
         return $this->withPagination(VehicleResource::collection($vehicles), 'Vehicles retrieved successfully');
@@ -120,7 +123,7 @@ class DealerService
 
         $vehicle = $user->vehicles->find($id);
 
-        if (!$vehicle) {
+        if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -133,7 +136,7 @@ class DealerService
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (!$vehicle) {
+        if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -194,7 +197,7 @@ class DealerService
 
         $vehicle = $user->vehicles->find($id);
 
-        if (!$vehicle) {
+        if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -211,7 +214,7 @@ class DealerService
 
         $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (!$vehicle) {
+        if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
@@ -227,7 +230,7 @@ class DealerService
             ->where('id', $id)
             ->first();
 
-        if (!$vehicleImage) {
+        if (! $vehicleImage) {
             return $this->errorResponse(null, 'Vehicle image not found', 404);
         }
 
@@ -249,7 +252,7 @@ class DealerService
     {
         $user = User::where('id', $userId)->first();
 
-        if (!$user) {
+        if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
 
@@ -264,7 +267,7 @@ class DealerService
             ->where('id', $id)
             ->first();
 
-        if (!$tag) {
+        if (! $tag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
@@ -275,7 +278,7 @@ class DealerService
     {
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (!$tag instanceof FeatureTag) {
+        if (! $tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
@@ -297,12 +300,113 @@ class DealerService
     {
         $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
 
-        if (!$tag instanceof FeatureTag) {
+        if (! $tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
         $tag->delete();
 
         return $this->successResponse(null, 'Tag deleted successfully');
+    }
+
+    // Inspection Location
+    public function addNewLocation(LocationRequest $request, User $user): JsonResponse
+    {
+        $location = $user->inspectionLocations()->create([
+            'name' => $request->name,
+            'address' => $request->address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'note' => $request->note,
+            'country_id' => $request->country_id,
+        ]);
+
+        return $this->successResponse(new InspectionLocationResource($location), 'Location added successfully');
+    }
+
+    public function getAllLocations(int $userId): JsonResponse
+    {
+        $user = User::where('id', $userId)->first();
+
+        if (! $user) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
+
+        $locations = InspectionLocation::where('user_id', $user->id)->latest()->get();
+
+        return $this->successResponse(InspectionLocationResource::collection($locations), 'Locations retrieved successfully');
+    }
+
+    public function getLocation(int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)
+            ->where('id', $id)
+            ->first();
+
+        if (! $location) {
+            return $this->errorResponse(null, 'Tag not found', 404);
+        }
+
+        return $this->successResponse(new InspectionLocationResource($location), 'Location retrieved successfully');
+    }
+
+    public function makeLocationDefault(int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $location instanceof InspectionLocation) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        DB::transaction(function () use ($user, $location) {
+            InspectionLocation::where('user_id', $user->id)
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+
+            $location->is_default = true;
+            $location->save();
+        });
+
+        return $this->successResponse(null, 'Location marked as default successfully');
+    }
+
+    public function updateLocation(Request $request, int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $location instanceof InspectionLocation) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        if ($location->name !== $request->name) {
+            $existingTag = InspectionLocation::where('user_id', $user->id)->where('name', $request->name)->first();
+            if ($existingTag) {
+                return $this->errorResponse(null, 'Location name already exists', 422);
+            }
+        }
+
+        $location->update([
+            'name' => $request->name ?? $location->name,
+            'address' => $request->address ?? $location->address,
+            'city' => $request->city ?? $location->city,
+            'state' => $request->state ?? $location->state,
+            'country_id' => $request->country_id ?? $location->country_id,
+            'note' => $request->note ?? $location->note,
+        ]);
+
+        return $this->successResponse(new InspectionLocationResource($location), 'Location updated successfully');
+    }
+
+    public function deleteLocation(int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $location instanceof InspectionLocation) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        $location->delete();
+
+        return $this->successResponse(null, 'Location deleted successfully');
     }
 }

@@ -47,6 +47,15 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
                 Route::delete('/delete/{id}', 'deleteTag');
             });
 
+            Route::prefix('location')->group(function () {
+                Route::get('/{user_id}', 'getAllLocations');
+                Route::post('/add', 'addNewLocation');
+                Route::get('/details/{id}', 'getlocation');
+                Route::put('/update/{id}', 'updateLocation');
+                Route::put('/make-default/{id}', 'updateLocation');
+                Route::delete('/delete/{id}', 'deleteLocation');
+            });
+
         });
 
 });
