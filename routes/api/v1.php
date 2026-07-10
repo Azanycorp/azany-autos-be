@@ -52,8 +52,17 @@ Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
                 Route::post('/add', 'addNewLocation');
                 Route::get('/details/{id}', 'getlocation');
                 Route::put('/update/{id}', 'updateLocation');
-                Route::put('/make-default/{id}', 'updateLocation');
+                Route::put('/make-default/{id}', 'makeLocationDefault');
                 Route::delete('/delete/{id}', 'deleteLocation');
+            });
+
+            Route::prefix('inspections')->group(function () {
+                Route::get('/{user_id}', 'getAllSlots');
+                Route::post('/add', 'addNewSlot');
+                Route::get('/details/{id}', 'getSlot');
+                Route::put('/update/{id}', 'updateSlot');
+                Route::put('/update-status/{id}', 'updateSlotStatus');
+                Route::delete('/delete/{id}', 'deleteSlot');
             });
 
         });

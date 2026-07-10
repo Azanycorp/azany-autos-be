@@ -4,14 +4,17 @@ namespace App\Services;
 
 use App\Enum\VehicleStatus;
 use App\Http\Requests\V1\LocationRequest;
+use App\Http\Requests\V1\SlotRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
 use App\Http\Resources\InspectionLocationResource;
+use App\Http\Resources\SlotResource;
 use App\Http\Resources\TagResource;
 use App\Http\Resources\VehicleResource;
 use App\Models\FeatureTag;
 use App\Models\InspectionLocation;
+use App\Models\InspectionSlot;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
@@ -344,7 +347,7 @@ class DealerService
             ->first();
 
         if (! $location) {
-            return $this->errorResponse(null, 'Tag not found', 404);
+            return $this->errorResponse(null, 'Location not found', 404);
         }
 
         return $this->successResponse(new InspectionLocationResource($location), 'Location retrieved successfully');
@@ -398,6 +401,108 @@ class DealerService
     }
 
     public function deleteLocation(int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $location instanceof InspectionLocation) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        if ($location->is_default == true) {
+            return $this->errorResponse(null, 'Default Location can not be deleted', 403);
+        }
+
+        $location->delete();
+
+        return $this->successResponse(null, 'Location deleted successfully');
+    }
+
+    // Inspection Slots
+    public function addNewSlot(SlotRequest $request, User $user): JsonResponse
+    {
+        $slot = $user->inspectionLocations()->create([
+            'vehicle_id' => $request->vehicle_id,
+            'inspection_date' => $request->inspection_date,
+            'inspection_time' => $request->inspection_time
+            ]);
+
+        return $this->successResponse(new SlotResource($slot), 'New Slot added successfully');
+    }
+
+    public function getAllSlots(int $userId): JsonResponse
+    {
+        $user = User::where('id', $userId)->first();
+
+        if (! $user) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
+
+        $slots = InspectionSlot::where('user_id', $user->id)->latest()->get();
+
+        return $this->successResponse(SlotResource::collection($slots), 'Inspection slots retrieved successfully');
+    }
+
+    public function getSlot(int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)
+            ->where('id', $id)
+            ->first();
+
+        if (! $location) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        return $this->successResponse(new InspectionLocationResource($location), 'Location retrieved successfully');
+    }
+
+    public function updateSlotStatus(int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $location instanceof InspectionLocation) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        DB::transaction(function () use ($user, $location) {
+            InspectionLocation::where('user_id', $user->id)
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+
+            $location->is_default = true;
+            $location->save();
+        });
+
+        return $this->successResponse(null, 'Location marked as default successfully');
+    }
+
+    public function updateSlot(Request $request, int $id, User $user): JsonResponse
+    {
+        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+
+        if (! $location instanceof InspectionLocation) {
+            return $this->errorResponse(null, 'Location not found', 404);
+        }
+
+        if ($location->name !== $request->name) {
+            $existingTag = InspectionLocation::where('user_id', $user->id)->where('name', $request->name)->first();
+            if ($existingTag) {
+                return $this->errorResponse(null, 'Location name already exists', 422);
+            }
+        }
+
+        $location->update([
+            'name' => $request->name ?? $location->name,
+            'address' => $request->address ?? $location->address,
+            'city' => $request->city ?? $location->city,
+            'state' => $request->state ?? $location->state,
+            'country_id' => $request->country_id ?? $location->country_id,
+            'note' => $request->note ?? $location->note,
+        ]);
+
+        return $this->successResponse(new InspectionLocationResource($location), 'Location updated successfully');
+    }
+
+    public function deleteSlot(int $id, User $user): JsonResponse
     {
         $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
 
