@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enum\InspectionStatus;
 use App\Enum\VehicleStatus;
 use App\Http\Requests\V1\LocationRequest;
 use App\Http\Requests\V1\SlotRequest;
+use App\Http\Requests\V1\StatusUpdateRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
@@ -456,14 +458,14 @@ class DealerService
         return $this->successResponse(new SlotResource($slot), 'Slot retrieved successfully');
     }
 
-    public function updateSlotStatus(Request $request, int $id, User $user): JsonResponse
+    public function updateSlotStatus(StatusUpdateRequest $request, int $id, User $user): JsonResponse
     {
         $slot = InspectionSlot::where('dealer_id', $user->id)->where('id', $id)->first();
 
         if (! $slot instanceof InspectionSlot) {
             return $this->errorResponse(null, 'Slot not found', 404);
         }
-          $slot->update([
+        $slot->update([
             'status' => $request->status ?? $slot->status,
         ]);
 
@@ -485,7 +487,7 @@ class DealerService
             'inspection_time' => $request->inspection_time ?? $slot->inspection_time,
         ]);
 
-        return $this->successResponse(null, 'Location updated successfully');
+        return $this->successResponse(null, 'Slot updated successfully');
     }
 
     public function deleteSlot(int $id, User $user): JsonResponse
@@ -494,6 +496,10 @@ class DealerService
 
         if (! $slot instanceof InspectionSlot) {
             return $this->errorResponse(null, 'Slot not found', 404);
+        }
+
+        if ($slot->status == InspectionStatus::COMPLETED->value) {
+            return $this->errorResponse(null, 'Completed Inspection can not be deleted', 403);
         }
 
         $slot->delete();

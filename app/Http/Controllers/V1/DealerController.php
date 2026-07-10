@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\LocationRequest;
 use App\Http\Requests\V1\SlotRequest;
+use App\Http\Requests\V1\StatusUpdateRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
@@ -132,9 +133,9 @@ class DealerController extends Controller
         return $this->dealerService->getSlot($id, $user);
     }
 
-    public function updateSlotStatus(int $id, #[CurrentUser] User $user): JsonResponse
+    public function updateSlotStatus(StatusUpdateRequest $request, int $id, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->dealerService->updateSlotStatus($id, $user);
+        return $this->dealerService->updateSlotStatus($request, $id, $user);
     }
 
     public function updateSlot(SlotRequest $request, int $id, #[CurrentUser] User $user): JsonResponse
@@ -144,6 +145,6 @@ class DealerController extends Controller
 
     public function deleteSlot(int $id, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->dealerService->deleteLocation($id, $user);
+        return $this->dealerService->deleteSlot($id, $user);
     }
 }
