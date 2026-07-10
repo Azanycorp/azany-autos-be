@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\FeatureTag;
 use App\Traits\ShouldVerify;
 use App\Traits\UserRelationships;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -168,5 +168,18 @@ class User extends Authenticatable
     public function inspectionLocations(): HasMany
     {
         return $this->hasMany(InspectionLocation::class);
+    }
+
+    /**
+     * @return HasMany<InspectionSlot, $this>
+     */
+    public function inspectionSlots(): HasMany
+    {
+        return $this->hasMany(InspectionSlot::class, 'dealer_id', 'id');
+    }
+
+    protected function fullName(): Attribute
+    {
+        return Attribute::get(fn () => "{$this->first_name} {$this->last_name}");
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\LocationRequest;
+use App\Http\Requests\V1\SlotRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
@@ -19,8 +20,7 @@ class DealerController extends Controller
     public function __construct(
         private readonly AccountService $accountService,
         private readonly DealerService $dealerService
-    ) {
-    }
+    ) {}
 
     public function profile(int $userId): JsonResponse
     {
@@ -113,6 +113,36 @@ class DealerController extends Controller
     }
 
     public function deleteLocation(int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->deleteLocation($id, $user);
+    }
+
+    public function addNewSlot(SlotRequest $request, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->addNewSlot($request, $user);
+    }
+
+    public function getAllSlots(int $userId): JsonResponse
+    {
+        return $this->dealerService->getAllSlots($userId);
+    }
+
+    public function getSlot(int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->getSlot($id, $user);
+    }
+
+    public function updateSlotStatus(int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->updateSlotStatus($id, $user);
+    }
+
+    public function updateSlot(SlotRequest $request, int $id, #[CurrentUser] User $user): JsonResponse
+    {
+        return $this->dealerService->updateSlot($request, $id, $user);
+    }
+
+    public function deleteSlot(int $id, #[CurrentUser] User $user): JsonResponse
     {
         return $this->dealerService->deleteLocation($id, $user);
     }

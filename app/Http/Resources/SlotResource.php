@@ -20,15 +20,10 @@ class SlotResource extends JsonResource
     {
         return [
             'id' => (int) $this->resource->id,
-            'name' => (string) $this->resource->name,
-            'address' => (string) $this->resource->address,
-            'city' => (string) $this->resource->city,
             'inspection_date' => (string) $this->resource->inspection_date,
-            // 'buyer' => (string) $this->resource->buyer?->name,
+            'inspection_time' => (string) $this->resource->inspection_time,
             'status' => (string) $this->resource->status,
-            'buyer' => (object) [
-                'first_name' => (string) optional($this->resource->buyer)->first_name,
-            ],
+            'buyer' => (string) $this->resource->buyer?->full_name,
 
             'vehicle' => (object) [
                 'previous_owner' => (string) optional($this->resource->vehicle)->previous_owner,
