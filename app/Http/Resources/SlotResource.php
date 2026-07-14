@@ -24,7 +24,6 @@ class SlotResource extends JsonResource
             'inspection_time' => (string) $this->resource->inspection_time,
             'status' => (string) $this->resource->status,
             'buyer' => (string) $this->resource->buyer?->full_name,
-
             'vehicle' => (object) [
                 'previous_owner' => (string) $this->resource->vehicle->previous_owner,
                 'make' => (string) $this->resource->vehicle->make,
@@ -34,7 +33,6 @@ class SlotResource extends JsonResource
                 'body_type' => (string) $this->resource->vehicle->body_type,
                 'vin' => (string) $this->resource->vehicle->vin,
             ],
-
             'location' => (object) [
                 'name' => (string) $this->resource->location->name,
                 'address' => (string) $this->resource->location->address,
@@ -43,7 +41,6 @@ class SlotResource extends JsonResource
                 'note' => (string) $this->resource->location->note,
                 'country' => (string) $this->resource->location->country?->name,
             ],
-
         ];
     }
 }
