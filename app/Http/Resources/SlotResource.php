@@ -26,22 +26,22 @@ class SlotResource extends JsonResource
             'buyer' => (string) $this->resource->buyer?->full_name,
 
             'vehicle' => (object) [
-                'previous_owner' => (string) optional($this->resource->vehicle)->previous_owner,
-                'make' => (string) optional($this->resource->vehicle)->make,
-                'model' => (string) optional($this->resource->vehicle)->model,
-                'year' => (string) optional($this->resource->vehicle)->year,
-                'variant' => (string) optional($this->resource->vehicle)->variant,
-                'body_type' => (string) optional($this->resource->vehicle)->body_type,
-                'vin' => (string) optional($this->resource->vehicle)->vin,
+                'previous_owner' => (string) $this->resource->vehicle->previous_owner,
+                'make' => (string) $this->resource->vehicle->make,
+                'model' => (string) $this->resource->vehicle->model,
+                'year' => (string) $this->resource->vehicle->year,
+                'variant' => (string) $this->resource->vehicle->variant,
+                'body_type' => (string) $this->resource->vehicle->body_type,
+                'vin' => (string) $this->resource->vehicle->vin,
             ],
 
             'location' => (object) [
-                'name' => (string) optional($this->resource->location)->name,
-                'address' => (string) optional($this->resource->location)->address,
-                'city' => (string) optional($this->resource->location)->city,
-                'state' => (string) optional($this->resource->location)->state,
-                'note' => (string) optional($this->resource->location)->note,
-                'country' => (string) optional($this->resource->location)->country?->name,
+                'name' => (string) $this->resource->location->name,
+                'address' => (string) $this->resource->location->address,
+                'city' => (string) $this->resource->location->city,
+                'state' => (string) $this->resource->location->state,
+                'note' => (string) $this->resource->location->note,
+                'country' => (string) $this->resource->location->country?->name,
             ],
 
         ];

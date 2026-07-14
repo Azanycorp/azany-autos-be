@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Database\Factories\InspectionLocationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +21,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InspectionLocation extends Model
 {
+    /** @use HasFactory<InspectionLocationFactory> */
+    use HasFactory;
+
+    /**
+     * @return BelongsTo<Country, $this>
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');

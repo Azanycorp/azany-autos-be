@@ -159,7 +159,7 @@ if (! function_exists('imageKitClient')) {
 }
 
 if (! function_exists('getCurrencyCodeByCountryId')) {
-    function getCurrencyCodeByCountryId($countryId): string
+    function getCurrencyCodeByCountryId(int $countryId): string
     {
         if (! $countryId) {
             return 'USD';

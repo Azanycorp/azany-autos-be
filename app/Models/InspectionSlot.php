@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\InspectionLocation;
-use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,21 +18,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InspectionSlot extends Model
 {
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function dealer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function buyer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'buyer_id');
     }
 
+    /**
+     * @return BelongsTo<Vehicle, $this>
+     */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
+     /**
+     * @return BelongsTo<InspectionLocation, $this>
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(InspectionLocation::class, 'location_id');

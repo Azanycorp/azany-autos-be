@@ -178,6 +178,9 @@ class User extends Authenticatable
         return $this->hasMany(InspectionSlot::class, 'dealer_id', 'id');
     }
 
+    /**
+     * @return Attribute<non-falsy-string, never>
+     */
     protected function fullName(): Attribute
     {
         return Attribute::get(fn () => "{$this->first_name} {$this->last_name}");
