@@ -331,22 +331,20 @@ class DealerService
 
     public function getAllLocations(int $userId): JsonResponse
     {
-        $user = User::where('id', $userId)->first();
+        $user = User::with('inspectionLocations')->find($userId);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
 
-        $locations = InspectionLocation::where('user_id', $user->id)->latest()->get();
+        $locations = $user->inspectionLocations()->latest()->get();
 
         return $this->successResponse(InspectionLocationResource::collection($locations), 'Locations retrieved successfully');
     }
 
     public function getLocation(int $id, User $user): JsonResponse
     {
-        $location = InspectionLocation::where('user_id', $user->id)
-            ->where('id', $id)
-            ->first();
+        $location = $user->inspectionLocations()->find($id);
 
         if (! $location) {
             return $this->errorResponse(null, 'Location not found', 404);
@@ -357,7 +355,7 @@ class DealerService
 
     public function makeLocationDefault(int $id, User $user): JsonResponse
     {
-        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+        $location = $user->inspectionLocations()->find($id);
 
         if (! $location instanceof InspectionLocation) {
             return $this->errorResponse(null, 'Location not found', 404);
@@ -368,8 +366,7 @@ class DealerService
                 ->where('is_default', true)
                 ->update(['is_default' => false]);
 
-            $location->is_default = true;
-            $location->save();
+            $location->update(['is_default' => true]);
         });
 
         return $this->successResponse(null, 'Location marked as default successfully');
@@ -377,17 +374,18 @@ class DealerService
 
     public function updateLocation(Request $request, int $id, User $user): JsonResponse
     {
-        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+        $location = $user->inspectionLocations()->find($id);
 
         if (! $location instanceof InspectionLocation) {
             return $this->errorResponse(null, 'Location not found', 404);
         }
 
-        if ($location->name !== $request->name) {
-            $existingTag = InspectionLocation::where('user_id', $user->id)->where('name', $request->name)->first();
-            if ($existingTag) {
-                return $this->errorResponse(null, 'Location name already exists', 422);
-            }
+        $exists = $user->inspectionLocations()
+            ->where('name', $request->name)
+            ->exists();
+        
+        if ($exists) {
+            return $this->errorResponse(null, 'Location name already exists', 422);
         }
 
         $location->update([
@@ -404,13 +402,13 @@ class DealerService
 
     public function deleteLocation(int $id, User $user): JsonResponse
     {
-        $location = InspectionLocation::where('user_id', $user->id)->where('id', $id)->first();
+        $location = $user->inspectionLocations()->find($id);
 
         if (! $location instanceof InspectionLocation) {
             return $this->errorResponse(null, 'Location not found', 404);
         }
 
-        if ($location->is_default == true) {
+        if ($location->is_default) {
             return $this->errorResponse(null, 'Default Location can not be deleted', 403);
         }
 
