@@ -19,7 +19,6 @@ class SlotRequest extends FormRequest
            'location_id' => ['required', 'integer', 'exists:inspection_locations,id'],
            'inspection_date' => ['required','date','after_or_equal:today'],
            'inspection_time' => ['required'],
-
         ];
     }
 }
