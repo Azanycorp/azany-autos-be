@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'status' => (string) $this->resource->status,
             'user_type' => (string) $this->resource->user_type,
             'country' => (string) $this->resource->country?->name,
+            'default_currency' => (string) $this->resource->default_currency,
             'state' => (string) $this->resource->state,
             'address' => (string) $this->resource->address,
             'zip_code' => (string) $this->resource->zip_code,

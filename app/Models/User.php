@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\FeatureTag;
 use App\Traits\ShouldVerify;
 use App\Traits\UserRelationships;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -99,6 +99,7 @@ use Laravel\Sanctum\PersonalAccessToken;
     'first_name',
     'last_name',
     'country_id',
+    'default_currency',
     'status',
     'user_type',
     'phone',
@@ -152,11 +153,36 @@ class User extends Authenticatable
     {
         return $this->hasMany(Vehicle::class);
     }
+
     /**
      * @return HasMany<FeatureTag, $this>
      */
     public function customTags(): HasMany
     {
         return $this->hasMany(FeatureTag::class);
+    }
+
+    /**
+     * @return HasMany<InspectionLocation, $this>
+     */
+    public function inspectionLocations(): HasMany
+    {
+        return $this->hasMany(InspectionLocation::class);
+    }
+
+    /**
+     * @return HasMany<InspectionSlot, $this>
+     */
+    public function inspectionSlots(): HasMany
+    {
+        return $this->hasMany(InspectionSlot::class, 'dealer_id', 'id');
+    }
+
+    /**
+     * @return Attribute<non-falsy-string, never>
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::get(fn () => "{$this->first_name} {$this->last_name}");
     }
 }
