@@ -3,10 +3,7 @@
 use App\Enum\UserType;
 use App\Models\Country;
 use App\Models\User;
-use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response as LaravelResponse;
 use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);

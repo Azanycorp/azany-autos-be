@@ -64,7 +64,8 @@
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test",
             "@rector-dry",
-            "@phpstan"
+            "@phpstan",
+            "@pint"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -86,7 +87,8 @@
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
         "phpstan": "vendor/bin/phpstan analyse --memory-limit=2G",
-        "rector-dry": "vendor/bin/rector process --dry-run"
+        "rector-dry": "vendor/bin/rector process --dry-run",
+        "pint": "vendor/bin/pint"
     },
     "extra": {
         "laravel": {

@@ -11,9 +11,8 @@ trait UserRelationships
      * Get the country associated with the user.
      *
      * @return BelongsTo<Country, $this>
-     * *
+     *                                   *
      */
-
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');

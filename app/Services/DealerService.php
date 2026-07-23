@@ -383,7 +383,7 @@ class DealerService
         $exists = $user->inspectionLocations()
             ->where('name', $request->name)
             ->exists();
-        
+
         if ($exists) {
             return $this->errorResponse(null, 'Location name already exists', 422);
         }

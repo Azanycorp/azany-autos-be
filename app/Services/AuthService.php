@@ -100,7 +100,7 @@ class AuthService
 
             $user->update([
                 'verification_code' => $verificationCode,
-                'verification_code_expire_at' => now()->addMinutes(10)
+                'verification_code_expire_at' => now()->addMinutes(10),
             ]);
 
             $type = MailingEnum::TWO_FA_OTP->value;

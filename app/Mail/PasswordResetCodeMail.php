@@ -38,7 +38,7 @@ class PasswordResetCodeMail extends Mailable
         return new Content(
             markdown: 'mail.password-reset-code',
             with: [
-                'user' => $this->user
+                'user' => $this->user,
             ],
         );
     }

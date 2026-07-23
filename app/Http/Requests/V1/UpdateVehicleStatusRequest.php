@@ -18,7 +18,7 @@ class UpdateVehicleStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'status' => ['required', 'string', Rule::in(VehicleStatus::values())],
+            'status' => ['required', 'string', Rule::in(VehicleStatus::values())],
         ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Enum;
+
 use Illuminate\Support\Collection;
 
 enum VehicleStatus: string
@@ -15,7 +16,7 @@ enum VehicleStatus: string
     case SOLD = 'sold';
     case CLOSED = 'closed';
 
-     public static function values(): mixed
+    public static function values(): mixed
     {
         return (new Collection(self::cases()))->pluck('value');
     }

@@ -7,6 +7,7 @@ use App\Mail\VerifyAccountMail;
 use App\Models\User;
 use App\Models\Verify;
 use App\Notifications\ResetPassword;
+use Carbon\CarbonInterface;
 use Exception;
 
 /**
@@ -18,7 +19,7 @@ use Exception;
  * @property string $email
  * @property string $first_name
  * @property string $password
- * @property \Carbon\CarbonInterface|null $email_verified_at
+ * @property CarbonInterface|null $email_verified_at
  */
 trait ShouldVerify
 {
@@ -47,7 +48,7 @@ trait ShouldVerify
                 'first_name' => $user->first_name,
                 'token' => $verifyUser->token,
                 'expires_at' => $verifyUser->expires_at->toISOString(),
-            ]
+            ],
         ];
 
         mailSend($type, $user, $subject, $mail_class, $payload);
@@ -61,7 +62,7 @@ trait ShouldVerify
         $user = $this;
 
         try {
-            
+
             $type = MailingEnum::RESET_OTP->value;
             $subject = 'Password Reset Request';
             $mail_class = ResetPassword::class;

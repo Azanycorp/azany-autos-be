@@ -42,7 +42,7 @@ class InspectionSlot extends Model
         return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
-     /**
+    /**
      * @return BelongsTo<InspectionLocation, $this>
      */
     public function location(): BelongsTo

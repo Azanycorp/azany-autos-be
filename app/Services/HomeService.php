@@ -13,9 +13,9 @@ class HomeService
     public function migrate(): JsonResponse
     {
         Artisan::call('migrate', [
-            '--force' => true
+            '--force' => true,
         ]);
 
-        return $this->successResponse(['output' => Artisan::output()], "Migration completed successfully.");
+        return $this->successResponse(['output' => Artisan::output()], 'Migration completed successfully.');
     }
 }

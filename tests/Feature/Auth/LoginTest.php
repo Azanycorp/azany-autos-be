@@ -11,7 +11,7 @@ beforeEach(fn () => Mail::fake());
 describe('POST /api/auth/login', function () {
     it('returns a token on valid credentials', function () {
         $user = User::factory()->create([
-            'email' => 'john@gmail.com'
+            'email' => 'john@gmail.com',
         ]);
 
         $this->postJson('/api/v1/auth/login', [
@@ -28,7 +28,7 @@ describe('POST /api/auth/login', function () {
     it('returns 401 when the password is wrong', function () {
 
         $user = User::factory()->create([
-            'email' => 'john@gmail.com'
+            'email' => 'john@gmail.com',
         ]);
 
         $this->postJson('/api/v1/auth/login', [
