@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Enum\SubscriptionStatus;
+use App\Models\Traits\UserRelationships;
 use App\Traits\ShouldVerify;
-use App\Traits\UserRelationships;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -11,7 +12,6 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -147,42 +147,28 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<Vehicle, $this>
-     */
-    public function vehicles(): HasMany
-    {
-        return $this->hasMany(Vehicle::class);
-    }
-
-    /**
-     * @return HasMany<FeatureTag, $this>
-     */
-    public function customTags(): HasMany
-    {
-        return $this->hasMany(FeatureTag::class);
-    }
-
-    /**
-     * @return HasMany<InspectionLocation, $this>
-     */
-    public function inspectionLocations(): HasMany
-    {
-        return $this->hasMany(InspectionLocation::class);
-    }
-
-    /**
-     * @return HasMany<InspectionSlot, $this>
-     */
-    public function inspectionSlots(): HasMany
-    {
-        return $this->hasMany(InspectionSlot::class, 'dealer_id', 'id');
-    }
-
-    /**
      * @return Attribute<non-falsy-string, never>
      */
     protected function fullName(): Attribute
     {
         return Attribute::get(fn () => "{$this->first_name} {$this->last_name}");
+    }
+
+    public function assignFreeSubscription(): Subscription
+    {
+        if ($this->subscriptions()->exists()) {
+            return $this->subscriptions()->latest()->first();
+        }
+
+        $plan = SubscriptionPlan::where('slug', 'free')->firstOrFail();
+
+        return $this->subscriptions()->create([
+            'subscription_plan_id' => $plan->id,
+            'amount' => $plan->price,
+            'starts_at' => now(),
+            'end_at' => null,
+            'gateway' => null,
+            'status' => SubscriptionStatus::ACTIVE,
+        ]);
     }
 }

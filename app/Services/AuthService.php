@@ -50,6 +50,7 @@ class AuthService
             $this->httpService->post('register', new RequestOptions(
                 data: $requestData
             ));
+
             $currency_code = getCurrencyCodeByCountryId($request->country_id);
 
             $user = User::create([
@@ -67,6 +68,7 @@ class AuthService
             ]);
 
             $user->sendVerificationEmail();
+            $user->assignFreeSubscription();
 
             return $this->successResponse(
                 new UserResource($user),

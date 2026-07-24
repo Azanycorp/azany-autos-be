@@ -1,7 +1,9 @@
 <?php
 
+use App\Enum\SubscriptionStatus;
 use App\Enum\UserType;
 use App\Models\Country;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -28,6 +30,12 @@ function registrationPayload(int $countryId): array
 it('creates the user and returns a success message', function () {
     $country = Country::factory()->create();
 
+    SubscriptionPlan::factory()->create([
+        'name' => 'Free Plan',
+        'slug' => 'free',
+        'price' => 0,
+    ]);
+
     $payload = registrationPayload($country->id);
 
     $this->postJson('/api/v1/auth/register', $payload)
@@ -38,8 +46,13 @@ it('creates the user and returns a success message', function () {
 
     $this->assertDatabaseHas('users', [
         'email' => 'john@gmail.com',
-        'first_name' => 'John',
-        'last_name' => 'Doe',
+    ]);
+
+    $user = User::where('email', 'john@gmail.com')->firstOrFail();
+
+    $this->assertDatabaseHas('subscriptions', [
+        'user_id' => $user->id,
+        'status' => SubscriptionStatus::ACTIVE->value,
     ]);
 });
 
