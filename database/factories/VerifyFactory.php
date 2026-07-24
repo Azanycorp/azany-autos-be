@@ -22,7 +22,7 @@ class VerifyFactory extends Factory
             'user_id' => User::factory(),
             'token' => fake()->sha256(),
             'email' => fake()->email(),
-            'expires_at' => now()->addMinutes(10)
+            'expires_at' => now()->addMinutes(10),
         ];
     }
 }

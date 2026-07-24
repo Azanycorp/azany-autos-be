@@ -4,7 +4,6 @@ use App\Models\Country;
 use App\Models\Mailing;
 use App\Models\User;
 use App\Models\Vehicle;
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -42,9 +41,6 @@ if (! function_exists('generateUserVerificationCode')) {
 if (! function_exists('calculateAuctionDuration')) {
     /**
      * Calculate the end date of an auction based on the number of days.
-     *
-     * @param int|string $days
-     * @return CarbonInterface
      */
     function calculateAuctionDuration(int|string $days): CarbonInterface
     {
@@ -63,13 +59,12 @@ if (! function_exists('uploadMultipleImages')) {
     /**
      * Upload multiple images and attach them dynamically to a model's relationship.
      *
-     * @param Request $request The incoming HTTP request
-     * @param string $inputKey The name of the input field (e.g., 'vehicle_images')
-     * @param string $folder The cloud storage folder destination
-     * @param Model $model The Eloquent model instance (Vehicle, Product, etc.)
-     * @param string $relationship The model relationship name (e.g., 'vehicleImages', 'images')
-     * @param string $columnName The database column name to save the path into (defaults to 'image_path')
-     * @return void
+     * @param  Request  $request  The incoming HTTP request
+     * @param  string  $inputKey  The name of the input field (e.g., 'vehicle_images')
+     * @param  string  $folder  The cloud storage folder destination
+     * @param  Model  $model  The Eloquent model instance (Vehicle, Product, etc.)
+     * @param  string  $relationship  The model relationship name (e.g., 'vehicleImages', 'images')
+     * @param  string  $columnName  The database column name to save the path into (defaults to 'image_path')
      */
     function uploadMultipleImages(
         Request $request,
@@ -95,8 +90,7 @@ if (! function_exists('uploadImage')) {
     /**
      * Upload an image to a cloud provider with fallbacks.
      *
-     * @param UploadedFile $file  <-- Updated typehint inside PHPDoc
-     * @param string $folder
+     * @param  UploadedFile  $file  <-- Updated typehint inside PHPDoc
      * @return array{url: string|null, public_id: string|null, error: string|null}
      */
     function uploadImage(UploadedFile $file, string $folder = 'uploads'): array|string
@@ -108,7 +102,7 @@ if (! function_exists('uploadImage')) {
             $fileContents = $realPath ? file_get_contents($realPath) : false;
 
             if ($fileContents === false) {
-                throw new Exception("Unable to read file contents.");
+                throw new Exception('Unable to read file contents.');
             }
 
             $base64 = base64_encode($fileContents);
@@ -174,4 +168,3 @@ if (! function_exists('getCurrencyCodeByCountryId')) {
         return $country->currency_code ?: 'USD';
     }
 }
-

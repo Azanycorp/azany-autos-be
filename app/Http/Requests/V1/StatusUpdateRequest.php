@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Requests\V1;
+
 use App\Enum\InspectionStatus;
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;

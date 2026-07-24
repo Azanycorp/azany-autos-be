@@ -25,12 +25,12 @@ class InspectionLocation extends Model
     use HasFactory;
 
     /**
-    * @return array<string, string>
-    */
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
-            'is_default' => 'boolean'
+            'is_default' => 'boolean',
         ];
     }
 

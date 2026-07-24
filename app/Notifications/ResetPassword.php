@@ -2,10 +2,8 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\Verify;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -20,7 +18,7 @@ class ResetPassword extends Notification
      */
     public function __construct(
         protected Verify $verify
-    ){}
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -37,7 +35,6 @@ class ResetPassword extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable): MailMessage
     {
@@ -49,14 +46,14 @@ class ResetPassword extends Notification
         ]);
 
         return (new MailMessage)
-                    ->from('no-reply@myislandvisa.com', config('app.name'))
-                    ->subject('Password Reset Request')
-                    ->greeting('Hello ' . $notifiable->first_name . ',')
-                    ->line('You\'ve requested for a password reset. Please Verify your profile by clicking the link below.')
-                    ->action('Verify My Profile', $link . '?' . $query)
-                    ->line('The link will expire on ' . $this->verify->expires_at->format('H:ia jS F, Y'))
-                    ->line('If you have not requested the password reset, please contact us at hello@myislandvisa.com')
-                    ->line('Thank you for using our application!');
+            ->from('no-reply@myislandvisa.com', config('app.name'))
+            ->subject('Password Reset Request')
+            ->greeting('Hello '.$notifiable->first_name.',')
+            ->line('You\'ve requested for a password reset. Please Verify your profile by clicking the link below.')
+            ->action('Verify My Profile', $link.'?'.$query)
+            ->line('The link will expire on '.$this->verify->expires_at->format('H:ia jS F, Y'))
+            ->line('If you have not requested the password reset, please contact us at hello@myislandvisa.com')
+            ->line('Thank you for using our application!');
     }
 
     /**

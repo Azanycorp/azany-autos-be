@@ -50,6 +50,7 @@ class AuthService
             $this->httpService->post('register', new RequestOptions(
                 data: $requestData
             ));
+
             $currency_code = getCurrencyCodeByCountryId($request->country_id);
 
             $user = User::create([
@@ -67,6 +68,7 @@ class AuthService
             ]);
 
             $user->sendVerificationEmail();
+            $user->assignFreeSubscription();
 
             return $this->successResponse(
                 new UserResource($user),
@@ -100,7 +102,7 @@ class AuthService
 
             $user->update([
                 'verification_code' => $verificationCode,
-                'verification_code_expire_at' => now()->addMinutes(10)
+                'verification_code_expire_at' => now()->addMinutes(10),
             ]);
 
             $type = MailingEnum::TWO_FA_OTP->value;

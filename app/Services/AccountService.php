@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Services;
+
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Traits\HttpResponses;
@@ -11,13 +13,12 @@ class AccountService
 
     public function profile(int $userId): JsonResponse
     {
-        $user = User::where('id', $userId)->first();
+        $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
         }
 
         return $this->successResponse(new UserResource($user), 'User profile');
     }
-
 }

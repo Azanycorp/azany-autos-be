@@ -5,6 +5,7 @@ use App\Models\InspectionLocation;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
@@ -18,8 +19,8 @@ it('an authenticated user can successfully add inspection slot', function () {
     actingAs($user, 'sanctum');
 
     $payload = [
-        'vehicle_id'      => $vehicle->id,
-        'location_id'     => $location->id,
+        'vehicle_id' => $vehicle->id,
+        'location_id' => $location->id,
         'inspection_date' => '2026-08-22',
         'inspection_time' => '10:00 PM',
     ];
@@ -43,17 +44,17 @@ it('an authenticated user can successfully add inspection slot', function () {
                 'location' => [
                     'name',
                     'address',
-                ]
+                ],
             ],
         ])
         ->assertJsonFragment([
-            'status'  => true,
+            'status' => true,
             'message' => 'New Slot added successfully',
         ]);
 
     $this->assertDatabaseHas('inspection_slots', [
-        'dealer_id'       => $user->id,
-        'vehicle_id'      => $vehicle->id,
+        'dealer_id' => $user->id,
+        'vehicle_id' => $vehicle->id,
         'inspection_date' => '2026-08-22',
     ]);
 });

@@ -18,9 +18,9 @@ use RectorLaravel\Set\LaravelSetProvider;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/app',
-        __DIR__ . '/routes',
-        __DIR__ . '/tests',
+        __DIR__.'/app',
+        __DIR__.'/routes',
+        __DIR__.'/tests',
     ])
     ->withSetProviders(LaravelSetProvider::class)
     ->withComposerBased(laravel: true)

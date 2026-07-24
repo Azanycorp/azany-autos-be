@@ -35,11 +35,13 @@ class DealerService
         if ($request->reserved_price > $request->price) {
             return $this->errorResponse(null, 'Reserved price cannot be higher than the actual price.', 400);
         }
+
         $user = User::where('id', $request->user_id)->first();
 
-        if (! $user) {
+        if (! $user instanceof User) {
             return $this->errorResponse(null, 'User not found', 404);
         }
+
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
         $backPath = uploadImage($request->file('back_image'), 'vehicles');
         $rear_image = uploadImage($request->file('rear_image'), 'vehicles');
@@ -93,8 +95,7 @@ class DealerService
             });
 
         } catch (Exception $e) {
-
-            return $this->errorResponse(null, 'Something went wrong while saving the vehicle listing.', 403);
+            return $this->errorResponse(null, "Something went wrong: {$e->getMessage()}", 403);
         }
     }
 
@@ -125,7 +126,6 @@ class DealerService
     public function getVehicle(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-
         $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {
@@ -139,7 +139,7 @@ class DealerService
     {
         $user = $request->user();
 
-        $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
+        $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
@@ -147,6 +147,7 @@ class DealerService
 
         if ($vehicle->vin !== $request->vin) {
             $existingVehicle = Vehicle::where('vin', $request->vin)->first();
+
             if ($existingVehicle) {
                 return $this->errorResponse(null, 'VIN already exists for another vehicle', 422);
             }
@@ -206,9 +207,7 @@ class DealerService
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
-        $vehicle->update([
-            'status' => $request->status,
-        ]);
+        $vehicle->update(['status' => $request->status]);
 
         return $this->successResponse(null, 'Vehicle status updated successfully');
     }
@@ -217,14 +216,16 @@ class DealerService
     {
         $user = $request->user();
 
-        $vehicle = Vehicle::where('user_id', $user->id)->where('id', $id)->first();
+        $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {
             return $this->errorResponse(null, 'Vehicle not found', 404);
         }
 
-        $vehicle->vehicleImages()->delete();
-        $vehicle->delete();
+        DB::transaction(function () use ($vehicle) {
+            $vehicle->vehicleImages()->delete();
+            $vehicle->delete();
+        });
 
         return $this->successResponse(null, 'Vehicle deleted successfully');
     }
@@ -255,22 +256,20 @@ class DealerService
 
     public function getTags(int $userId): JsonResponse
     {
-        $user = User::where('id', $userId)->first();
+        $user = User::with('customTags')->find($userId);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
 
-        $tags = FeatureTag::where('user_id', $user->id)->latest()->get();
+        $tags = $user->customTags()->latest()->get();
 
         return $this->successResponse(TagResource::collection($tags), 'Tags retrieved successfully');
     }
 
     public function getTag(int $id, User $user): JsonResponse
     {
-        $tag = FeatureTag::where('user_id', $user->id)
-            ->where('id', $id)
-            ->first();
+        $tag = $user->customTags()->find($id);
 
         if (! $tag) {
             return $this->errorResponse(null, 'Tag not found', 404);
@@ -281,14 +280,15 @@ class DealerService
 
     public function updateTag(Request $request, int $id, User $user): JsonResponse
     {
-        $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
+        $tag = $user->customTags()->find($id);
 
         if (! $tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
         }
 
         if ($tag->name !== $request->name) {
-            $existingTag = FeatureTag::where('user_id', $user->id)->where('name', $request->name)->first();
+            $existingTag = $user->customTags()->where('name', $request->name)->first();
+
             if ($existingTag) {
                 return $this->errorResponse(null, 'Tag name already exists', 422);
             }
@@ -303,7 +303,7 @@ class DealerService
 
     public function deleteTag(int $id, User $user): JsonResponse
     {
-        $tag = FeatureTag::where('user_id', $user->id)->where('id', $id)->first();
+        $tag = $tag = $user->customTags()->find($id);
 
         if (! $tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
@@ -383,7 +383,7 @@ class DealerService
         $exists = $user->inspectionLocations()
             ->where('name', $request->name)
             ->exists();
-        
+
         if ($exists) {
             return $this->errorResponse(null, 'Location name already exists', 422);
         }
@@ -438,16 +438,17 @@ class DealerService
             return $this->errorResponse(null, 'User not found', 404);
         }
 
-        $slots = InspectionSlot::with(['location', 'vehicle'])->where('dealer_id', $user->id)->latest()->get();
+        $slots = $user->inspectionSlots()
+            ->with(['location', 'vehicle'])
+            ->latest()
+            ->get();
 
         return $this->successResponse(SlotResource::collection($slots), 'Inspection slots retrieved successfully');
     }
 
     public function getSlot(int $id, User $user): JsonResponse
     {
-        $slot = InspectionSlot::where('dealer_id', $user->id)
-            ->where('id', $id)
-            ->first();
+        $slot = $user->inspectionSlots()->find($id);
 
         if (! $slot) {
             return $this->errorResponse(null, 'Slot not found', 404);
@@ -458,11 +459,12 @@ class DealerService
 
     public function updateSlotStatus(StatusUpdateRequest $request, int $id, User $user): JsonResponse
     {
-        $slot = InspectionSlot::where('dealer_id', $user->id)->where('id', $id)->first();
+        $slot = $user->inspectionSlots()->find($id);
 
         if (! $slot instanceof InspectionSlot) {
             return $this->errorResponse(null, 'Slot not found', 404);
         }
+
         $slot->update([
             'status' => $request->status ?? $slot->status,
         ]);
@@ -472,7 +474,7 @@ class DealerService
 
     public function updateSlot(SlotRequest $request, int $id, User $user): JsonResponse
     {
-        $slot = InspectionSlot::where('dealer_id', $user->id)->where('id', $id)->first();
+        $slot = $user->inspectionSlots()->find($id);
 
         if (! $slot instanceof InspectionSlot) {
             return $this->errorResponse(null, 'Slot not found', 404);
@@ -490,7 +492,7 @@ class DealerService
 
     public function deleteSlot(int $id, User $user): JsonResponse
     {
-        $slot = InspectionSlot::where('dealer_id', $user->id)->where('id', $id)->first();
+        $slot = $user->inspectionSlots()->find($id);
 
         if (! $slot instanceof InspectionSlot) {
             return $this->errorResponse(null, 'Slot not found', 404);

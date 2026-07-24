@@ -28,12 +28,17 @@ class AppServiceProvider extends ServiceProvider
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         Password::defaults(function () {
-            return Password::min(8)
+            $password = Password::min(8)
                 ->letters()
                 ->mixedCase()
                 ->numbers()
-                ->symbols()
-                ->uncompromised();
+                ->symbols();
+
+            if (! app()->runningUnitTests()) {
+                $password->uncompromised();
+            }
+
+            return $password;
         });
 
         RateLimiter::for('apis', function (Request $request) {
