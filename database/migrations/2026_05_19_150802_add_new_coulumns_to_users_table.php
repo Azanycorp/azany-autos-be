@@ -62,7 +62,7 @@ return new class extends Migration
                 'two_factor_enabled',
                 'kyc_verification',
                 'biometric_enabled',
-                'lock_screen_enabled'
+                'lock_screen_enabled',
             ]);
         });
     }

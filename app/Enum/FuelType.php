@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Enum;
+
 use Illuminate\Support\Collection;
 
 enum FuelType: string
@@ -10,7 +11,7 @@ enum FuelType: string
     case ELECTRIC = 'electric';
     case HYBRID = 'hybrid';
 
-     public static function values(): mixed
+    public static function values(): mixed
     {
         return (new Collection(self::cases()))->pluck('value');
     }

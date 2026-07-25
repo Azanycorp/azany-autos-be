@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Requests\V1;
+
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -15,7 +16,7 @@ class TagRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'name' => ['required', 'string', 'unique:feature_tags,name']
+            'name' => ['required', 'string', 'unique:feature_tags,name'],
         ];
     }
 }

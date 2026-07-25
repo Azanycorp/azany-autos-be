@@ -3,6 +3,7 @@
 use App\Http\Controllers\V1\AuthenticationController;
 use App\Http\Controllers\V1\DealerController;
 use App\Http\Controllers\V1\ForgotPasswordController;
+use App\Http\Controllers\V1\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -24,47 +25,63 @@ Route::prefix('auth')->group(function () {
         });
 });
 
-Route::middleware(['auth:sanctum'])->prefix('dealer')->group(function () {
-    Route::controller(DealerController::class)
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    // Dealer route
+    Route::prefix('dealer')
         ->group(function () {
-            Route::get('/profile/{user_id}', 'profile');
+            Route::get('/profile/{user_id}', [DealerController::class, 'profile']);
 
-            Route::prefix('vehicles')->group(function () {
-                Route::get('/', 'getVehicles');
-                Route::post('/add', 'addVehicle');
-                Route::get('/details/{id}', 'getVehicle');
-                Route::put('/update/{id}', 'updateVehicle');
-                Route::delete('/delete-vehicle/{id}', 'deleteVehicle');
-                Route::put('/update-status/{id}', 'updateVehicleStatus');
-                Route::delete('/delete-image/{id}', 'deleteVehicleImage');
-            });
+            Route::prefix('vehicles')
+                ->controller(DealerController::class)
+                ->group(function () {
+                    Route::get('/', 'getVehicles');
+                    Route::post('/add', 'addVehicle');
+                    Route::get('/details/{id}', 'getVehicle');
+                    Route::put('/update/{id}', 'updateVehicle');
+                    Route::delete('/delete-vehicle/{id}', 'deleteVehicle');
+                    Route::put('/update-status/{id}', 'updateVehicleStatus');
+                    Route::delete('/delete-image/{id}', 'deleteVehicleImage');
+                });
 
-            Route::prefix('tags')->group(function () {
-                Route::get('/{user_id}', 'getTags');
-                Route::post('/add', 'addCustomTag');
-                Route::get('/details/{id}', 'getTag');
-                Route::put('/update/{id}', 'updateTag');
-                Route::delete('/delete/{id}', 'deleteTag');
-            });
+            Route::prefix('tags')
+                ->controller(DealerController::class)
+                ->group(function () {
+                    Route::get('/{user_id}', 'getTags');
+                    Route::post('/add', 'addCustomTag');
+                    Route::get('/details/{id}', 'getTag');
+                    Route::put('/update/{id}', 'updateTag');
+                    Route::delete('/delete/{id}', 'deleteTag');
+                });
 
-            Route::prefix('location')->group(function () {
-                Route::get('/{user_id}', 'getAllLocations');
-                Route::post('/add', 'addNewLocation');
-                Route::get('/details/{id}', 'getlocation');
-                Route::put('/update/{id}', 'updateLocation');
-                Route::put('/make-default/{id}', 'makeLocationDefault');
-                Route::delete('/delete/{id}', 'deleteLocation');
-            });
+            Route::prefix('location')
+                ->controller(DealerController::class)
+                ->group(function () {
+                    Route::get('/{user_id}', 'getAllLocations');
+                    Route::post('/add', 'addNewLocation');
+                    Route::get('/details/{id}', 'getlocation');
+                    Route::put('/update/{id}', 'updateLocation');
+                    Route::put('/make-default/{id}', 'makeLocationDefault');
+                    Route::delete('/delete/{id}', 'deleteLocation');
+                });
 
-            Route::prefix('inspections')->group(function () {
-                Route::get('/{user_id}', 'getAllSlots');
-                Route::post('/add', 'addNewSlot');
-                Route::get('/details/{id}', 'getSlot');
-                Route::put('/update/{id}', 'updateSlot');
-                Route::put('/update-status/{id}', 'updateSlotStatus');
-                Route::delete('/delete/{id}', 'deleteSlot');
-            });
+            Route::prefix('inspections')
+                ->controller(DealerController::class)
+                ->group(function () {
+                    Route::get('/{user_id}', 'getAllSlots');
+                    Route::post('/add', 'addNewSlot');
+                    Route::get('/details/{id}', 'getSlot');
+                    Route::put('/update/{id}', 'updateSlot');
+                    Route::put('/update-status/{id}', 'updateSlotStatus');
+                    Route::delete('/delete/{id}', 'deleteSlot');
+                });
 
+            // Subscription plan
+            Route::prefix('subscription')
+                ->controller(SubscriptionController::class)
+                ->group(function () {
+                    Route::get('/list', 'index');
+                    Route::get('/{id}', 'show');
+                });
         });
-
 });

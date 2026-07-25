@@ -48,7 +48,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vehicle extends Model
 {
-     /** @use HasFactory<VehicleFactory> */
+    /** @use HasFactory<VehicleFactory> */
     use HasFactory;
 
     protected function casts(): array

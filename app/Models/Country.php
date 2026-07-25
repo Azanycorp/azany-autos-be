@@ -1,8 +1,12 @@
 <?php
+
 namespace App\Models;
-use Illuminate\Database\Eloquent\Model;
+
+use Carbon\CarbonImmutable;
+use Database\Factories\CountryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
@@ -13,8 +17,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string|null $currency_code
  * @property string|null $flag
  * @property string|null $continent
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ *
  * @method static \Database\Factories\CountryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Country newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Country newQuery()
@@ -29,12 +34,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Country wherePhonecode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Country whereSortname($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Country whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['sortname', 'name', 'phonecode', 'is_allowed', 'currency_code', 'flag', 'continent'])]
 
 class Country extends Model
 {
-    /** @use HasFactory<\Database\Factories\CountryFactory> */
+    /** @use HasFactory<CountryFactory> */
     use HasFactory;
 }

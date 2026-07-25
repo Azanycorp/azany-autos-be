@@ -35,7 +35,7 @@ class UserFactory extends Factory
             'status' => UserStatus::PENDING->value,
             'user_type' => UserType::AUTOBUYER->value,
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('Password@123'),
+            'password' => Hash::make('Password@123'),
             'remember_token' => Str::random(10),
         ];
     }

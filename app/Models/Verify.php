@@ -2,21 +2,23 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
+use Database\Factories\VerifyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $user_id
  * @property string $token
  * @property string $email
- * @property \Carbon\CarbonImmutable $expires_at
- * @property \Carbon\CarbonImmutable $created_at
- * @property-read \App\Models\User|null $user
+ * @property CarbonImmutable $expires_at
+ * @property CarbonImmutable $created_at
+ * @property-read User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify query()
@@ -26,15 +28,15 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereUserId($value)
+ *
  * @mixin \Eloquent
  */
-
 #[Fillable(['user_id', 'token', 'email', 'expires_at'])]
 #[Table(timestamps: true)]
 
 class Verify extends Model
 {
-    /** @use HasFactory<\Database\Factories\VerifyFactory> */
+    /** @use HasFactory<VerifyFactory> */
     use HasFactory;
 
     const UPDATED_AT = null;

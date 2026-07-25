@@ -2,9 +2,9 @@
 
 namespace App\Services\Auth;
 
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Http\Client\ConnectionException;
-use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -14,7 +14,7 @@ class HttpService
     public function __construct(private readonly Repository $repository) {}
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function request(string $method, string $endpoint, array $data = [], ?string $token = null): Response
     {
@@ -37,7 +37,7 @@ class HttpService
     }
 
     /**
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param  RequestOptions|array<string, mixed>|null  $options
      */
     public function sendRequest(string $method, string $endpoint, RequestOptions|array|null $options = null): Response
     {
@@ -115,7 +115,7 @@ class HttpService
     }
 
     /**
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param  RequestOptions|array<string, mixed>|null  $options
      */
     public function get(string $endpoint, RequestOptions|array|null $options = null): Response
     {
@@ -123,7 +123,7 @@ class HttpService
     }
 
     /**
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param  RequestOptions|array<string, mixed>|null  $options
      */
     public function post(string $endpoint, RequestOptions|array|null $options = null): Response
     {
@@ -131,7 +131,7 @@ class HttpService
     }
 
     /**
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param  RequestOptions|array<string, mixed>|null  $options
      */
     public function patch(string $endpoint, RequestOptions|array|null $options = null): Response
     {
@@ -139,7 +139,7 @@ class HttpService
     }
 
     /**
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param  RequestOptions|array<string, mixed>|null  $options
      */
     public function put(string $endpoint, RequestOptions|array|null $options = null): Response
     {
@@ -147,7 +147,7 @@ class HttpService
     }
 
     /**
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param  RequestOptions|array<string, mixed>|null  $options
      */
     public function delete(string $endpoint, RequestOptions|array|null $options = null): Response
     {

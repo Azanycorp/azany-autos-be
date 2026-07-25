@@ -5,13 +5,8 @@ namespace App\Services\Auth;
 class RequestOptions
 {
     /**
-     * @param array<string, mixed> $data
-     * @param ?string $token
-     * @param int $timeout
-     * @param int $connectTimeout
-     * @param int $retries
-     * @param int $retryDelay
-     * @param array<string, string> $headers
+     * @param  array<string, mixed>  $data
+     * @param  array<string, string>  $headers
      */
     public function __construct(
         public readonly array $data = [],
@@ -90,7 +85,7 @@ class RequestOptions
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function withData(array $data): self
     {

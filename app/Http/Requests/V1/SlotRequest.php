@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Requests\V1;
+
 use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -15,10 +16,10 @@ class SlotRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
-           'location_id' => ['required', 'integer', 'exists:inspection_locations,id'],
-           'inspection_date' => ['required','date','after_or_equal:today'],
-           'inspection_time' => ['required'],
+            'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
+            'location_id' => ['required', 'integer', 'exists:inspection_locations,id'],
+            'inspection_date' => ['required', 'date', 'after_or_equal:today'],
+            'inspection_time' => ['required'],
         ];
     }
 }

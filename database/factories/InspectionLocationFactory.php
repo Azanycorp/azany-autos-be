@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\InspectionLocation>
+ * @extends Factory<InspectionLocation>
  */
 class InspectionLocationFactory extends Factory
 {
@@ -23,7 +23,7 @@ class InspectionLocationFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => $this->faker->company() . ' Location one',
+            'name' => $this->faker->company().' Location one',
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),

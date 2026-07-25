@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,8 +19,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $max_attempts
  * @property string|null $scheduled_at
  * @property array<array-key, mixed>|null $error_response
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing query()
@@ -37,9 +39,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereSubject($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Mailing whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
-
 #[Fillable([
     'type',
     'email',
@@ -64,7 +66,7 @@ class Mailing extends Model
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function saveData(mixed $data): self
     {

@@ -14,12 +14,11 @@ class MailingService
 {
     public function sendEmails(int $batchSize = 15): void
     {
-        $emails = DB::transaction(fn () =>
-            Mailing::where('status', MailingEnum::PENDING)
-                ->whereRaw('attempts < max_attempts')
-                ->limit($batchSize)
-                ->lockForUpdate()
-                ->get()
+        $emails = DB::transaction(fn () => Mailing::where('status', MailingEnum::PENDING)
+            ->whereRaw('attempts < max_attempts')
+            ->limit($batchSize)
+            ->lockForUpdate()
+            ->get()
         );
 
         if ($emails->isEmpty()) {
@@ -34,6 +33,7 @@ class MailingService
                         'status' => MailingEnum::FAILED,
                         'error_response' => 'Mailable class not found',
                     ]);
+
                     continue;
                 }
 
@@ -45,6 +45,7 @@ class MailingService
                         'status' => MailingEnum::FAILED,
                         'error_response' => 'Payload is empty',
                     ]);
+
                     continue;
                 }
 
@@ -57,6 +58,7 @@ class MailingService
                         'status' => MailingEnum::FAILED,
                         'error_response' => 'Invalid mailable class contract structure',
                     ]);
+
                     continue;
                 }
 
@@ -65,7 +67,7 @@ class MailingService
                 $email->update(['status' => MailingEnum::SENT]);
 
             } catch (Throwable $e) {
-                Log::error('Email failed to send: ' . $e->getMessage());
+                Log::error('Email failed to send: '.$e->getMessage());
 
                 $email->increment('attempts');
 

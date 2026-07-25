@@ -24,7 +24,7 @@ class RegisterRequest extends FormRequest
             'user_type' => ['required', 'string', 'max:50', Rule::in(UserType::values())],
             'contact_person' => ['nullable', 'string', 'max:50'],
             'business_name' => ['nullable', 'string', 'max:50'],
-            'reg_number' => ['nullable', 'string', 'max:50','unique:users,reg_number'],
+            'reg_number' => ['nullable', 'string', 'max:50', 'unique:users,reg_number'],
             'email' => ['required', 'string', 'email', 'email:rfc,dns', 'max:50', 'unique:users,email'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'country_id' => ['required', 'integer', 'exists:countries,id'],

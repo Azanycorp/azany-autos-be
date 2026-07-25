@@ -2,10 +2,8 @@
 
 namespace App\Traits;
 
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 trait HttpResponses
 {
