@@ -22,6 +22,11 @@ class BuyerController extends Controller
         return $this->accountService->profile($userId);
     }
 
+    public function getVehiclePrefernce(VehicleRequest $request): JsonResponse
+    {
+        return $this->dealerService->getVehiclePrefernce($request);
+    }
+
     public function setPreference(VehicleRequest $request): JsonResponse
     {
         return $this->dealerService->setVehiclePrefernce($request);

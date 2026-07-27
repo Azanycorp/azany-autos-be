@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\BuyerPreferenceResource;
 use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class BuyerService
 
        $preference= $user->vehiclePreference;
 
-        return $this->successResponse(null, 'Preference retrieved successfully');
+        return $this->successResponse(new BuyerPreferenceResource($preference), 'Preference retrieved successfully');
     }
 
     public function setVehiclePrefernce(Request $request): JsonResponse
