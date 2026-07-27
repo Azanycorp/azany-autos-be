@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\V1\AuthenticationController;
+use App\Http\Controllers\V1\BuyerController;
 use App\Http\Controllers\V1\DealerController;
 use App\Http\Controllers\V1\ForgotPasswordController;
 use App\Http\Controllers\V1\SubscriptionController;
@@ -28,6 +29,13 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dealer route
+    Route::prefix('buyer')
+        ->controller(BuyerController::class)
+        ->group(function () {
+            Route::get('/profile/{user_id}', 'profile');
+            Route::post('/set-preference', 'setPreference');
+        });
+
     Route::prefix('dealer')
         ->group(function () {
             Route::get('/profile/{user_id}', [DealerController::class, 'profile']);

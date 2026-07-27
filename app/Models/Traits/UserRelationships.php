@@ -3,6 +3,7 @@
 namespace App\Models\Traits;
 
 use App\Enum\SubscriptionStatus;
+use App\Models\BuyerPreference;
 use App\Models\Country;
 use App\Models\FeatureTag;
 use App\Models\InspectionLocation;
@@ -60,6 +61,14 @@ trait UserRelationships
     public function inspectionSlots(): HasMany
     {
         return $this->hasMany(InspectionSlot::class, 'dealer_id', 'id');
+    }
+
+    /**
+     * @return HasOne<BuyerPreference, $this>
+     */
+    public function vehiclePreference(): HasOne
+    {
+        return $this->hasOne(BuyerPreference::class);
     }
 
     /**

@@ -22,9 +22,9 @@ class BuyerController extends Controller
         return $this->accountService->profile($userId);
     }
 
-    public function setPreference(VehicleRequest $request, #[CurrentUser] User $user): JsonResponse
+    public function setPreference(VehicleRequest $request): JsonResponse
     {
-        return $this->dealerService->setVehiclePrefernce($request,$user);
+        return $this->dealerService->setVehiclePrefernce($request);
     }
 
 }
