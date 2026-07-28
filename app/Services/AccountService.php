@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -59,5 +60,20 @@ class AccountService
         ]);
 
         return $this->successResponse(null, 'Profile photo Updated');
+    }
+
+    public function updatePassword(PasswordRequest $request, int $userId): JsonResponse
+    {
+        $user = User::find($userId);
+
+        if (! $user instanceof User) {
+            return $this->errorResponse(null, 'User does not exist', 404);
+        }
+
+        $user->update([
+            'password' => $request->password,
+        ]);
+
+        return $this->successResponse(null, 'Password Updated');
     }
 }

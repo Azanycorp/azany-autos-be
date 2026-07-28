@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\PreferenceRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
 use App\Services\AccountService;
@@ -30,6 +31,11 @@ class BuyerController extends Controller
     public function updateProfilePhoto(ProfilePhotoRequest $request, int $userId): JsonResponse
     {
         return $this->accountService->updateProfilePhoto($request, $userId);
+    }
+
+    public function updatePassword(PasswordRequest $request, int $userId): JsonResponse
+    {
+        return $this->accountService->updatePassword($request, $userId);
     }
 
     public function getVehiclePrefernce(Request $request): JsonResponse

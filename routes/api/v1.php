@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->controller(BuyerController::class)
         ->group(function () {
             Route::get('/profile/{user_id}', 'profile');
+            Route::post('/update-password/{user_id}', 'updatePassword');
             Route::post('/update-profile/{user_id}', 'updateprofile');
             Route::post('/profile-photo/{user_id}', 'updateProfilePhoto');
             Route::get('/get-preference', 'getVehiclePrefernce');
