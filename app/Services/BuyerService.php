@@ -25,7 +25,7 @@ class BuyerService
     {
         $user = $request->user();
 
-        $user->vehiclePreference->updateOrCreate(
+        $user->vehiclePreference()->updateOrCreate(
             [
                 'user_id' => $user->id,
             ],

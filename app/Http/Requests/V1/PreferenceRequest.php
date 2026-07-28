@@ -19,13 +19,18 @@ class PreferenceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vehicle_ids' => ['required', 'array', 'exists:vehicles,id'],
+            'vehicle_ids' => ['required', 'array'],
             'prefered_colors' => ['required', 'array'],
             'body_types' => ['required', 'array'],
-            'fuel_types' => ['required', 'array', Rule::in(FuelType::values())],
-            'transmissions' => ['required', 'array', Rule::in(TransmissionType::values())],
-            'budget_min' => ['required'],
-            'budget_max' => ['required'],
+            'fuel_types' => ['required', 'array'],
+            'transmissions' => ['required', 'array'],
+            'vehicle_ids.*' => ['integer', 'exists:vehicles,id'],
+            'prefered_colors.*' => ['string'],
+            'body_types.*' => ['string'],
+            'fuel_types.*' => [Rule::in(FuelType::values())],
+            'transmissions.*' => [Rule::in(TransmissionType::values())],
+            'budget_min' => ['required', 'numeric', 'min:0'],
+            'budget_max' => ['required', 'numeric', 'gte:budget_min'],
         ];
     }
 }

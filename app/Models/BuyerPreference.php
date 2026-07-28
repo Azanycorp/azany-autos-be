@@ -2,11 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 #[Fillable([
     'user_id',
     'vehicle_ids',
@@ -18,25 +15,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'body_types',
 ])]
 
-class BuyerPreference extends Model {
-
-protected function casts(): array
+class BuyerPreference extends Model
+{
+    protected function casts(): array
     {
         return [
             'vehicle_ids' => 'array',
-            'body_types' => 'array',
             'fuel_types' => 'array',
+            'prefered_colors' => 'array',
             'transmissions' => 'array',
-            'preferred_colors' => 'array',
+            'body_types' => 'array',
         ];
     }
 
-       /**
-     * @return BelongsTo<User, $this>
-     */
-    public function customTags(): BelongsTo
+    public function getVehiclesAttribute()
     {
-        return $this->BelongsTo(User::class);
-    }
+        $ids = $this->vehicle_ids ?? [];
 
+        if (is_string($ids)) {
+            $ids = json_decode($ids, true);
+        }
+
+        return Vehicle::whereIn('id', $ids)->get();
+    }
 }
