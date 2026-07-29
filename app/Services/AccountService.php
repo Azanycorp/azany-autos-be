@@ -4,12 +4,12 @@ namespace App\Services;
 
 use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
+use App\Http\Requests\V1\ProfileUpdateRequest;
 use App\Http\Requests\V1\Update2FARequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AccountService
 {
@@ -26,21 +26,24 @@ class AccountService
         return $this->successResponse(new UserResource($user), 'User profile');
     }
 
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(ProfileUpdateRequest $request): JsonResponse
     {
         $user = $request->user();
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
         }
-        $currency_code = getCurrencyCodeByCountryId($request->country_id);
+
+        $currency_code = $request->filled('country_id')
+        ? getCurrencyCodeByCountryId((int) $request->country_id)
+        : $user->default_currency;
 
         $user->update([
             'email' => $request->email ?? $user->email,
             'first_name' => $request->first_name ?? $user->first_name,
             'last_name' => $request->last_name ?? $user->last_name,
             'country_id' => $request->country_id ?? $user->country_id,
-            'default_currency' => $currency_code ?? $user->default_currency,
+            'default_currency' => $currency_code,
         ]);
 
         return $this->successResponse(null, 'Details Updated');

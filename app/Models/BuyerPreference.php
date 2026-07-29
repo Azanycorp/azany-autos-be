@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 #[Fillable([
     'user_id',
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class BuyerPreference extends Model
 {
+    use HasFactory;
+
     protected function casts(): array
     {
         return [
