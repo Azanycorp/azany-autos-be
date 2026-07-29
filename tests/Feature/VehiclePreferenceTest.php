@@ -14,13 +14,13 @@ beforeEach(function () {
     $this->vehicles = Vehicle::factory()->count(2)->create();
 
     $this->validPayload = [
-        'vehicle_ids'      => $this->vehicles->pluck('id')->toArray(), // Use dynamic IDs [1, 2]
-        'prefered_colors'  => ['Black', 'White'],
-        'body_types'       => ['SUV', 'Sedan'],
-        'fuel_types'       => ['petrol', 'diesel'],
-        'transmissions'    => ['automatic', 'manual'],
-        'budget_min'       => 5000,
-        'budget_max'       => 25000,
+        'vehicle_ids' => $this->vehicles->pluck('id')->toArray(), // Use dynamic IDs [1, 2]
+        'prefered_colors' => ['Black', 'White'],
+        'body_types' => ['SUV', 'Sedan'],
+        'fuel_types' => ['petrol', 'diesel'],
+        'transmissions' => ['automatic', 'manual'],
+        'budget_min' => 5000,
+        'budget_max' => 25000,
     ];
 });
 
@@ -28,14 +28,14 @@ it('retrieves vehicle preference successfully for authenticated user', function 
     Sanctum::actingAs($this->user);
 
     BuyerPreference::create([
-        'user_id'         => $this->user->id,
-        'vehicle_ids'     => $this->validPayload['vehicle_ids'],
+        'user_id' => $this->user->id,
+        'vehicle_ids' => $this->validPayload['vehicle_ids'],
         'prefered_colors' => ['Black', 'White'],
-        'body_types'       => ['SUV', 'Sedan'],
-        'fuel_types'       => ['petrol', 'diesel'],
-        'transmissions'    => ['automatic', 'manual'],
-        'budget_min'      => 5000,
-        'budget_max'      => 25000,
+        'body_types' => ['SUV', 'Sedan'],
+        'fuel_types' => ['petrol', 'diesel'],
+        'transmissions' => ['automatic', 'manual'],
+        'budget_min' => 5000,
+        'budget_max' => 25000,
     ]);
 
     $response = $this->getJson('/api/v1/buyer/get-preference');
@@ -65,7 +65,7 @@ it('creates a new vehicle preference successfully', function () {
         ->assertJson(['message' => 'Preference set successfully']);
 
     $this->assertDatabaseHas('buyer_preferences', [
-        'user_id'    => $this->user->id,
+        'user_id' => $this->user->id,
         'budget_min' => 5000,
         'budget_max' => 25000,
     ]);
@@ -89,7 +89,7 @@ it('updates existing vehicle preference instead of creating duplicates', functio
     expect(BuyerPreference::where('user_id', $this->user->id)->count())->toBe(1);
 
     $this->assertDatabaseHas('buyer_preferences', [
-        'user_id'    => $this->user->id,
+        'user_id' => $this->user->id,
         'budget_min' => 10000,
         'budget_max' => 50000,
     ]);

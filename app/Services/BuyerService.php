@@ -16,7 +16,7 @@ class BuyerService
     {
         $user = $request->user();
 
-       $preference= $user->vehiclePreference;
+        $preference = $user->vehiclePreference;
 
         return $this->successResponse(new BuyerPreferenceResource($preference), 'Preference retrieved successfully');
     }

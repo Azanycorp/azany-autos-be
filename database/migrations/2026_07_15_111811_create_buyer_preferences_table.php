@@ -16,8 +16,8 @@ return new class extends Migration
             $table->bigInteger('user_id')->unsigned();
             $table->json('vehicle_ids');
             $table->json('fuel_types');
-            $table->decimal('budget_min',10,2);
-            $table->decimal('budget_max',10,2);
+            $table->decimal('budget_min', 10, 2);
+            $table->decimal('budget_max', 10, 2);
             $table->json('prefered_colors');
             $table->json('transmissions');
             $table->json('body_types');

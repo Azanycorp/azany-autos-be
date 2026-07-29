@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\BuyerPreferenceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 #[Fillable([
     'user_id',
     'vehicle_ids',
@@ -18,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BuyerPreference extends Model
 {
+    /** @use HasFactory<BuyerPreferenceFactory> */
     use HasFactory;
 
     protected function casts(): array
@@ -31,7 +36,10 @@ class BuyerPreference extends Model
         ];
     }
 
-    public function getVehiclesAttribute()
+    /**
+     * @return Attribute<Collection<int, Vehicle>, null>
+     */
+    protected function vehicles(): Attribute
     {
         $ids = $this->vehicle_ids ?? [];
 
@@ -39,6 +47,13 @@ class BuyerPreference extends Model
             $ids = json_decode($ids, true);
         }
 
-        return Vehicle::whereIn('id', $ids)->get();
+        return Attribute::make(get: function () {
+            $ids = $this->vehicle_ids ?? [];
+            if (is_string($ids)) {
+                $ids = json_decode($ids, true);
+            }
+
+            return Vehicle::whereIn('id', $ids)->get();
+        });
     }
 }
