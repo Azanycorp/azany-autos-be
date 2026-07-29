@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
+use App\Http\Requests\V1\Update2FARequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Traits\HttpResponses;
@@ -25,9 +26,9 @@ class AccountService
         return $this->successResponse(new UserResource($user), 'User profile');
     }
 
-    public function updateProfile(Request $request, int $userId): JsonResponse
+    public function updateProfile(Request $request): JsonResponse
     {
-        $user = User::find($userId);
+        $user = $request->user();
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
@@ -45,9 +46,9 @@ class AccountService
         return $this->successResponse(null, 'Details Updated');
     }
 
-    public function updateProfilePhoto(ProfilePhotoRequest $request, int $userId): JsonResponse
+    public function updateProfilePhoto(ProfilePhotoRequest $request): JsonResponse
     {
-        $user = User::find($userId);
+        $user = $request->user();
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
@@ -62,9 +63,9 @@ class AccountService
         return $this->successResponse(null, 'Profile photo Updated');
     }
 
-    public function updatePassword(PasswordRequest $request, int $userId): JsonResponse
+    public function updatePassword(PasswordRequest $request): JsonResponse
     {
-        $user = User::find($userId);
+        $user = $request->user();
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
@@ -76,18 +77,25 @@ class AccountService
 
         return $this->successResponse(null, 'Password Updated');
     }
-    public function enable2FA(PasswordRequest $request, int $userId): JsonResponse
-    {
-        $user = User::find($userId);
 
-        if (! $user instanceof User) {
-            return $this->errorResponse(null, 'User does not exist', 404);
+    public function enable2FA(Update2FARequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $newStatus = (bool) $request->validated('two_factor_enabled');
+
+        if ($user->two_factor_enabled === $newStatus) {
+            $state = $newStatus ? 'enabled' : 'disabled';
+
+            return $this->errorResponse(null, "2FA is already {$state}.", 400);
         }
 
         $user->update([
-            'two_factor_enabled' => $request->two_factor_enabled,
+            'two_factor_enabled' => $newStatus,
         ]);
 
-        return $this->successResponse(null, 'Password Updated');
+        $status = $newStatus ? 'enabled' : 'disabled';
+
+        return $this->successResponse(null, "2FA {$status} successfully.");
     }
 }

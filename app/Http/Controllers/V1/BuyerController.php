@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\PreferenceRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
+use App\Http\Requests\V1\Update2FARequest;
 use App\Services\AccountService;
 use App\Services\BuyerService;
 use Illuminate\Http\JsonResponse;
@@ -23,19 +24,24 @@ class BuyerController extends Controller
         return $this->accountService->profile($userId);
     }
 
-    public function updateProfile(Request $request, int $userId): JsonResponse
+    public function updateProfile(Request $request): JsonResponse
     {
-        return $this->accountService->updateprofile($request, $userId);
+        return $this->accountService->updateprofile($request);
     }
 
-    public function updateProfilePhoto(ProfilePhotoRequest $request, int $userId): JsonResponse
+    public function updateProfilePhoto(ProfilePhotoRequest $request): JsonResponse
     {
-        return $this->accountService->updateProfilePhoto($request, $userId);
+        return $this->accountService->updateProfilePhoto($request);
     }
 
-    public function updatePassword(PasswordRequest $request, int $userId): JsonResponse
+    public function updatePassword(PasswordRequest $request): JsonResponse
     {
-        return $this->accountService->updatePassword($request, $userId);
+        return $this->accountService->updatePassword($request);
+    }
+
+    public function enable2FA(Update2FARequest $request): JsonResponse
+    {
+        return $this->accountService->enable2FA($request);
     }
 
     public function getVehiclePrefernce(Request $request): JsonResponse
