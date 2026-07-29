@@ -2,10 +2,43 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $dealer_id
+ * @property int|null $buyer_id
+ * @property int $vehicle_id
+ * @property int $location_id
+ * @property string $inspection_date
+ * @property string $inspection_time
+ * @property string $status
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read User|null $buyer
+ * @property-read User|null $dealer
+ * @property-read InspectionLocation|null $location
+ * @property-read Vehicle|null $vehicle
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereBuyerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereDealerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereInspectionDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereInspectionTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereLocationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|InspectionSlot whereVehicleId($value)
+ *
+ * @mixin \Eloquent
+ */
 #[Fillable([
     'dealer_id',
     'buyer_id',
