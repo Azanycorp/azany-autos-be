@@ -28,7 +28,7 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    // Dealer route
+    // Buyer route
     Route::prefix('buyer')
         ->controller(BuyerController::class)
         ->group(function () {

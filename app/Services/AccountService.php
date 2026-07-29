@@ -76,4 +76,18 @@ class AccountService
 
         return $this->successResponse(null, 'Password Updated');
     }
+    public function enable2FA(PasswordRequest $request, int $userId): JsonResponse
+    {
+        $user = User::find($userId);
+
+        if (! $user instanceof User) {
+            return $this->errorResponse(null, 'User does not exist', 404);
+        }
+
+        $user->update([
+            'two_factor_enabled' => $request->two_factor_enabled,
+        ]);
+
+        return $this->successResponse(null, 'Password Updated');
+    }
 }
