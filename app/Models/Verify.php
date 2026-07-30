@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Verify whereUserId($value)
+ * @method static \Database\Factories\VerifyFactory factory($count = null, $state = [])
  *
  * @mixin \Eloquent
  */

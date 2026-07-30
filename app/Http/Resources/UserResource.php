@@ -36,6 +36,15 @@ class UserResource extends JsonResource
             'kyc_verification' => $this->resource->kyc_verification,
             'two_factor_enabled' => $this->resource->two_factor_enabled,
             'profile_photo' => (string) $this->resource->profile_photo,
+            'active_subscription' => $this->whenLoaded('activeSubscription', fn () => [
+                'id' => $this->activeSubscription->id,
+                'amount' => $this->resource->activeSubscription->amount,
+                'start_at' => $this->resource->activeSubscription->start_at,
+                'end_at' => $this->resource->activeSubscription->end_at,
+                'renews_at' => $this->resource->activeSubscription->renews_at,
+                'status' => $this->resource->activeSubscription->status,
+                'plan' => $this->whenLoaded('activeSubscription.plan', fn () => new SubscriptionPlanResource($this->resource->activeSubscription->plan)),
+            ]),
         ];
     }
 }

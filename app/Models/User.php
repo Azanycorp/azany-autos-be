@@ -91,6 +91,22 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
  *
+ * @property string $default_currency
+ * @property-read Subscription|null $activeSubscription
+ * @property-read Collection<int, FeatureTag> $customTags
+ * @property-read int|null $custom_tags_count
+ * @property-read mixed $full_name
+ * @property-read Collection<int, InspectionLocation> $inspectionLocations
+ * @property-read int|null $inspection_locations_count
+ * @property-read Collection<int, InspectionSlot> $inspectionSlots
+ * @property-read int|null $inspection_slots_count
+ * @property-read Collection<int, Subscription> $subscriptions
+ * @property-read int|null $subscriptions_count
+ * @property-read Collection<int, Vehicle> $vehicles
+ * @property-read int|null $vehicles_count
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDefaultCurrency($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable([

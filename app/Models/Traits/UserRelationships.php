@@ -9,6 +9,7 @@ use App\Models\InspectionLocation;
 use App\Models\InspectionSlot;
 use App\Models\Subscription;
 use App\Models\Vehicle;
+use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -82,5 +83,13 @@ trait UserRelationships
                     ->orWhere('end_at', '>', now());
             })
             ->latestOfMany('starts_at');
+    }
+
+    /**
+     * @return HasOne<Wallet, $this>
+     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
     }
 }
