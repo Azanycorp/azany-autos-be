@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\BuyerPreference;
 use App\Models\User;
-use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

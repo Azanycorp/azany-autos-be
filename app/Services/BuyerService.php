@@ -7,8 +7,10 @@ use App\Http\Requests\V1\SavedSearchRequest;
 use App\Http\Resources\BuyerPreferenceResource;
 use App\Http\Resources\SavedSearchResource;
 use App\Http\Resources\VehicleResource;
+use App\Models\SavedSearch;
 use App\Models\User;
 use App\Traits\HttpResponses;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -53,24 +55,25 @@ class BuyerService
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
-
+        /** @var Collection<int, SavedSearch> $savedSearches */
         $savedSearches = $user->savedSearches()->latest()->get();
 
         $totalSaved = $savedSearches->count();
         $alertsOn = $savedSearches->where('is_notify', true)->count();
         $alertsPaused = $savedSearches->where('is_notify', false)->count();
 
-        $newMatchesToday = $savedSearches->sum(function ($search) {
-            return $search->new_matches_today;
-        });
+        // Pass typed callbacks to resolve Larastan TReturnType template errors
+        $newMatchesToday = $savedSearches->sum(
+            fn (SavedSearch $search): int => (int) $search->new_matches_today
+        );
 
-        $searchesWithNewMatches = $savedSearches->filter(function ($search) {
-            return $search->new_matches_today > 0;
-        })->count();
+        $searchesWithNewMatches = $savedSearches->filter(
+            fn (SavedSearch $search): bool => (int) $search->new_matches_today > 0
+        )->count();
 
-        $totalMatchesFound = $savedSearches->sum(function ($search) {
-            return $search->total_matches;
-        });
+        $totalMatchesFound = $savedSearches->sum(
+            fn (SavedSearch $search): int => (int) $search->total_matches
+        );
 
         $data = [
             'stats' => [
@@ -85,10 +88,12 @@ class BuyerService
         ];
 
         return $this->successResponse($data, 'My Saved Searches');
+
     }
 
     public function addSavedSearch(SavedSearchRequest $request): JsonResponse
     {
+        /** @var User|null $user */
         $user = User::find($request->user_id);
 
         if (! $user) {

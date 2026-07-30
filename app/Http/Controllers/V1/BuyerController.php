@@ -63,26 +63,26 @@ class BuyerController extends Controller
 
     public function getSavedSearches(Request $request, int $user_id): JsonResponse
     {
-        return $this->buyerService->getSavedSearches($request,$user_id);
+        return $this->buyerService->getSavedSearches($request, $user_id);
     }
 
     public function updateSavedSearch(Request $request, int $id): JsonResponse
     {
-        return $this->buyerService->updateSavedSearch($request,$id);
+        return $this->buyerService->updateSavedSearch($request, $id);
     }
 
     public function viewSavedSearch(Request $request, int $id): JsonResponse
     {
-        return $this->buyerService->viewSavedSearch($request,$id);
+        return $this->buyerService->viewSavedSearch($request, $id);
     }
 
     public function deleteSavedSearch(Request $request, int $id): JsonResponse
     {
-        return $this->buyerService->deleteSavedSearch($request,$id);
+        return $this->buyerService->deleteSavedSearch($request, $id);
     }
 
     public function runSavedSearch(Request $request, int $id): JsonResponse
     {
-        return $this->buyerService->runSavedSearch($request,$id);
+        return $this->buyerService->runSavedSearch($request, $id);
     }
 }

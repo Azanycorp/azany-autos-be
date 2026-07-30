@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enum\VehicleStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -30,10 +31,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SavedSearch extends Model
 {
-    protected $casts = [
-        'filters' => 'array',
-        'is_notify' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'filters' => 'array',
+            'is_notify' => 'boolean',
+        ];
+    }
 
     /**
      * Get the country associated with the user.
@@ -46,48 +50,54 @@ class SavedSearch extends Model
         return $this->belongsTo(Country::class, 'country_id');
     }
 
-    public function scopeFilter(Builder $query, array $filters): Builder
-    {
-        return $query->where('is_active', true)
-            ->when($filters['make'] ?? null, function ($q, $make) {
-                $q->where('make', $make);
-            })
-            ->when($filters['model'] ?? null, function ($q, $model) {
-                $q->where('model', $model);
-            })
-            ->when($filters['min_price'] ?? null, function ($q, $minPrice) {
-                $q->where('price', '>=', $minPrice);
-            })
-            ->when($filters['max_price'] ?? null, function ($q, $maxPrice) {
-                $q->where('price', '<=', $maxPrice);
-            })
-            ->when($filters['min_year'] ?? null, function ($q, $minYear) {
-                $q->where('year', '>=', $minYear);
-            });
-    }
-
+    /**
+     * Get the query builder for matching vehicles.
+     *
+     * @return Builder<Vehicle>
+     */
     public function matchesQuery(): Builder
     {
+        /** @var array<string, mixed> $filters */
         $filters = $this->filters ?? [];
+
+        $make = $filters['make'] ?? null;
+        $model = $filters['model'] ?? null;
+        $minPrice = $filters['min_price'] ?? null;
+        $maxPrice = $filters['max_price'] ?? null;
+        $minYear = $filters['min_year'] ?? null;
 
         return Vehicle::query()
             ->where('status', VehicleStatus::ACTIVE->value)
-            ->when(! empty($filters['make']), fn ($q) => $q->where('make', $filters['make']))
-            ->when(! empty($filters['model']), fn ($q) => $q->where('model', $filters['model']))
-            ->when(! empty($filters['min_price']), fn ($q) => $q->where('price', '>=', $filters['min_price']))
-            ->when(! empty($filters['max_price']), fn ($q) => $q->where('price', '<=', $filters['max_price']))
-            ->when(! empty($filters['min_year']), fn ($q) => $q->where('year', '>=', $filters['min_year']));
+            ->unless(blank($make), fn (Builder $q) => $q->where('make', $make))
+            ->unless(blank($model), fn (Builder $q) => $q->where('model', $model))
+            ->unless(blank($minPrice), fn (Builder $q) => $q->where('price', '>=', $minPrice))
+            ->unless(blank($maxPrice), fn (Builder $q) => $q->where('price', '<=', $maxPrice))
+            ->unless(blank($minYear), fn (Builder $q) => $q->where('year', '>=', $minYear));
     }
 
-    public function getTotalMatchesAttribute(): int
+    /**
+     * Get the total count of matching vehicles.
+     *
+     * @return Attribute<int, null>
+     */
+    protected function totalMatches(): Attribute
     {
-        return $this->matchesQuery()->count();
+        return Attribute::make(
+            get: fn (): int => $this->matchesQuery()->count()
+        );
     }
 
-    public function getNewMatchesTodayAttribute(): int
+    /**
+     * Get the count of new matching vehicles created today.
+     *
+     * @return Attribute<int, null>
+     */
+    protected function newMatchesToday(): Attribute
     {
-        return $this->matchesQuery()
-            ->whereDate('created_at', now()->today())
-            ->count();
+        return Attribute::make(
+            get: fn (): int => $this->matchesQuery()
+                ->whereDate('created_at', today())
+                ->count()
+        );
     }
 }

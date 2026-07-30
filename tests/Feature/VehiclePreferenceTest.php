@@ -14,7 +14,7 @@ beforeEach(function () {
     $this->vehicles = Vehicle::factory()->count(2)->create();
 
     $this->validPayload = [
-        'vehicles' =>['Camry', 'Corolla'],
+        'vehicles' => ['Camry', 'Corolla'],
         'prefered_colors' => ['Black', 'White'],
         'body_types' => ['SUV', 'Sedan'],
         'fuel_types' => ['petrol', 'diesel'],
