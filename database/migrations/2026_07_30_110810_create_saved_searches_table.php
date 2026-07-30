@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('country_id');
             $table->string('body_type');
             $table->boolean('is_notify')->default(false);
+            $table->json('filters')->nullable();
             $table->timestamps();
         });
     }

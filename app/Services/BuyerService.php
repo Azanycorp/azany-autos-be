@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Http\Requests\V1\PreferenceRequest;
 use App\Http\Requests\V1\SavedSearchRequest;
 use App\Http\Resources\BuyerPreferenceResource;
+use App\Http\Resources\SavedSearchResource;
+use App\Http\Resources\VehicleResource;
 use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
@@ -46,19 +48,48 @@ class BuyerService
 
     public function getSavedSearches(Request $request, int $user_id): JsonResponse
     {
-        $user = User::with('savedSearches')->where('id', $user_id)->first();
-        
+        $user = User::find($user_id);
+
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
-
         }
 
-        return $this->successResponse($user->savedSearches, 'My Saved Searches');
+        $savedSearches = $user->savedSearches()->latest()->get();
+
+        $totalSaved = $savedSearches->count();
+        $alertsOn = $savedSearches->where('is_notify', true)->count();
+        $alertsPaused = $savedSearches->where('is_notify', false)->count();
+
+        $newMatchesToday = $savedSearches->sum(function ($search) {
+            return $search->new_matches_today;
+        });
+
+        $searchesWithNewMatches = $savedSearches->filter(function ($search) {
+            return $search->new_matches_today > 0;
+        })->count();
+
+        $totalMatchesFound = $savedSearches->sum(function ($search) {
+            return $search->total_matches;
+        });
+
+        $data = [
+            'stats' => [
+                'total_saved' => $totalSaved,
+                'alerts_on' => $alertsOn,
+                'alerts_paused' => $alertsPaused,
+                'new_matches_today' => $newMatchesToday,
+                'searches_with_new_matches' => $searchesWithNewMatches,
+                'total_matches_found' => $totalMatchesFound,
+            ],
+            'searches' => SavedSearchResource::collection($savedSearches),
+        ];
+
+        return $this->successResponse($data, 'My Saved Searches');
     }
 
     public function addSavedSearch(SavedSearchRequest $request): JsonResponse
     {
-        $user = User::where('id', $request->user_id)->first();
+        $user = User::find($request->user_id);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
@@ -84,5 +115,45 @@ class BuyerService
             ]);
 
         return $this->successResponse(null, 'New record added successfully');
+    }
+
+    public function viewSavedSearch(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $saved_search = $user->savedSearches()->find($id);
+
+        if (! $saved_search) {
+            return $this->errorResponse(null, 'Vehicle not found', 404);
+        }
+
+        return $this->successResponse(new SavedSearchResource($saved_search), 'details');
+    }
+
+    public function deleteSavedSearch(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $saved_search = $user->savedSearches()->find($id);
+
+        if (! $saved_search) {
+            return $this->errorResponse(null, 'Vehicle not found', 404);
+        }
+        $saved_search->delete();
+
+        return $this->successResponse(null, 'Record deleted');
+    }
+
+    public function runSavedSearch(Request $request, int $id): JsonResponse
+    {
+        $savedSearch = $request->user()
+            ->savedSearches()
+            ->findOrFail($id);
+
+        $vehicles = $savedSearch->matchesQuery()
+            ->latest()
+            ->paginate($request->input('per_page', 15));
+
+        return $this->successResponse(VehicleResource::collection($vehicles)->response()->getData(true),
+            "Matches found for '{$savedSearch->name}'"
+        );
     }
 }

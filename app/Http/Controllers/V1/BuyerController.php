@@ -18,7 +18,7 @@ class BuyerController extends Controller
 {
     public function __construct(
         private readonly AccountService $accountService,
-        private readonly BuyerService $dealerService
+        private readonly BuyerService $buyerService
     ) {}
 
     public function profile(int $userId): JsonResponse
@@ -48,21 +48,36 @@ class BuyerController extends Controller
 
     public function getVehiclePrefernce(Request $request): JsonResponse
     {
-        return $this->dealerService->getVehiclePrefernce($request);
+        return $this->buyerService->getVehiclePrefernce($request);
     }
 
     public function setPreference(PreferenceRequest $request): JsonResponse
     {
-        return $this->dealerService->setVehiclePrefernce($request);
+        return $this->buyerService->setVehiclePrefernce($request);
     }
 
     public function addSavedSearch(SavedSearchRequest $request): JsonResponse
     {
-        return $this->dealerService->addSavedSearch($request);
+        return $this->buyerService->addSavedSearch($request);
     }
 
     public function getSavedSearches(Request $request, int $user_id): JsonResponse
     {
-        return $this->dealerService->getSavedSearches($request,$user_id);
+        return $this->buyerService->getSavedSearches($request,$user_id);
+    }
+
+    public function viewSavedSearch(Request $request, int $id): JsonResponse
+    {
+        return $this->buyerService->viewSavedSearch($request,$id);
+    }
+
+    public function deleteSavedSearch(Request $request, int $id): JsonResponse
+    {
+        return $this->buyerService->deleteSavedSearch($request,$id);
+    }
+
+    public function runSavedSearch(Request $request, int $id): JsonResponse
+    {
+        return $this->buyerService->runSavedSearch($request,$id);
     }
 }
