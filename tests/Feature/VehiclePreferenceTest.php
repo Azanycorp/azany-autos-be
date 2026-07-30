@@ -14,7 +14,7 @@ beforeEach(function () {
     $this->vehicles = Vehicle::factory()->count(2)->create();
 
     $this->validPayload = [
-        'vehicle_ids' => $this->vehicles->pluck('id')->toArray(), // Use dynamic IDs [1, 2]
+        'vehicles' =>['Camry', 'Corolla'],
         'prefered_colors' => ['Black', 'White'],
         'body_types' => ['SUV', 'Sedan'],
         'fuel_types' => ['petrol', 'diesel'],
@@ -29,7 +29,7 @@ it('retrieves vehicle preference successfully for authenticated user', function 
 
     BuyerPreference::create([
         'user_id' => $this->user->id,
-        'vehicle_ids' => $this->validPayload['vehicle_ids'],
+        'vehicles' => ['Camry', 'Corolla'],
         'prefered_colors' => ['Black', 'White'],
         'body_types' => ['SUV', 'Sedan'],
         'fuel_types' => ['petrol', 'diesel'],
@@ -102,7 +102,7 @@ it('fails validation when required preference fields are missing', function () {
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors([
-            'vehicle_ids',
+            'vehicles',
             'prefered_colors',
             'body_types',
             'fuel_types',

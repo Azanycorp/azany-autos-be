@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('buyer_preferences', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->unsigned();
-            $table->json('vehicle_ids');
+            $table->json('vehicles');
             $table->json('fuel_types');
             $table->decimal('budget_min', 10, 2);
             $table->decimal('budget_max', 10, 2);

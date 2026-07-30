@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'user_id',
-    'vehicle_ids',
+    'vehicles',
     'fuel_types',
     'budget_min',
     'budget_max',
@@ -28,32 +28,11 @@ class BuyerPreference extends Model
     protected function casts(): array
     {
         return [
-            'vehicle_ids' => 'array',
+            'vehicles' => 'array',
             'fuel_types' => 'array',
             'prefered_colors' => 'array',
             'transmissions' => 'array',
             'body_types' => 'array',
         ];
-    }
-
-    /**
-     * @return Attribute<Collection<int, Vehicle>, null>
-     */
-    protected function vehicles(): Attribute
-    {
-        $ids = $this->vehicle_ids ?? [];
-
-        if (is_string($ids)) {
-            $ids = json_decode($ids, true);
-        }
-
-        return Attribute::make(get: function () {
-            $ids = $this->vehicle_ids ?? [];
-            if (is_string($ids)) {
-                $ids = json_decode($ids, true);
-            }
-
-            return Vehicle::whereIn('id', $ids)->get();
-        });
     }
 }

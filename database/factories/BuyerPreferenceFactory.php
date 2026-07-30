@@ -28,7 +28,7 @@ class BuyerPreferenceFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'vehicle_ids' => fn () => Vehicle::factory()->count(2)->create()->pluck('id')->toArray(),
+            'vehicles' => ['Camry', 'Corolla'],
             'fuel_types' => ['petrol', 'diesel'],
             'prefered_colors' => ['Black', 'White'],
             'transmissions' => ['automatic', 'manual'],

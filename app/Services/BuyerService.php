@@ -30,7 +30,7 @@ class BuyerService
                 'user_id' => $user->id,
             ],
             [
-                'vehicle_ids' => $request->vehicle_ids,
+                'vehicles' => $request->vehicles,
                 'fuel_types' => $request->fuel_types,
                 'budget_min' => $request->budget_min,
                 'budget_max' => $request->budget_max,

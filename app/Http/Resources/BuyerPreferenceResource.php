@@ -19,18 +19,13 @@ class BuyerPreferenceResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'fuel_types' => $this->fuel_types,
-            'budget_min' => (float) $this->budget_min,
-            'budget_max' => (float) $this->budget_max,
-            'prefered_colors' => $this->prefered_colors,
-            'transmissions' => $this->transmissions,
-            'body_types' => $this->body_types,
-            'vehicles' => $this->resource->vehicles->map(function ($vehicle) {
-                return [
-                    'make' => $vehicle->make,
-                    'model' => $vehicle->model,
-                ];
-            }),
+            'fuel_types' => $this->resource->fuel_types,
+            'budget_min' => (float) $this->resource->budget_min,
+            'budget_max' => (float) $this->resource->budget_max,
+            'prefered_colors' => $this->resource->prefered_colors,
+            'transmissions' => $this->resource->transmissions,
+            'body_types' => $this->resource->body_types,
+            'vehicles' => $this->resource->vehicles,
         ];
     }
 }

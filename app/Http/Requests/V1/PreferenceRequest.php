@@ -19,12 +19,12 @@ class PreferenceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vehicle_ids' => ['required', 'array'],
+            'vehicles' => ['required', 'array'],
             'prefered_colors' => ['required', 'array'],
             'body_types' => ['required', 'array'],
             'fuel_types' => ['required', 'array'],
             'transmissions' => ['required', 'array'],
-            'vehicle_ids.*' => ['integer', 'exists:vehicles,id'],
+            'vehicles.*' => ['string'],
             'prefered_colors.*' => ['string'],
             'body_types.*' => ['string'],
             'fuel_types.*' => [Rule::in(FuelType::values())],
