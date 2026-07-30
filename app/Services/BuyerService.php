@@ -41,4 +41,54 @@ class BuyerService
 
         return $this->successResponse(null, 'Preference set successfully');
     }
+
+    public function getSavedSearches(PreferenceRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $user->savedSearches()->create(
+            [
+                'name' => $request->name,
+                'listing_type' => $request->listing_type,
+                'fuel_type' => $request->fuel_type,
+                'transmission_type' => $request->transmission_type,
+                'condition' => $request->condition,
+                'kilometer_reading' => $request->kilometer_reading,
+                'make' => $request->make,
+                'model' => $request->model,
+                'min_year' => $request->min_year,
+                'max_year' => $request->max_year,
+                'min_price' => $request->min_price,
+                'max_price' => $request->max_price,
+                'country_id' => $request->country_id,
+                'body_type' => $request->body_type,
+            ]);
+
+        return $this->successResponse(null, 'My Saved Searches');
+    }
+
+    public function addSavedSearch(PreferenceRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $user->savedSearches()->create(
+            [
+                'name' => $request->name,
+                'listing_type' => $request->listing_type,
+                'fuel_type' => $request->fuel_type,
+                'transmission_type' => $request->transmission_type,
+                'condition' => $request->condition,
+                'kilometer_reading' => $request->kilometer_reading,
+                'make' => $request->make,
+                'model' => $request->model,
+                'min_year' => $request->min_year,
+                'max_year' => $request->max_year,
+                'min_price' => $request->min_price,
+                'max_price' => $request->max_price,
+                'country_id' => $request->country_id,
+                'body_type' => $request->body_type,
+            ]);
+
+        return $this->successResponse(null, 'New record added successfully');
+    }
 }

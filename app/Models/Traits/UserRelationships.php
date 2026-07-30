@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Models\FeatureTag;
 use App\Models\InspectionLocation;
 use App\Models\InspectionSlot;
+use App\Models\SavedSearch;
 use App\Models\Subscription;
 use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Model;
@@ -69,6 +70,14 @@ trait UserRelationships
     public function vehiclePreference(): HasOne
     {
         return $this->hasOne(BuyerPreference::class);
+    }
+
+    /**
+     * @return HasMany<SavedSearch, $this>
+     */
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class);
     }
 
     /**
