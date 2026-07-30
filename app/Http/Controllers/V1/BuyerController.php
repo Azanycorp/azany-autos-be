@@ -7,6 +7,7 @@ use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\PreferenceRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
 use App\Http\Requests\V1\ProfileUpdateRequest;
+use App\Http\Requests\V1\SavedSearchRequest;
 use App\Http\Requests\V1\Update2FARequest;
 use App\Services\AccountService;
 use App\Services\BuyerService;
@@ -53,5 +54,15 @@ class BuyerController extends Controller
     public function setPreference(PreferenceRequest $request): JsonResponse
     {
         return $this->dealerService->setVehiclePrefernce($request);
+    }
+
+    public function addSavedSearch(SavedSearchRequest $request): JsonResponse
+    {
+        return $this->dealerService->addSavedSearch($request);
+    }
+
+    public function getSavedSearches(Request $request, int $user_id): JsonResponse
+    {
+        return $this->dealerService->getSavedSearches($request,$user_id);
     }
 }

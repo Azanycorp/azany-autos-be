@@ -39,6 +39,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/profile-photo', 'updateProfilePhoto');
             Route::get('/get-preference', 'getVehiclePrefernce');
             Route::post('/set-preference', 'setPreference');
+
+            Route::prefix('saved-searches')
+                ->group(function () {
+                    Route::get('/{user_id}', 'getSavedSearches');
+                    Route::post('/add', 'addSavedSearch');
+                });
         });
 
     Route::prefix('dealer')
