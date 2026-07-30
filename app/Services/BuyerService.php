@@ -123,10 +123,10 @@ class BuyerService
         $saved_search = $user->savedSearches()->find($id);
 
         if (! $saved_search) {
-            return $this->errorResponse(null, 'Vehicle not found', 404);
+            return $this->errorResponse(null, 'Record not found', 404);
         }
 
-        return $this->successResponse(new SavedSearchResource($saved_search), 'details');
+        return $this->successResponse(new SavedSearchResource($saved_search), 'Details');
     }
 
     public function updateSavedSearch(Request $request, int $id): JsonResponse
@@ -135,7 +135,7 @@ class BuyerService
         $saved_search = $user->savedSearches()->find($id);
 
         if (! $saved_search) {
-            return $this->errorResponse(null, 'Vehicle not found', 404);
+            return $this->errorResponse(null, 'Record not found', 404);
         }
 
         $saved_search->update(
@@ -156,7 +156,7 @@ class BuyerService
                 'body_type' => $request->body_type ?? $saved_search->body_type,
             ]);
 
-        return $this->successResponse(new SavedSearchResource($saved_search), 'details');
+        return $this->successResponse(new SavedSearchResource($saved_search), 'Details Updated');
     }
 
     public function deleteSavedSearch(Request $request, int $id): JsonResponse
@@ -165,7 +165,7 @@ class BuyerService
         $saved_search = $user->savedSearches()->find($id);
 
         if (! $saved_search) {
-            return $this->errorResponse(null, 'Vehicle not found', 404);
+            return $this->errorResponse(null, 'Record not found', 404);
         }
         $saved_search->delete();
 
@@ -180,9 +180,9 @@ class BuyerService
 
         $vehicles = $savedSearch->matchesQuery()
             ->latest()
-            ->paginate($request->input('per_page', 15));
+            ->get();
 
-        return $this->successResponse(VehicleResource::collection($vehicles)->response()->getData(true),
+        return $this->successResponse(VehicleResource::collection($vehicles),
             "Matches found for '{$savedSearch->name}'"
         );
     }

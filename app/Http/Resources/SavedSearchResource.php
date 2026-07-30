@@ -20,6 +20,7 @@ class SavedSearchResource extends JsonResource
     {
         return [
             'id' => (int) $this->resource->id,
+            'name' => (string) $this->resource->name,
             'listing_type' => (string) $this->resource->listing_type,
             'fuel_type' => (string) $this->resource->fuel_type,
             'transmission_type' => (string) $this->resource->transmission_type,
