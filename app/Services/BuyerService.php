@@ -129,6 +129,36 @@ class BuyerService
         return $this->successResponse(new SavedSearchResource($saved_search), 'details');
     }
 
+    public function updateSavedSearch(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $saved_search = $user->savedSearches()->find($id);
+
+        if (! $saved_search) {
+            return $this->errorResponse(null, 'Vehicle not found', 404);
+        }
+
+        $saved_search->update(
+            [
+                'name' => $request->name ?? $saved_search->name,
+                'listing_type' => $request->listing_type ?? $saved_search->listing_type,
+                'fuel_type' => $request->fuel_type ?? $saved_search->fuel_type,
+                'transmission_type' => $request->transmission_type ?? $saved_search->transmission_type,
+                'condition' => $request->condition ?? $saved_search->condition,
+                'kilometer_reading' => $request->kilometer_reading ?? $saved_search->kilometer_reading,
+                'make' => $request->make ?? $saved_search->make,
+                'model' => $request->model ?? $saved_search->model,
+                'min_year' => $request->min_year ?? $saved_search->min_year,
+                'max_year' => $request->max_year ?? $saved_search->max_year,
+                'min_price' => $request->min_price ?? $saved_search->min_price,
+                'max_price' => $request->max_price ?? $saved_search->max_price,
+                'country_id' => $request->country_id ?? $saved_search->country_id,
+                'body_type' => $request->body_type ?? $saved_search->body_type,
+            ]);
+
+        return $this->successResponse(new SavedSearchResource($saved_search), 'details');
+    }
+
     public function deleteSavedSearch(Request $request, int $id): JsonResponse
     {
         $user = $request->user();

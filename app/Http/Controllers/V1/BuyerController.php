@@ -66,6 +66,11 @@ class BuyerController extends Controller
         return $this->buyerService->getSavedSearches($request,$user_id);
     }
 
+    public function updateSavedSearch(Request $request, int $id): JsonResponse
+    {
+        return $this->buyerService->updateSavedSearch($request,$id);
+    }
+
     public function viewSavedSearch(Request $request, int $id): JsonResponse
     {
         return $this->buyerService->viewSavedSearch($request,$id);

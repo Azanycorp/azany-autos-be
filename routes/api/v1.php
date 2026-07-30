@@ -44,7 +44,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 ->group(function () {
                     Route::get('/{user_id}', 'getSavedSearches');
                     Route::post('/add', 'addSavedSearch');
-                    Route::get('/run/{id}/search', 'runSavedSearch');
+                    Route::get('/details/{id}', 'viewSavedSearch');
+                    Route::post('/update/{id}', 'updateSavedSearch');
+                    Route::delete('/delete/{id}', 'deleteSavedSearch');
+                    Route::get('/run-search/{id}', 'runSavedSearch');
                 });
         });
 
