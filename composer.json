@@ -19,7 +19,7 @@
         "wendelladriel/laravel-validated-dto": "^4.6"
     },
     "require-dev": {
-        "barryvdh/laravel-ide-helper": "^3.7",
+        "barryvdh/laravel-ide-helper": "*",
         "driftingly/rector-laravel": "*",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^3.0",
