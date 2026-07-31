@@ -1,105 +1,177 @@
 <?php
 
-use App\Enum\AccidentType;
 use App\Enum\ConditionType;
-use App\Enum\DamageType;
 use App\Enum\FuelType;
 use App\Enum\ListingType;
 use App\Enum\TransmissionType;
-use App\Enum\UserType;
-use App\Enum\VehicleStatus;
-use App\Models\Country;
+use App\Enum\UserStatus;
+use App\Models\SavedSearch;
 use App\Models\User;
-use App\Models\Vehicle;
-use CloudinaryLabs\CloudinaryLaravel\CloudinaryEngine;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-
-use function Pest\Laravel\actingAs; // Imported the helper function directly
 
 uses(RefreshDatabase::class);
 
-it('an authenticated user can successfully add a vehicle', function () {
-    Storage::fake('vehicles');
-    Storage::fake('vehicle_images');
+it('retrieves saved searches and stats for a valid user', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
 
-    $mockedUploadResult = Mockery::mock(CloudinaryEngine::class);
-    $mockedUploadResult->shouldReceive('getSecurePath')
-        ->zeroOrMoreTimes()
-        ->andReturn('https://res.cloudinary.com/fake-account/image/upload/v123/vehicles/fake_car.jpg');
-    $mockedUploadResult->shouldReceive('getPublicId')
-        ->zeroOrMoreTimes()
-        ->andReturn('vehicles/fake_car');
-
-    Cloudinary::shouldReceive('upload')
-        ->zeroOrMoreTimes()
-        ->andReturn($mockedUploadResult);
-
-    $country = Country::factory()->create();
-    $user = User::factory()->create(['user_type' => UserType::AUTODEALER->value]);
-
-    actingAs($user, 'sanctum');
-
-    $payload = [
-        'user_id' => $user->id,
-        'make' => 'Toyota',
-        'model' => 'Camry',
-        'year' => '2024',
-        'reserved_price' => 25000,
-        'price' => 30000,
-        'listing_type' => ListingType::AUCTION->value,
-        'auction_days' => 7,
-        'auction_start_date' => now(),
-        'auction_end_date' => now()->addDays(7),
-        'country_id' => $country->id,
-        'city' => 'Lagos',
-        'fuel_type' => FuelType::PETROL->value,
-        'transmission_type' => TransmissionType::AUTOMATIC->value,
-        'condition' => ConditionType::USED->value,
-        'kilometer_reading' => '15000',
-        'engine_capacity' => '2.5L',
-        'previous_owner' => 'Sunday',
-        'variant' => 'LE',
-        'body_type' => 'Sedan',
-        'vin' => '1HGCR2F8XHAXXXXXX',
-        'accident_history' => AccidentType::NO_ACCIDENT->value,
-        'damage_history' => DamageType::NO_DAMAGE->value,
-        'service_history' => 'Full',
-        'description' => 'A very clean vehicle.',
-        'features' => ['Leather seats', 'Sunroof'],
-        'front_image' => UploadedFile::fake()->image('front.jpg'),
-        'back_image' => UploadedFile::fake()->image('back.jpg'),
-        'rear_image' => UploadedFile::fake()->image('rear.jpg'),
-        'passenger_side_image' => UploadedFile::fake()->image('passenger.jpg'),
-        'dashboard_image' => UploadedFile::fake()->image('dashboard.jpg'),
-        'video_link' => null,
-        'vehicle_images' => [
-            UploadedFile::fake()->image('extra1.jpg'),
-            UploadedFile::fake()->image('extra2.jpg'),
-        ],
-    ];
-
-    $response = $this->postJson('/api/v1/dealer/vehicles/add', $payload);
+    $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/{$user->id}");
 
     $response->assertOk()
         ->assertJsonStructure([
-            'data' => ['id', 'make', 'model', 'year', 'slug'],
-            'message',
-        ])
-        ->assertJsonFragment([
-            'message' => 'Vehicle added successfully',
+            'data' => [
+                'stats' => [
+                    'total_saved',
+                    'alerts_on',
+                    'alerts_paused',
+                    'new_matches_today',
+                    'searches_with_new_matches',
+                    'total_matches_found',
+                ],
+                'searches',
+            ],
         ]);
+});
 
-    $this->assertDatabaseHas('vehicles', [
+it('returns 404 when getting saved searches for non-existent user', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+
+    $response = $this->actingAs($user)->getJson('api/v1/buyer/saved-searches/999999');
+
+    $response->assertStatus(404)
+        ->assertJsonFragment(['message' => 'User not found']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Add Saved Search
+|--------------------------------------------------------------------------
+*/
+
+it('successfully adds a new saved search', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+
+    $payload = [
+        'user_id'           => $user->id,
+        'name'              => 'Toyota SUV Search',
+        'listing_type'      => ListingType::SALE->value,
+        'fuel_type'         => FuelType::PETROL->value,
+        'transmission_type' => TransmissionType::AUTOMATIC->value,
+        'condition'         => ConditionType::NEW->value,
+        'kilometer_reading' => 50000,
+        'make'              => 'Toyota',
+        'model'             => 'RAV4',
+        'min_year'          => 2018,
+        'max_year'          => 2024,
+        'min_price'         => 10000,
+        'max_price'         => 30000,
+        'country_id'        => 1,
+        'body_type'         => 'SUV',
+    ];
+
+    $response = $this->actingAs($user)->postJson('api/v1/buyer/saved-searches/add', $payload);
+
+    $response->assertOk()
+        ->assertJsonFragment(['message' => 'New record added successfully']);
+
+    $this->assertDatabaseHas('saved_searches', [
         'user_id' => $user->id,
-        'make' => 'Toyota',
-        'model' => 'Camry',
-        'year' => '2024',
-        'status' => VehicleStatus::PENDING->value,
+        'name'    => 'Toyota SUV Search',
+        'make'    => 'Toyota',
+    ]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| View Saved Search Details
+|--------------------------------------------------------------------------
+*/
+
+it('views a specific saved search detail', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+    $savedSearch = SavedSearch::factory()->create([
+        'user_id' => $user->id,
+        'name'    => 'Honda Sedan',
     ]);
 
-    $vehicle = Vehicle::first();
-    expect($vehicle->vehicleImages)->toHaveCount(2);
+    $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/details/{$savedSearch->id}");
+
+    $response->assertOk()
+        ->assertJsonFragment(['name' => 'Honda Sedan']);
+});
+
+it('returns 404 when viewing non-existent or unowned saved search', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+    $otherUser = User::factory()->create();
+
+    $otherSearch = SavedSearch::factory()->create(['user_id' => $otherUser->id]);
+
+    // Attempt to view another user's saved search
+    $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/details/{$otherSearch->id}");
+
+    $response->assertStatus(404)
+        ->assertJsonFragment(['message' => 'Record not found']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Update Saved Search
+|--------------------------------------------------------------------------
+*/
+
+it('updates an existing saved search record', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+    $savedSearch = SavedSearch::factory()->create([
+        'user_id' => $user->id,
+        'name'    => 'Old Search Name',
+    ]);
+
+    $payload = [
+        'name' => 'Updated Search Name',
+    ];
+
+    $response = $this->actingAs($user)->postJson("api/v1/buyer/saved-searches/update/{$savedSearch->id}", $payload);
+
+    $response->assertOk();
+
+    $this->assertDatabaseHas('saved_searches', [
+        'id'   => $savedSearch->id,
+        'name' => 'Updated Search Name',
+    ]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Delete Saved Search
+|--------------------------------------------------------------------------
+*/
+
+it('deletes a saved search record', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+    $savedSearch = SavedSearch::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)->deleteJson("api/v1/buyer/saved-searches/delete/{$savedSearch->id}");
+
+    $response->assertOk()
+        ->assertJsonFragment(['message' => 'Record deleted']);
+
+    $this->assertDatabaseMissing('saved_searches', ['id' => $savedSearch->id]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Run Saved Search
+|--------------------------------------------------------------------------
+*/
+
+it('runs a saved search and returns matched results', function () {
+    $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
+    $savedSearch = SavedSearch::factory()->create([
+        'user_id' => $user->id,
+        'name'    => 'Luxury Cars',
+    ]);
+
+    $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/run-search/{$savedSearch->id}");
+
+    $response->assertOk()
+        ->assertJsonFragment(['message' => "Matches found for 'Luxury Cars'"]);
 });
