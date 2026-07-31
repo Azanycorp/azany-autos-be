@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Exceptions\SubscriptionException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\ChangeSubscriptionPlanRequest;
 use App\Http\Resources\SubscriptionPlanResource;
+use App\Http\Resources\SubscriptionResource;
+use App\Models\User;
 use App\Services\SubscriptionService;
 use App\Traits\HttpResponses;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 
 class SubscriptionController extends Controller
@@ -32,5 +37,38 @@ class SubscriptionController extends Controller
         }
 
         return $this->successResponse(new SubscriptionPlanResource($plan), 'Subscription plan fetched successfully');
+    }
+
+    public function upgrade(ChangeSubscriptionPlanRequest $request, #[CurrentUser] User $user): JsonResponse
+    {
+        try {
+            $subscription = $this->subscriptionService->upgrade($user->id, $request->validated('plan_id'));
+
+            return $this->successResponse(new SubscriptionResource($subscription), 'Subscription upgraded successfully');
+        } catch (SubscriptionException $e) {
+            return $this->errorResponse(null, $e->getMessage(), 422);
+        }
+    }
+
+    public function downgrade(ChangeSubscriptionPlanRequest $request, #[CurrentUser] User $user): JsonResponse
+    {
+        try {
+            $subscription = $this->subscriptionService->downgrade($user->id, $request->validated('plan_id'));
+
+            return $this->successResponse(new SubscriptionResource($subscription), 'Downgrade scheduled for your next billing cycle');
+        } catch (SubscriptionException $e) {
+            return $this->errorResponse(null, $e->getMessage(), 422);
+        }
+    }
+
+    public function cancel(#[CurrentUser] User $user): JsonResponse
+    {
+        try {
+            $subscription = $this->subscriptionService->cancel($user->id);
+
+            return $this->successResponse(new SubscriptionResource($subscription), 'Subscription will be cancelled at the end of your billing cycle');
+        } catch (SubscriptionException $e) {
+            return $this->errorResponse(null, $e->getMessage(), 422);
+        }
     }
 }

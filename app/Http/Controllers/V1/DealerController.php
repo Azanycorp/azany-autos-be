@@ -10,7 +10,6 @@ use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
 use App\Models\User;
-use App\Services\AccountService;
 use App\Services\DealerService;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
@@ -18,15 +17,7 @@ use Illuminate\Http\Request;
 
 class DealerController extends Controller
 {
-    public function __construct(
-        private readonly AccountService $accountService,
-        private readonly DealerService $dealerService
-    ) {}
-
-    public function profile(int $userId): JsonResponse
-    {
-        return $this->accountService->profile($userId);
-    }
+    public function __construct(private readonly DealerService $dealerService) {}
 
     public function addVehicle(VehicleRequest $request): JsonResponse
     {

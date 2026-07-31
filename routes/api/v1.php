@@ -4,6 +4,7 @@ use App\Http\Controllers\V1\AuthenticationController;
 use App\Http\Controllers\V1\BuyerController;
 use App\Http\Controllers\V1\DealerController;
 use App\Http\Controllers\V1\ForgotPasswordController;
+use App\Http\Controllers\V1\ProfileController;
 use App\Http\Controllers\V1\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,7 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('dealer')
         ->group(function () {
-            Route::get('/profile/{user_id}', [DealerController::class, 'profile']);
+            Route::get('/profile/{user_id}', [ProfileController::class]);
 
             Route::prefix('vehicles')
                 ->controller(DealerController::class)
@@ -104,6 +105,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 ->controller(SubscriptionController::class)
                 ->group(function () {
                     Route::get('/list', 'index');
+                    Route::post('/upgrade', 'upgrade');
+                    Route::post('/downgrade', 'downgrade');
+                    Route::post('/cancel', 'cancel');
                     Route::get('/{id}', 'show');
                 });
         });
