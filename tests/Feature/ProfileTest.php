@@ -21,7 +21,7 @@ beforeEach(function () {
 it('returns user profile successfully', function () {
     Sanctum::actingAs($this->user);
 
-    $response = $this->getJson("/api/v1/buyer/profile/{$this->user->id}");
+    $response = $this->getJson("/api/v1/profile/{$this->user->id}");
 
     $response->assertStatus(200)
         ->assertJson(['message' => 'User profile'])
@@ -33,7 +33,7 @@ it('returns user profile successfully', function () {
 it('returns 404 when fetching non-existent user profile', function () {
     Sanctum::actingAs($this->user);
 
-    $response = $this->getJson('/api/v1/buyer/profile/99999');
+    $response = $this->getJson('/api/v1/profile/99999');
 
     $response->assertStatus(404)
         ->assertJson(['message' => 'User does not exist']);
@@ -49,7 +49,7 @@ it('updates user profile details successfully', function () {
         'country_id' => 1,
     ];
 
-    $response = $this->postJson('/api/v1/buyer/update-profile', $payload);
+    $response = $this->postJson('/api/v1/profile/update-profile', $payload);
 
     $response->assertStatus(200)
         ->assertJson(['message' => 'Details Updated']);
@@ -69,7 +69,7 @@ it('updates user profile photo successfully', function () {
 
     $file = UploadedFile::fake()->image('avatar.jpg');
 
-    $response = $this->postJson('/api/v1/buyer/profile-photo', [
+    $response = $this->postJson('/api/v1/profile/profile-photo', [
         'profile_photo' => $file,
     ]);
 
@@ -88,7 +88,7 @@ it('updates user password successfully', function () {
         'password_confirmation' => 'NewSecurePassword123!',
     ];
 
-    $response = $this->postJson('/api/v1/buyer/update-password', $payload);
+    $response = $this->postJson('/api/v1/profile/update-password', $payload);
 
     $response->assertStatus(200)
         ->assertJson(['message' => 'Password Updated']);
@@ -100,7 +100,7 @@ it('updates user password successfully', function () {
 it('enables 2FA successfully', function () {
     Sanctum::actingAs($this->user);
 
-    $response = $this->postJson('/api/v1/buyer/update-2fa', [
+    $response = $this->postJson('/api/v1/profile/update-2fa', [
         'two_factor_enabled' => true,
     ]);
 
@@ -117,7 +117,7 @@ it('disables 2FA successfully', function () {
     $this->user->update(['two_factor_enabled' => true]);
     Sanctum::actingAs($this->user);
 
-    $response = $this->postJson('/api/v1/buyer/update-2fa', [
+    $response = $this->postJson('/api/v1/profile/update-2fa', [
         'two_factor_enabled' => false,
     ]);
 
@@ -134,7 +134,7 @@ it('returns 400 error if 2FA status is already set', function () {
     $this->user->update(['two_factor_enabled' => true]);
     Sanctum::actingAs($this->user);
 
-    $response = $this->postJson('/api/v1/buyer/update-2fa', [
+    $response = $this->postJson('/api/v1/profile/update-2fa', [
         'two_factor_enabled' => true,
     ]);
 
@@ -143,9 +143,9 @@ it('returns 400 error if 2FA status is already set', function () {
 });
 
 it('prevents unauthenticated users from accessing profile endpoints', function () {
-    $this->getJson('/api/v1/buyer/profile/1')->assertStatus(401);
-    $this->postJson('/api/v1/buyer/update-profile', [])->assertStatus(401);
-    $this->postJson('/api/v1/buyer/profile-photo', [])->assertStatus(401);
-    $this->postJson('/api/v1/buyer/update-password', [])->assertStatus(401);
-    $this->postJson('/api/v1/buyer/update-2fa', [])->assertStatus(401);
+    $this->getJson('/api/v1/profile/1')->assertStatus(401);
+    $this->postJson('/api/v1/profile/update-profile', [])->assertStatus(401);
+    $this->postJson('/api/v1/profile/profile-photo', [])->assertStatus(401);
+    $this->postJson('/api/v1/profile/update-password', [])->assertStatus(401);
+    $this->postJson('/api/v1/profile/update-2fa', [])->assertStatus(401);
 });

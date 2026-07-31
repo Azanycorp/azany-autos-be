@@ -11,13 +11,13 @@ use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\JsonResponse;
 
-class AccountService
+class ProfileService
 {
     use HttpResponses;
 
     public function profile(int $userId): JsonResponse
     {
-        $user = User::find($userId);
+        $user = User::with(['activeSubscription.plan.features'])->find($userId);
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);

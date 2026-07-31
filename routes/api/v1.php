@@ -28,16 +28,20 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::prefix('profile')
+        ->controller(ProfileController::class)
+        ->group(function () {
+            Route::get('/{user_id}', 'profile');
+            Route::post('/update-password', 'updatePassword');
+            Route::post('/update-profile', 'updateprofile');
+            Route::post('/update-2fa', 'enable2FA');
+            Route::post('/profile-photo', 'updateProfilePhoto');
+        });
 
     // Buyer route
     Route::prefix('buyer')
         ->controller(BuyerController::class)
         ->group(function () {
-            Route::get('/profile/{user_id}', 'profile');
-            Route::post('/update-password', 'updatePassword');
-            Route::post('/update-profile', 'updateprofile');
-            Route::post('/update-2fa', 'enable2FA');
-            Route::post('/profile-photo', 'updateProfilePhoto');
             Route::get('/get-preference', 'getVehiclePrefernce');
             Route::post('/set-preference', 'setPreference');
 
@@ -54,8 +58,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('dealer')
         ->group(function () {
-            Route::get('/profile/{user_id}', [ProfileController::class]);
-
             Route::prefix('vehicles')
                 ->controller(DealerController::class)
                 ->group(function () {
