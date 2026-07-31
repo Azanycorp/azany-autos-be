@@ -29,25 +29,25 @@ class SavedSearchFactory extends Factory
         $minPrice = fake()->numberBetween(5000, 20000);
 
         return [
-            'user_id'           => User::factory(),
-            'name'              => fake()->words(3, true) . ' Search',
-            'listing_type'      => fake()->randomElement(['sale', 'rent']),
-            'fuel_type'         => fake()->randomElement(['petrol', 'diesel', 'electric', 'hybrid']),
+            'user_id' => User::factory(),
+            'name' => fake()->words(3, true).' Search',
+            'listing_type' => fake()->randomElement(['sale', 'rent']),
+            'fuel_type' => fake()->randomElement(['petrol', 'diesel', 'electric', 'hybrid']),
             'transmission_type' => fake()->randomElement(['automatic', 'manual']),
-            'condition'         => fake()->randomElement(['new', 'used']),
+            'condition' => fake()->randomElement(['new', 'used']),
             'kilometer_reading' => fake()->numberBetween(10000, 150000),
-            'make'              => fake()->randomElement(['Toyota', 'Honda', 'Ford', 'BMW', 'Mercedes']),
-            'model'             => fake()->word(),
-            'min_year'          => $minYear,
-            'max_year'          => $minYear + fake()->numberBetween(1, 4),
-            'min_price'         => $minPrice,
-            'max_price'         => $minPrice + fake()->numberBetween(5000, 15000),
-            'country_id'        => 1,
-            'body_type'         => fake()->randomElement(['SUV', 'Sedan', 'Hatchback', 'Coupe']),
-            'filters'           => [
+            'make' => fake()->randomElement(['Toyota', 'Honda', 'Ford', 'BMW', 'Mercedes']),
+            'model' => fake()->word(),
+            'min_year' => $minYear,
+            'max_year' => $minYear + fake()->numberBetween(1, 4),
+            'min_price' => $minPrice,
+            'max_price' => $minPrice + fake()->numberBetween(5000, 15000),
+            'country_id' => 1,
+            'body_type' => fake()->randomElement(['SUV', 'Sedan', 'Hatchback', 'Coupe']),
+            'filters' => [
                 'color' => fake()->safeColorName(),
             ],
-            'is_notify'         => fake()->boolean(80),
+            'is_notify' => fake()->boolean(80),
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enum\VehicleStatus;
+use Database\Factories\SavedSearchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -32,10 +33,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SavedSearch extends Model
 {
-
     /** @use HasFactory<SavedSearchFactory> */
     use HasFactory;
-    
+
     protected function casts(): array
     {
         return [

@@ -51,21 +51,21 @@ it('successfully adds a new saved search', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
 
     $payload = [
-        'user_id'           => $user->id,
-        'name'              => 'Toyota SUV Search',
-        'listing_type'      => ListingType::SALE->value,
-        'fuel_type'         => FuelType::PETROL->value,
+        'user_id' => $user->id,
+        'name' => 'Toyota SUV Search',
+        'listing_type' => ListingType::SALE->value,
+        'fuel_type' => FuelType::PETROL->value,
         'transmission_type' => TransmissionType::AUTOMATIC->value,
-        'condition'         => ConditionType::NEW->value,
+        'condition' => ConditionType::NEW->value,
         'kilometer_reading' => 50000,
-        'make'              => 'Toyota',
-        'model'             => 'RAV4',
-        'min_year'          => 2018,
-        'max_year'          => 2024,
-        'min_price'         => 10000,
-        'max_price'         => 30000,
-        'country_id'        => 1,
-        'body_type'         => 'SUV',
+        'make' => 'Toyota',
+        'model' => 'RAV4',
+        'min_year' => 2018,
+        'max_year' => 2024,
+        'min_price' => 10000,
+        'max_price' => 30000,
+        'country_id' => 1,
+        'body_type' => 'SUV',
     ];
 
     $response = $this->actingAs($user)->postJson('api/v1/buyer/saved-searches/add', $payload);
@@ -75,8 +75,8 @@ it('successfully adds a new saved search', function () {
 
     $this->assertDatabaseHas('saved_searches', [
         'user_id' => $user->id,
-        'name'    => 'Toyota SUV Search',
-        'make'    => 'Toyota',
+        'name' => 'Toyota SUV Search',
+        'make' => 'Toyota',
     ]);
 });
 
@@ -90,7 +90,7 @@ it('views a specific saved search detail', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
     $savedSearch = SavedSearch::factory()->create([
         'user_id' => $user->id,
-        'name'    => 'Honda Sedan',
+        'name' => 'Honda Sedan',
     ]);
 
     $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/details/{$savedSearch->id}");
@@ -122,7 +122,7 @@ it('updates an existing saved search record', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
     $savedSearch = SavedSearch::factory()->create([
         'user_id' => $user->id,
-        'name'    => 'Old Search Name',
+        'name' => 'Old Search Name',
     ]);
 
     $payload = [
@@ -134,7 +134,7 @@ it('updates an existing saved search record', function () {
     $response->assertOk();
 
     $this->assertDatabaseHas('saved_searches', [
-        'id'   => $savedSearch->id,
+        'id' => $savedSearch->id,
         'name' => 'Updated Search Name',
     ]);
 });
@@ -167,7 +167,7 @@ it('runs a saved search and returns matched results', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
     $savedSearch = SavedSearch::factory()->create([
         'user_id' => $user->id,
-        'name'    => 'Luxury Cars',
+        'name' => 'Luxury Cars',
     ]);
 
     $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/run-search/{$savedSearch->id}");
