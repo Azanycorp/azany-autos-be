@@ -36,7 +36,8 @@ class DealerService
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User not found', 404);
-        }       
+        }  
+             
          return $this->successResponse(null, 'User found', 200);
     }
 
