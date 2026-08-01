@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('dealer')
         ->group(function () {
             Route::get('/profile/{user_id}', [ProfileController::class]);
+            Route::get('/dashboard/{user_id}', [DealerController::class]);
 
             Route::prefix('vehicles')
                 ->controller(DealerController::class)
