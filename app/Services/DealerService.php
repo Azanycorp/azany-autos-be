@@ -30,6 +30,16 @@ class DealerService
 {
     use HttpResponses;
 
+    public function dashboard($user_id): JsonResponse
+    {
+        $user = User::where('id', $user_id)->first();
+
+        if (! $user instanceof User) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }       
+         return $this->successResponse(null, 'User found', 200);
+    }
+
     public function addVehicle(VehicleRequest $request): JsonResponse
     {
         if ($request->reserved_price > $request->price) {
