@@ -10,6 +10,7 @@ use App\Http\Requests\V1\StatusUpdateRequest;
 use App\Http\Requests\V1\TagRequest;
 use App\Http\Requests\V1\UpdateVehicleRequest;
 use App\Http\Requests\V1\VehicleRequest;
+use App\Http\Resources\DashboardResource;
 use App\Http\Resources\InspectionLocationResource;
 use App\Http\Resources\SlotResource;
 use App\Http\Resources\TagResource;
@@ -37,8 +38,8 @@ class DealerService
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User not found', 404);
         }  
-             
-         return $this->successResponse(null, 'User found', 200);
+
+         return $this->successResponse(new DashboardResource($user), 'User found', 200);
     }
 
     public function addVehicle(VehicleRequest $request): JsonResponse
