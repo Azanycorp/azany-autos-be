@@ -30,6 +30,11 @@ class DealerService
 {
     use HttpResponses;
 
+    public function dashboard(): JsonResponse
+    {
+       return $this->successResponse(null, 'Dashboard details');
+    }
+
     public function addVehicle(VehicleRequest $request): JsonResponse
     {
         if ($request->reserved_price > $request->price) {

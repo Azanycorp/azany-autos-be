@@ -19,6 +19,11 @@ class DealerController extends Controller
 {
     public function __construct(private readonly DealerService $dealerService) {}
 
+    public function dashboard(): JsonResponse
+    {
+        return $this->dealerService->dashboard();
+    }
+
     public function addVehicle(VehicleRequest $request): JsonResponse
     {
         return $this->dealerService->addVehicle($request);

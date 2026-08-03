@@ -112,5 +112,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::post('/cancel', 'cancel');
                     Route::get('/{id}', 'show');
                 });
+
+            Route::controller(DealerController::class)
+                ->group(function () {
+                    Route::get('/dashboard', 'dashboard');
+                });
         });
 });
