@@ -115,7 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::controller(DealerController::class)
                 ->group(function () {
-                    Route::get('/dashboard', 'dashboard');
+                    Route::get('/dashboard/{user_id}', 'dashboard');
                 });
         });
 });

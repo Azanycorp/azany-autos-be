@@ -30,9 +30,26 @@ class DealerService
 {
     use HttpResponses;
 
-    public function dashboard(): JsonResponse
+    public function dashboard(int $user_id): JsonResponse
     {
-       return $this->successResponse(null, 'Dashboard details');
+        $user = User::where('id', $user_id)->first();
+
+        if (! $user instanceof User) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
+
+        $active_listings = $user->vehicles()->where('status', VehicleStatus::ACTIVE->value)->count();
+        $pending_listings = $user->vehicles()->where('status', VehicleStatus::PENDING->value)->count();
+        $inspection_slots = $user->inspectionSlots()->count();
+        $listing_activity = $user->vehicles()->latest()->get();
+
+        $data = [
+            'active_listings' => $active_listings,
+            'pending_listings' => $pending_listings,
+            'inspection_slots' => $inspection_slots,
+            'listing_activity' => VehicleResource::collection($listing_activity),
+        ];
+       return $this->successResponse($data, 'Dashboard details');
     }
 
     public function addVehicle(VehicleRequest $request): JsonResponse
