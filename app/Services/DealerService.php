@@ -49,7 +49,8 @@ class DealerService
             'inspection_slots' => $inspection_slots,
             'listing_activity' => VehicleResource::collection($listing_activity),
         ];
-       return $this->successResponse($data, 'Dashboard details');
+
+        return $this->successResponse($data, 'Dashboard details');
     }
 
     public function addVehicle(VehicleRequest $request): JsonResponse
