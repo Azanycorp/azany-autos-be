@@ -12,24 +12,20 @@ uses(RefreshDatabase::class);
 it('successfully retrieves user dashboard statistics and listing activity', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
 
-    // Create 2 Active vehicles for this user
     Vehicle::factory()->count(2)->create([
         'user_id' => $user->id,
-        'status'  => VehicleStatus::ACTIVE->value,
+        'status' => VehicleStatus::ACTIVE->value,
     ]);
 
-    // Create 1 Pending vehicle for this user
     Vehicle::factory()->create([
         'user_id' => $user->id,
-        'status'  => VehicleStatus::PENDING->value,
+        'status' => VehicleStatus::PENDING->value,
     ]);
 
-    // Create 3 Inspection Slots for this user
     InspectionSlot::factory()->count(3)->create([
         'dealer_id' => $user->id,
     ]);
 
-    // Request the dashboard endpoint
     $response = $this->actingAs($user)->getJson("api/v1/dealer/dashboard/{$user->id}");
 
     $response->assertOk()
@@ -47,7 +43,7 @@ it('returns empty counts when user has no listings or inspection slots', functio
 
     $response->assertOk()
         ->assertJsonFragment([
-            'active_listings'  => 0,
+            'active_listings' => 0,
             'pending_listings' => 0,
             'inspection_slots' => 0,
         ])

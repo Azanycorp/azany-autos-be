@@ -2,10 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enum\InspectionSlotStatus; // Adjust or remove if you use plain strings
+// Adjust or remove if you use plain strings
 use App\Models\InspectionLocation;
 use App\Models\InspectionSlot;
-use App\Models\Location;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,13 +29,13 @@ class InspectionSlotFactory extends Factory
     public function definition(): array
     {
         return [
-            'dealer_id'       => User::factory(),
-            'buyer_id'        => User::factory(),
-            'vehicle_id'      => Vehicle::factory(),
-            'location_id'     => InspectionLocation::factory(),
+            'dealer_id' => User::factory(),
+            'buyer_id' => User::factory(),
+            'vehicle_id' => Vehicle::factory(),
+            'location_id' => InspectionLocation::factory(),
             'inspection_date' => fake()->dateTimeBetween('now', '+1 month')->format('Y-m-d'),
             'inspection_time' => fake()->randomElement(['09:00:00', '11:00:00', '14:00:00', '16:00:00']),
-            'status'          => fake()->randomElement(['pending', 'confirmed', 'completed', 'cancelled']),
+            'status' => fake()->randomElement(['pending', 'confirmed', 'completed', 'cancelled']),
         ];
     }
 
