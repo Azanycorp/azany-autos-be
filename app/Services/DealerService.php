@@ -65,15 +65,15 @@ class DealerService
             return $this->errorResponse(null, 'User not found', 404);
         }
 
-        $frontPath = uploadImage($request->file('front_image'), 'vehicles');
-        $backPath = uploadImage($request->file('back_image'), 'vehicles');
+        $front_path = uploadImage($request->file('front_image'), 'vehicles');
+        $back_path = uploadImage($request->file('back_image'), 'vehicles');
         $rear_image = uploadImage($request->file('rear_image'), 'vehicles');
         $passenger_side_image = uploadImage($request->file('passenger_side_image'), 'vehicles');
         $dashboard_image = uploadImage($request->file('dashboard_image'), 'vehicles');
         $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
 
         try {
-            return DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
+            return DB::transaction(function () use ($request, $user, $front_path, $back_path, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
 
                 $vehicle = $user->vehicles()->create([
                     'make' => $request->make,
@@ -101,8 +101,8 @@ class DealerService
                     'accident_history' => $request->accident_history,
                     'damage_history' => $request->damage_history,
                     'service_history' => $request->service_history,
-                    'front_image' => $frontPath,
-                    'back_image' => $backPath,
+                    'front_image' => $front_path,
+                    'back_image' => $back_path,
                     'rear_image' => $rear_image,
                     'passenger_side_image' => $passenger_side_image,
                     'dashboard_image' => $dashboard_image,
@@ -176,8 +176,8 @@ class DealerService
             }
         }
 
-        $frontPath = $request->hasFile('front_image') ? uploadImage($request->file('front_image'), 'vehicles') : $vehicle->front_image;
-        $backPath = $request->hasFile('back_image') ? uploadImage($request->file('back_image'), 'vehicles') : $vehicle->back_image;
+        $front_path = $request->hasFile('front_image') ? uploadImage($request->file('front_image'), 'vehicles') : $vehicle->front_image;
+        $back_path = $request->hasFile('back_image') ? uploadImage($request->file('back_image'), 'vehicles') : $vehicle->back_image;
         $rear_image = $request->hasFile('rear_image') ? uploadImage($request->file('rear_image'), 'vehicles') : $vehicle->rear_image;
         $passenger_side_image = $request->hasFile('passenger_side_image') ? uploadImage($request->file('passenger_side_image'), 'vehicles') : $vehicle->passenger_side_image;
         $dashboard_image = $request->hasFile('dashboard_image') ? uploadImage($request->file('dashboard_image'), 'vehicles') : $vehicle->dashboard_image;
@@ -203,8 +203,8 @@ class DealerService
             'accident_history' => $request->accident_history ?? $vehicle->accident_history,
             'damage_history' => $request->damage_history ?? $vehicle->damage_history,
             'service_history' => $request->service_history ?? $vehicle->service_history,
-            'front_image' => $frontPath,
-            'back_image' => $backPath,
+            'front_image' => $front_path,
+            'back_image' => $back_path,
             'rear_image' => $rear_image,
             'passenger_side_image' => $passenger_side_image,
             'dashboard_image' => $dashboard_image,
@@ -220,10 +220,8 @@ class DealerService
         return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
     }
 
-    public function updateVehicleStatus(Request $request, int $id): JsonResponse
+    public function updateVehicleStatus(Request $request, User $user, int $id): JsonResponse
     {
-        $user = $request->user();
-
         $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {
@@ -235,10 +233,8 @@ class DealerService
         return $this->successResponse(null, 'Vehicle status updated successfully');
     }
 
-    public function deleteVehicle(Request $request, int $id): JsonResponse
+    public function deleteVehicle(User $user, int $id): JsonResponse
     {
-        $user = $request->user();
-
         $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {

@@ -44,14 +44,14 @@ class DealerController extends Controller
         return $this->dealer_service->updateVehicle($request, $id);
     }
 
-    public function deleteVehicle(Request $request, int $id): JsonResponse
+    public function deleteVehicle(#[CurrentUser] User $user, int $id): JsonResponse
     {
-        return $this->dealer_service->deleteVehicle($request, $id);
+        return $this->dealer_service->deleteVehicle($user, $id);
     }
 
-    public function updateVehicleStatus(Request $request, int $id): JsonResponse
+    public function updateVehicleStatus(Request $request, #[CurrentUser] User $user, int $id): JsonResponse
     {
-        return $this->dealer_service->updateVehicleStatus($request, $id);
+        return $this->dealer_service->updateVehicleStatus($request, $user, $id);
     }
 
     public function deleteVehicleImage(Request $request, int $id): JsonResponse

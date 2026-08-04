@@ -162,6 +162,7 @@ class BuyerService
         if (! $saved_search) {
             return $this->errorResponse(null, 'Record not found', 404);
         }
+        
         $saved_search->delete();
 
         return $this->successResponse(null, 'Record deleted');

@@ -30,13 +30,13 @@ class AuthService
     use HttpResponses;
 
     public function __construct(
-        private readonly HttpService $httpService
+        private readonly HttpService $http_service
     ) {}
 
     public function register(RegisterRequest $request): JsonResponse
     {
         try {
-            $requestData = $request->only([
+            $request_data = $request->only([
                 'first_name',
                 'last_name',
                 'email',
@@ -44,11 +44,11 @@ class AuthService
                 'password',
             ]);
 
-            $requestData['signed_up_from'] = 'Azanyautos';
-            $requestData['type'] = $request->user_type == UserType::AUTOBUYER->value ? UserType::AUTOBUYER->value : UserType::AUTODEALER->value;
+            $request_data['signed_up_from'] = 'Azanyautos';
+            $request_data['type'] = $request->user_type == UserType::AUTOBUYER->value ? UserType::AUTOBUYER->value : UserType::AUTODEALER->value;
 
-            $this->httpService->post('register', new RequestOptions(
-                data: $requestData
+            $this->http_service->post('register', new RequestOptions(
+                data: $request_data
             ));
 
             $currency_code = getCurrencyCodeByCountryId($request->country_id);
@@ -98,10 +98,10 @@ class AuthService
         }
 
         if ($user->two_factor_enabled) {
-            $verificationCode = generateUserVerificationCode();
+            $verification_code = generateUserVerificationCode();
 
             $user->update([
-                'verification_code' => $verificationCode,
+                'verification_code' => $verification_code,
                 'verification_code_expire_at' => now()->addMinutes(10),
             ]);
 
@@ -246,11 +246,11 @@ class AuthService
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        $verificationCode = generateUserVerificationCode();
+        $verification_code = generateUserVerificationCode();
         $expiry = now()->addMinutes(10);
 
         $user->update([
-            'verification_code' => $verificationCode,
+            'verification_code' => $verification_code,
             'verification_code_expire_at' => $expiry,
         ]);
 
@@ -269,10 +269,10 @@ class AuthService
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        $verificationCode = generateUserVerificationCode();
+        $verification_code = generateUserVerificationCode();
 
         $user->update([
-            'verification_code' => $verificationCode,
+            'verification_code' => $verification_code,
             'verification_code_expire_at' => Date::now()->addMinutes(30),
         ]);
 
