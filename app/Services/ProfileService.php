@@ -28,10 +28,6 @@ class ProfileService
 
     public function updateProfile(ProfileUpdateRequest $request, User $user): JsonResponse
     {
-        if (! $user instanceof User) {
-            return $this->errorResponse(null, 'User does not exist', 404);
-        }
-
         $currency_code = $request->filled('country_id')
         ? getCurrencyCodeByCountryId((int) $request->country_id)
         : $user->default_currency;
@@ -49,10 +45,6 @@ class ProfileService
 
     public function updateProfilePhoto(ProfilePhotoRequest $request, User $user): JsonResponse
     {
-        if (! $user instanceof User) {
-            return $this->errorResponse(null, 'User does not exist', 404);
-        }
-
         $profile_photo = $request->hasFile('profile_photo') ? uploadImage($request->file('profile_photo'), 'profile_photo') : $user->profile_photo;
 
         $user->update([
@@ -64,10 +56,6 @@ class ProfileService
 
     public function updatePassword(PasswordRequest $request, User $user): JsonResponse
     {
-        if (! $user instanceof User) {
-            return $this->errorResponse(null, 'User does not exist', 404);
-        }
-
         $user->update([
             'password' => $request->password,
         ]);

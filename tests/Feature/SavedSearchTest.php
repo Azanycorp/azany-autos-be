@@ -19,14 +19,12 @@ it('retrieves saved searches and stats for a valid user', function () {
     $response->assertOk()
         ->assertJsonStructure([
             'data' => [
-                'stats' => [
-                    'total_saved',
-                    'alerts_on',
-                    'alerts_paused',
-                    'new_matches_today',
-                    'searches_with_new_matches',
-                    'total_matches_found',
-                ],
+                'total_saved',
+                'alerts_on',
+                'alerts_paused',
+                'new_matches_today',
+                'searches_with_new_matches',
+                'total_matches_found',
                 'searches',
             ],
         ]);
@@ -40,12 +38,6 @@ it('returns 404 when getting saved searches for non-existent user', function () 
     $response->assertStatus(404)
         ->assertJsonFragment(['message' => 'User not found']);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Add Saved Search
-|--------------------------------------------------------------------------
-*/
 
 it('successfully adds a new saved search', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
@@ -80,12 +72,6 @@ it('successfully adds a new saved search', function () {
     ]);
 });
 
-/*
-|--------------------------------------------------------------------------
-| View Saved Search Details
-|--------------------------------------------------------------------------
-*/
-
 it('views a specific saved search detail', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
     $savedSearch = SavedSearch::factory()->create([
@@ -105,18 +91,11 @@ it('returns 404 when viewing non-existent or unowned saved search', function () 
 
     $otherSearch = SavedSearch::factory()->create(['user_id' => $otherUser->id]);
 
-    // Attempt to view another user's saved search
     $response = $this->actingAs($user)->getJson("api/v1/buyer/saved-searches/details/{$otherSearch->id}");
 
     $response->assertStatus(404)
         ->assertJsonFragment(['message' => 'Record not found']);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Update Saved Search
-|--------------------------------------------------------------------------
-*/
 
 it('updates an existing saved search record', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
@@ -139,12 +118,6 @@ it('updates an existing saved search record', function () {
     ]);
 });
 
-/*
-|--------------------------------------------------------------------------
-| Delete Saved Search
-|--------------------------------------------------------------------------
-*/
-
 it('deletes a saved search record', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);
     $savedSearch = SavedSearch::factory()->create(['user_id' => $user->id]);
@@ -156,12 +129,6 @@ it('deletes a saved search record', function () {
 
     $this->assertDatabaseMissing('saved_searches', ['id' => $savedSearch->id]);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Run Saved Search
-|--------------------------------------------------------------------------
-*/
 
 it('runs a saved search and returns matched results', function () {
     $user = User::factory()->create(['status' => UserStatus::ACTIVE->value]);

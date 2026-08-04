@@ -51,22 +51,22 @@ class BuyerService
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
         }
-        /** @var Collection<int, SavedSearch> $savedSearches */
+        /** @var Collection<int, SavedSearch> $saved_searches */
         $saved_searches = $user->savedSearches()->latest()->get();
 
-        $total_saved = $savedSearches->count();
-        $alerts_on = $savedSearches->where('is_notify', true)->count();
-        $alerts_paused = $savedSearches->where('is_notify', false)->count();
+        $total_saved = $saved_searches->count();
+        $alerts_on = $saved_searches->where('is_notify', true)->count();
+        $alerts_paused = $saved_searches->where('is_notify', false)->count();
 
-        $new_matches_today = $savedSearches->sum(
+        $new_matches_today = $saved_searches->sum(
             fn (SavedSearch $search): int => (int) $search->new_matches_today
         );
 
-        $searches_with_new_matches = $savedSearches->filter(
+        $searches_with_new_matches = $saved_searches->filter(
             fn (SavedSearch $search): bool => (int) $search->new_matches_today > 0
         )->count();
 
-        $total_matches_found = $savedSearches->sum(
+        $total_matches_found = $saved_searches->sum(
             fn (SavedSearch $search): int => (int) $search->total_matches
         );
 
@@ -162,7 +162,7 @@ class BuyerService
         if (! $saved_search) {
             return $this->errorResponse(null, 'Record not found', 404);
         }
-        
+
         $saved_search->delete();
 
         return $this->successResponse(null, 'Record deleted');
