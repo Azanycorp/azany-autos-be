@@ -7,37 +7,39 @@ use App\Http\Requests\V1\PasswordRequest;
 use App\Http\Requests\V1\ProfilePhotoRequest;
 use App\Http\Requests\V1\ProfileUpdateRequest;
 use App\Http\Requests\V1\Update2FARequest;
+use App\Models\User;
 use App\Services\ProfileService;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 
 class ProfileController extends Controller
 {
     public function __construct(
-        private readonly ProfileService $profileService
+        private readonly ProfileService $profile_service
     ) {}
 
     public function profile(int $userId): JsonResponse
     {
-        return $this->profileService->profile($userId);
+        return $this->profile_service->profile($userId);
     }
 
-    public function updateProfile(ProfileUpdateRequest $request): JsonResponse
+    public function updateProfile(ProfileUpdateRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profileService->updateprofile($request);
+        return $this->profile_service->updateProfile($request, $user);
     }
 
-    public function updateProfilePhoto(ProfilePhotoRequest $request): JsonResponse
+    public function updateProfilePhoto(ProfilePhotoRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profileService->updateProfilePhoto($request);
+        return $this->profile_service->updateProfilePhoto($request, $user);
     }
 
-    public function updatePassword(PasswordRequest $request): JsonResponse
+    public function updatePassword(PasswordRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profileService->updatePassword($request);
+        return $this->profile_service->updatePassword($request, $user);
     }
 
-    public function enable2FA(Update2FARequest $request): JsonResponse
+    public function enable2FA(Update2FARequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profileService->enable2FA($request);
+        return $this->profile_service->enable2FA($request, $user);
     }
 }

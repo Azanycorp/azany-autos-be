@@ -18,19 +18,15 @@ class BuyerService
 {
     use HttpResponses;
 
-    public function getVehiclePrefernce(Request $request): JsonResponse
+    public function getVehiclePrefernce(User $user): JsonResponse
     {
-        $user = $request->user();
-
         $preference = $user->vehiclePreference;
 
         return $this->successResponse(new BuyerPreferenceResource($preference), 'Preference retrieved successfully');
     }
 
-    public function setVehiclePrefernce(PreferenceRequest $request): JsonResponse
+    public function setVehiclePrefernce(PreferenceRequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
-
         $user->vehiclePreference()->updateOrCreate(
             [
                 'user_id' => $user->id,
@@ -48,7 +44,7 @@ class BuyerService
         return $this->successResponse(null, 'Preference set successfully');
     }
 
-    public function getSavedSearches(Request $request, int $user_id): JsonResponse
+    public function getSavedSearches(int $user_id): JsonResponse
     {
         $user = User::find($user_id);
 
@@ -56,35 +52,32 @@ class BuyerService
             return $this->errorResponse(null, 'User not found', 404);
         }
         /** @var Collection<int, SavedSearch> $savedSearches */
-        $savedSearches = $user->savedSearches()->latest()->get();
+        $saved_searches = $user->savedSearches()->latest()->get();
 
-        $totalSaved = $savedSearches->count();
-        $alertsOn = $savedSearches->where('is_notify', true)->count();
-        $alertsPaused = $savedSearches->where('is_notify', false)->count();
+        $total_saved = $savedSearches->count();
+        $alerts_on = $savedSearches->where('is_notify', true)->count();
+        $alerts_paused = $savedSearches->where('is_notify', false)->count();
 
-        // Pass typed callbacks to resolve Larastan TReturnType template errors
-        $newMatchesToday = $savedSearches->sum(
+        $new_matches_today = $savedSearches->sum(
             fn (SavedSearch $search): int => (int) $search->new_matches_today
         );
 
-        $searchesWithNewMatches = $savedSearches->filter(
+        $searches_with_new_matches = $savedSearches->filter(
             fn (SavedSearch $search): bool => (int) $search->new_matches_today > 0
         )->count();
 
-        $totalMatchesFound = $savedSearches->sum(
+        $total_matches_found = $savedSearches->sum(
             fn (SavedSearch $search): int => (int) $search->total_matches
         );
 
         $data = [
-            'stats' => [
-                'total_saved' => $totalSaved,
-                'alerts_on' => $alertsOn,
-                'alerts_paused' => $alertsPaused,
-                'new_matches_today' => $newMatchesToday,
-                'searches_with_new_matches' => $searchesWithNewMatches,
-                'total_matches_found' => $totalMatchesFound,
-            ],
-            'searches' => SavedSearchResource::collection($savedSearches),
+            'total_saved' => $total_saved,
+            'alerts_on' => $alerts_on,
+            'alerts_paused' => $alerts_paused,
+            'new_matches_today' => $new_matches_today,
+            'searches_with_new_matches' => $searches_with_new_matches,
+            'total_matches_found' => $total_matches_found,
+            'searches' => SavedSearchResource::collection($saved_searches),
         ];
 
         return $this->successResponse($data, 'My Saved Searches');
@@ -122,9 +115,8 @@ class BuyerService
         return $this->successResponse(null, 'New record added successfully');
     }
 
-    public function viewSavedSearch(Request $request, int $id): JsonResponse
+    public function viewSavedSearch(User $user, int $id): JsonResponse
     {
-        $user = $request->user();
         $saved_search = $user->savedSearches()->find($id);
 
         if (! $saved_search) {
@@ -134,9 +126,8 @@ class BuyerService
         return $this->successResponse(new SavedSearchResource($saved_search), 'Details');
     }
 
-    public function updateSavedSearch(Request $request, int $id): JsonResponse
+    public function updateSavedSearch(Request $request, User $user, int $id): JsonResponse
     {
-        $user = $request->user();
         $saved_search = $user->savedSearches()->find($id);
 
         if (! $saved_search) {
@@ -164,9 +155,8 @@ class BuyerService
         return $this->successResponse(new SavedSearchResource($saved_search), 'Details Updated');
     }
 
-    public function deleteSavedSearch(Request $request, int $id): JsonResponse
+    public function deleteSavedSearch(User $user, int $id): JsonResponse
     {
-        $user = $request->user();
         $saved_search = $user->savedSearches()->find($id);
 
         if (! $saved_search) {
@@ -177,18 +167,18 @@ class BuyerService
         return $this->successResponse(null, 'Record deleted');
     }
 
-    public function runSavedSearch(Request $request, int $id): JsonResponse
+    public function runSavedSearch(User $user, int $id): JsonResponse
     {
-        $savedSearch = $request->user()
+        $saved_search = $user
             ->savedSearches()
             ->findOrFail($id);
 
-        $vehicles = $savedSearch->matchesQuery()
+        $vehicles = $saved_search->matchesQuery()
             ->latest()
             ->get();
 
         return $this->successResponse(VehicleResource::collection($vehicles),
-            "Matches found for '{$savedSearch->name}'"
+            "Matches found for '{$saved_search->name}'"
         );
     }
 }

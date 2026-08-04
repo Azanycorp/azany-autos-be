@@ -18,19 +18,19 @@ class SubscriptionController extends Controller
     use HttpResponses;
 
     public function __construct(
-        private readonly SubscriptionService $subscriptionService
+        private readonly SubscriptionService $subscription_service
     ) {}
 
     public function index(): JsonResponse
     {
-        $plans = $this->subscriptionService->index();
+        $plans = $this->subscription_service->index();
 
         return $this->successResponse(SubscriptionPlanResource::collection($plans), 'Subscription plans fetched successfully');
     }
 
     public function show(int $id): JsonResponse
     {
-        $plan = $this->subscriptionService->show($id);
+        $plan = $this->subscription_service->show($id);
 
         if (! $plan) {
             return $this->errorResponse(null, 'Subscription plan not found', 404);
@@ -42,7 +42,7 @@ class SubscriptionController extends Controller
     public function upgrade(ChangeSubscriptionPlanRequest $request, #[CurrentUser] User $user): JsonResponse
     {
         try {
-            $subscription = $this->subscriptionService->upgrade($user->id, $request->validated('plan_id'));
+            $subscription = $this->subscription_service->upgrade($user->id, $request->validated('plan_id'));
 
             return $this->successResponse(new SubscriptionResource($subscription), 'Subscription upgraded successfully');
         } catch (SubscriptionException $e) {
@@ -53,7 +53,7 @@ class SubscriptionController extends Controller
     public function downgrade(ChangeSubscriptionPlanRequest $request, #[CurrentUser] User $user): JsonResponse
     {
         try {
-            $subscription = $this->subscriptionService->downgrade($user->id, $request->validated('plan_id'));
+            $subscription = $this->subscription_service->downgrade($user->id, $request->validated('plan_id'));
 
             return $this->successResponse(new SubscriptionResource($subscription), 'Downgrade scheduled for your next billing cycle');
         } catch (SubscriptionException $e) {
@@ -64,7 +64,7 @@ class SubscriptionController extends Controller
     public function cancel(#[CurrentUser] User $user): JsonResponse
     {
         try {
-            $subscription = $this->subscriptionService->cancel($user->id);
+            $subscription = $this->subscription_service->cancel($user->id);
 
             return $this->successResponse(new SubscriptionResource($subscription), 'Subscription will be cancelled at the end of your billing cycle');
         } catch (SubscriptionException $e) {

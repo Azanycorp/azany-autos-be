@@ -8,10 +8,10 @@ use Illuminate\Http\JsonResponse;
 
 class HomeController extends Controller
 {
-    public function __construct(private readonly HomeService $homeService) {}
+    public function __construct(private readonly HomeService $home_service) {}
 
     public function migrate(): JsonResponse
     {
-        return $this->homeService->migrate();
+        return $this->home_service->migrate();
     }
 }

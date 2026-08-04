@@ -277,9 +277,9 @@ class DealerService
         return $this->successResponse(new TagResource($tag), 'Custom tag added successfully');
     }
 
-    public function getTags(int $userId): JsonResponse
+    public function getTags(int $user_id): JsonResponse
     {
-        $user = User::with('customTags')->find($userId);
+        $user = User::with('customTags')->find($user_id);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
@@ -310,9 +310,9 @@ class DealerService
         }
 
         if ($tag->name !== $request->name) {
-            $existingTag = $user->customTags()->where('name', $request->name)->first();
+            $existing_tag = $user->customTags()->where('name', $request->name)->first();
 
-            if ($existingTag) {
+            if ($existing_tag) {
                 return $this->errorResponse(null, 'Tag name already exists', 422);
             }
         }
@@ -326,7 +326,7 @@ class DealerService
 
     public function deleteTag(int $id, User $user): JsonResponse
     {
-        $tag = $tag = $user->customTags()->find($id);
+        $tag = $user->customTags()->find($id);
 
         if (! $tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
@@ -352,9 +352,9 @@ class DealerService
         return $this->successResponse(new InspectionLocationResource($location), 'Location added successfully');
     }
 
-    public function getAllLocations(int $userId): JsonResponse
+    public function getAllLocations(int $user_id): JsonResponse
     {
-        $user = User::with('inspectionLocations')->find($userId);
+        $user = User::with('inspectionLocations')->find($user_id);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
@@ -453,9 +453,9 @@ class DealerService
         return $this->successResponse(new SlotResource($slot), 'New Slot added successfully');
     }
 
-    public function getAllSlots(int $userId): JsonResponse
+    public function getAllSlots(int $user_id): JsonResponse
     {
-        $user = User::where('id', $userId)->first();
+        $user = User::where('id', $user_id)->first();
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);

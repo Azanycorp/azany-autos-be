@@ -26,10 +26,8 @@ class ProfileService
         return $this->successResponse(new UserResource($user), 'User profile');
     }
 
-    public function updateProfile(ProfileUpdateRequest $request): JsonResponse
+    public function updateProfile(ProfileUpdateRequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
-
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
         }
@@ -49,10 +47,8 @@ class ProfileService
         return $this->successResponse(null, 'Details Updated');
     }
 
-    public function updateProfilePhoto(ProfilePhotoRequest $request): JsonResponse
+    public function updateProfilePhoto(ProfilePhotoRequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
-
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
         }
@@ -66,10 +62,8 @@ class ProfileService
         return $this->successResponse(null, 'Profile photo Updated');
     }
 
-    public function updatePassword(PasswordRequest $request): JsonResponse
+    public function updatePassword(PasswordRequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
-
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
         }
@@ -81,23 +75,21 @@ class ProfileService
         return $this->successResponse(null, 'Password Updated');
     }
 
-    public function enable2FA(Update2FARequest $request): JsonResponse
+    public function enable2FA(Update2FARequest $request, User $user): JsonResponse
     {
-        $user = $request->user();
+        $new_status = (bool) $request->validated('two_factor_enabled');
 
-        $newStatus = (bool) $request->validated('two_factor_enabled');
-
-        if ($user->two_factor_enabled === $newStatus) {
-            $state = $newStatus ? 'enabled' : 'disabled';
+        if ($user->two_factor_enabled === $new_status) {
+            $state = $new_status ? 'enabled' : 'disabled';
 
             return $this->errorResponse(null, "2FA is already {$state}.", 400);
         }
 
         $user->update([
-            'two_factor_enabled' => $newStatus,
+            'two_factor_enabled' => $new_status,
         ]);
 
-        $status = $newStatus ? 'enabled' : 'disabled';
+        $status = $new_status ? 'enabled' : 'disabled';
 
         return $this->successResponse(null, "2FA {$status} successfully.");
     }
