@@ -15,9 +15,9 @@ class ProfileService
 {
     use HttpResponses;
 
-    public function profile(int $userId): JsonResponse
+    public function profile(int $user_id): JsonResponse
     {
-        $user = User::with(['activeSubscription.plan.features'])->find($userId);
+        $user = User::with(['activeSubscription.plan.features'])->find($user_id);
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);

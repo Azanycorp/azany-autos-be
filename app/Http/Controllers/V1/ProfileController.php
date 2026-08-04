@@ -18,9 +18,9 @@ class ProfileController extends Controller
         private readonly ProfileService $profile_service
     ) {}
 
-    public function profile(int $userId): JsonResponse
+    public function profile(int $user_id): JsonResponse
     {
-        return $this->profile_service->profile($userId);
+        return $this->profile_service->profile($user_id);
     }
 
     public function updateProfile(ProfileUpdateRequest $request, #[CurrentUser] User $user): JsonResponse
