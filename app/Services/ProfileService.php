@@ -15,9 +15,9 @@ class ProfileService
 {
     use HttpResponses;
 
-    public function profile(int $user_id): JsonResponse
+    public function profile(int $userId): JsonResponse
     {
-        $user = User::with(['activeSubscription.plan.features'])->find($user_id);
+        $user = User::with(['activeSubscription.plan.features'])->find($userId);
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User does not exist', 404);
@@ -28,7 +28,7 @@ class ProfileService
 
     public function updateProfile(ProfileUpdateRequest $request, User $user): JsonResponse
     {
-        $currency_code = $request->filled('country_id')
+        $currencyCode = $request->filled('country_id')
         ? getCurrencyCodeByCountryId((int) $request->country_id)
         : $user->default_currency;
 
@@ -37,7 +37,7 @@ class ProfileService
             'first_name' => $request->first_name ?? $user->first_name,
             'last_name' => $request->last_name ?? $user->last_name,
             'country_id' => $request->country_id ?? $user->country_id,
-            'default_currency' => $currency_code,
+            'default_currency' => $currencyCode,
         ]);
 
         return $this->successResponse(null, 'Details Updated');
@@ -45,10 +45,10 @@ class ProfileService
 
     public function updateProfilePhoto(ProfilePhotoRequest $request, User $user): JsonResponse
     {
-        $profile_photo = $request->hasFile('profile_photo') ? uploadImage($request->file('profile_photo'), 'profile_photo') : $user->profile_photo;
+        $profilePhoto = $request->hasFile('profile_photo') ? uploadImage($request->file('profile_photo'), 'profile_photo') : $user->profile_photo;
 
         $user->update([
-            'profile_photo' => $profile_photo,
+            'profile_photo' => $profilePhoto,
         ]);
 
         return $this->successResponse(null, 'Profile photo Updated');
@@ -65,19 +65,19 @@ class ProfileService
 
     public function enable2FA(Update2FARequest $request, User $user): JsonResponse
     {
-        $new_status = (bool) $request->validated('two_factor_enabled');
+        $newStatus = $request->boolean('two_factor_enabled');
 
-        if ($user->two_factor_enabled === $new_status) {
-            $state = $new_status ? 'enabled' : 'disabled';
+        if ($user->two_factor_enabled === $newStatus) {
+            $state = $newStatus ? 'enabled' : 'disabled';
 
             return $this->errorResponse(null, "2FA is already {$state}.", 400);
         }
 
         $user->update([
-            'two_factor_enabled' => $new_status,
+            'two_factor_enabled' => $newStatus,
         ]);
 
-        $status = $new_status ? 'enabled' : 'disabled';
+        $status = $newStatus ? 'enabled' : 'disabled';
 
         return $this->successResponse(null, "2FA {$status} successfully.");
     }

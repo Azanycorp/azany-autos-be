@@ -30,24 +30,24 @@ class DealerService
 {
     use HttpResponses;
 
-    public function dashboard(int $user_id): JsonResponse
+    public function dashboard(int $userId): JsonResponse
     {
-        $user = User::where('id', $user_id)->first();
+        $user = User::where('id', $userId)->first();
 
         if (! $user instanceof User) {
             return $this->errorResponse(null, 'User not found', 404);
         }
 
-        $active_listings = $user->vehicles()->where('status', VehicleStatus::ACTIVE->value)->count();
-        $pending_listings = $user->vehicles()->where('status', VehicleStatus::PENDING->value)->count();
-        $inspection_slots = $user->inspectionSlots()->count();
-        $listing_activity = $user->vehicles()->latest()->get();
+        $activeListings = $user->vehicles()->where('status', VehicleStatus::ACTIVE->value)->count();
+        $pendingListings = $user->vehicles()->where('status', VehicleStatus::PENDING->value)->count();
+        $inspectionSlots = $user->inspectionSlots()->count();
+        $listingActivity = $user->vehicles()->latest()->get();
 
         $data = [
-            'active_listings' => $active_listings,
-            'pending_listings' => $pending_listings,
-            'inspection_slots' => $inspection_slots,
-            'listing_activity' => VehicleResource::collection($listing_activity),
+            'active_listings' => $activeListings,
+            'pending_listings' => $pendingListings,
+            'inspection_slots' => $inspectionSlots,
+            'listing_activity' => VehicleResource::collection($listingActivity),
         ];
 
         return $this->successResponse($data, 'Dashboard details');
@@ -65,15 +65,15 @@ class DealerService
             return $this->errorResponse(null, 'User not found', 404);
         }
 
-        $front_path = uploadImage($request->file('front_image'), 'vehicles');
-        $back_path = uploadImage($request->file('back_image'), 'vehicles');
-        $rear_image = uploadImage($request->file('rear_image'), 'vehicles');
-        $passenger_side_image = uploadImage($request->file('passenger_side_image'), 'vehicles');
-        $dashboard_image = uploadImage($request->file('dashboard_image'), 'vehicles');
-        $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
+        $frontPath = uploadImage($request->file('front_image'), 'vehicles');
+        $backPath = uploadImage($request->file('back_image'), 'vehicles');
+        $rearPath = uploadImage($request->file('rear_image'), 'vehicles');
+        $passengerSideImagePath = uploadImage($request->file('passenger_side_image'), 'vehicles');
+        $dashboardPath = uploadImage($request->file('dashboard_image'), 'vehicles');
+        $youtubeVideoPath = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
 
         try {
-            return DB::transaction(function () use ($request, $user, $front_path, $back_path, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
+            return DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rearPath, $passengerSideImagePath, $dashboardPath, $youtubeVideoPath) {
 
                 $vehicle = $user->vehicles()->create([
                     'make' => $request->make,
@@ -101,12 +101,12 @@ class DealerService
                     'accident_history' => $request->accident_history,
                     'damage_history' => $request->damage_history,
                     'service_history' => $request->service_history,
-                    'front_image' => $front_path,
-                    'back_image' => $back_path,
-                    'rear_image' => $rear_image,
-                    'passenger_side_image' => $passenger_side_image,
-                    'dashboard_image' => $dashboard_image,
-                    'video_link' => $youtube_video,
+                    'front_image' => $frontPath,
+                    'back_image' => $backPath,
+                    'rear_image' => $rearPath,
+                    'passenger_side_image' => $passengerSideImagePath,
+                    'dashboard_image' => $dashboardPath,
+                    'video_link' => $youtubeVideoPath,
                     'description' => $request->description,
                     'features' => $request->features,
                 ]);
@@ -176,12 +176,12 @@ class DealerService
             }
         }
 
-        $front_path = $request->hasFile('front_image') ? uploadImage($request->file('front_image'), 'vehicles') : $vehicle->front_image;
-        $back_path = $request->hasFile('back_image') ? uploadImage($request->file('back_image'), 'vehicles') : $vehicle->back_image;
-        $rear_image = $request->hasFile('rear_image') ? uploadImage($request->file('rear_image'), 'vehicles') : $vehicle->rear_image;
-        $passenger_side_image = $request->hasFile('passenger_side_image') ? uploadImage($request->file('passenger_side_image'), 'vehicles') : $vehicle->passenger_side_image;
-        $dashboard_image = $request->hasFile('dashboard_image') ? uploadImage($request->file('dashboard_image'), 'vehicles') : $vehicle->dashboard_image;
-        $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : $vehicle->video_link;
+        $frontPath = $request->hasFile('front_image') ? uploadImage($request->file('front_image'), 'vehicles') : $vehicle->front_image;
+        $backPath = $request->hasFile('back_image') ? uploadImage($request->file('back_image'), 'vehicles') : $vehicle->back_image;
+        $rearPath = $request->hasFile('rear_image') ? uploadImage($request->file('rear_image'), 'vehicles') : $vehicle->rear_image;
+        $passengerSideImagePath = $request->hasFile('passenger_side_image') ? uploadImage($request->file('passenger_side_image'), 'vehicles') : $vehicle->passenger_side_image;
+        $dashboardPath = $request->hasFile('dashboard_image') ? uploadImage($request->file('dashboard_image'), 'vehicles') : $vehicle->dashboard_image;
+        $youtubeVideoPath = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : $vehicle->video_link;
 
         $vehicle->update([
             'make' => $request->make ?? $vehicle->make,
@@ -203,12 +203,12 @@ class DealerService
             'accident_history' => $request->accident_history ?? $vehicle->accident_history,
             'damage_history' => $request->damage_history ?? $vehicle->damage_history,
             'service_history' => $request->service_history ?? $vehicle->service_history,
-            'front_image' => $front_path,
-            'back_image' => $back_path,
-            'rear_image' => $rear_image,
-            'passenger_side_image' => $passenger_side_image,
-            'dashboard_image' => $dashboard_image,
-            'video_link' => $youtube_video,
+            'front_image' => $frontPath,
+            'back_image' => $backPath,
+            'rear_image' => $rearPath,
+            'passenger_side_image' => $passengerSideImagePath,
+            'dashboard_image' => $dashboardPath,
+            'video_link' => $youtubeVideoPath,
             'description' => $request->description ?? $vehicle->description,
             'features' => $request->features ?? $vehicle->features,
         ]);
@@ -306,9 +306,9 @@ class DealerService
         }
 
         if ($tag->name !== $request->name) {
-            $existing_tag = $user->customTags()->where('name', $request->name)->first();
+            $existingTag = $user->customTags()->where('name', $request->name)->first();
 
-            if ($existing_tag) {
+            if ($existingTag) {
                 return $this->errorResponse(null, 'Tag name already exists', 422);
             }
         }
@@ -449,9 +449,9 @@ class DealerService
         return $this->successResponse(new SlotResource($slot), 'New Slot added successfully');
     }
 
-    public function getAllSlots(int $user_id): JsonResponse
+    public function getAllSlots(int $userId): JsonResponse
     {
-        $user = User::where('id', $user_id)->first();
+        $user = User::where('id', $userId)->first();
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);

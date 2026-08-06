@@ -30,13 +30,13 @@ class AuthService
     use HttpResponses;
 
     public function __construct(
-        private readonly HttpService $http_service
+        private readonly HttpService $httpService
     ) {}
 
     public function register(RegisterRequest $request): JsonResponse
     {
         try {
-            $request_data = $request->only([
+            $requestData = $request->only([
                 'first_name',
                 'last_name',
                 'email',
@@ -44,14 +44,14 @@ class AuthService
                 'password',
             ]);
 
-            $request_data['signed_up_from'] = 'Azanyautos';
-            $request_data['type'] = $request->user_type == UserType::AUTOBUYER->value ? UserType::AUTOBUYER->value : UserType::AUTODEALER->value;
+            $requestData['signed_up_from'] = 'Azanyautos';
+            $requestData['type'] = $request->user_type == UserType::AUTOBUYER->value ? UserType::AUTOBUYER->value : UserType::AUTODEALER->value;
 
-            $this->http_service->post('register', new RequestOptions(
-                data: $request_data
+            $this->httpService->post('register', new RequestOptions(
+                data: $requestData
             ));
 
-            $currency_code = getCurrencyCodeByCountryId($request->country_id);
+            $currencyCode = getCurrencyCodeByCountryId($request->country_id);
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -62,7 +62,7 @@ class AuthService
                 'business_name' => $request->business_name,
                 'contact_person' => $request->contact_person,
                 'country_id' => $request->country_id,
-                'default_currency' => $currency_code,
+                'default_currency' => $currencyCode,
                 'status' => UserStatus::PENDING->value,
                 'password' => bcrypt($request->password),
             ]);
@@ -98,20 +98,20 @@ class AuthService
         }
 
         if ($user->two_factor_enabled) {
-            $verification_code = generateUserVerificationCode();
+            $verificationCode = generateUserVerificationCode();
 
             $user->update([
-                'verification_code' => $verification_code,
+                'verification_code' => $verificationCode,
                 'verification_code_expire_at' => now()->addMinutes(10),
             ]);
 
             $type = MailingEnum::TWO_FA_OTP->value;
             $subject = 'Two-Factor Authentication Code';
-            $mail_class = TwoFACodeMail::class;
+            $mailClass = TwoFACodeMail::class;
             $data = [
                 'user' => $user,
             ];
-            mailSend($type, $user, $subject, $mail_class, $data);
+            mailSend($type, $user, $subject, $mailClass, $data);
 
             return $this->successResponse(null, '2FA code sent.');
         }
@@ -246,21 +246,21 @@ class AuthService
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        $verification_code = generateUserVerificationCode();
+        $verificationCode = generateUserVerificationCode();
         $expiry = now()->addMinutes(10);
 
         $user->update([
-            'verification_code' => $verification_code,
+            'verification_code' => $verificationCode,
             'verification_code_expire_at' => $expiry,
         ]);
 
         $type = MailingEnum::RESET_OTP->value;
         $subject = 'Password Reset Request';
-        $mail_class = PasswordResetCodeMail::class;
+        $mailClass = PasswordResetCodeMail::class;
         $data = [
             'user' => $user,
         ];
-        mailSend($type, $user, $subject, $mail_class, $data);
+        mailSend($type, $user, $subject, $mailClass, $data);
 
         return $this->successResponse(null, 'A new code has been sent to you');
     }
@@ -269,21 +269,21 @@ class AuthService
     {
         $user = User::where('email', $request->email)->firstOrFail();
 
-        $verification_code = generateUserVerificationCode();
+        $verificationCode = generateUserVerificationCode();
 
         $user->update([
-            'verification_code' => $verification_code,
+            'verification_code' => $verificationCode,
             'verification_code_expire_at' => Date::now()->addMinutes(30),
         ]);
 
         $type = MailingEnum::RESET_OTP->value;
         $subject = 'Password Reset Request';
-        $mail_class = PasswordResetCodeMail::class;
+        $mailClass = PasswordResetCodeMail::class;
         $data = [
             'user' => $user,
         ];
 
-        mailSend($type, $user, $subject, $mail_class, $data);
+        mailSend($type, $user, $subject, $mailClass, $data);
 
         return $this->successResponse(null, 'A verification code has been sent to your email');
     }
