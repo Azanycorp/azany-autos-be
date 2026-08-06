@@ -15,31 +15,31 @@ use Illuminate\Http\JsonResponse;
 class ProfileController extends Controller
 {
     public function __construct(
-        private readonly ProfileService $profile_service
+        private readonly ProfileService $profileService
     ) {}
 
-    public function profile(int $user_id): JsonResponse
+    public function profile(int $userId): JsonResponse
     {
-        return $this->profile_service->profile($user_id);
+        return $this->profileService->profile($userId);
     }
 
     public function updateProfile(ProfileUpdateRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profile_service->updateProfile($request, $user);
+        return $this->profileService->updateProfile($request, $user);
     }
 
     public function updateProfilePhoto(ProfilePhotoRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profile_service->updateProfilePhoto($request, $user);
+        return $this->profileService->updateProfilePhoto($request, $user);
     }
 
     public function updatePassword(PasswordRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profile_service->updatePassword($request, $user);
+        return $this->profileService->updatePassword($request, $user);
     }
 
     public function enable2FA(Update2FARequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        return $this->profile_service->enable2FA($request, $user);
+        return $this->profileService->enable2FA($request, $user);
     }
 }

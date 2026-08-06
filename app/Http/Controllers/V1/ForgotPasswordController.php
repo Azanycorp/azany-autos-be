@@ -13,26 +13,26 @@ use Illuminate\Http\Request;
 class ForgotPasswordController extends Controller
 {
     public function __construct(
-        private AuthService $account_service
+        private AuthService $accountService
     ) {}
 
     public function verifyUser(VerifyUserRequest $request): JsonResponse
     {
-        return $this->account_service->verifyUserIdentity($request);
+        return $this->accountService->verifyUserIdentity($request);
     }
 
     public function verifyCode(CodeRequest $request): JsonResponse
     {
-        return $this->account_service->verifyCode($request);
+        return $this->accountService->verifyCode($request);
     }
 
     public function changePassword(UserResetPassRequest $request): JsonResponse
     {
-        return $this->account_service->changePassword($request);
+        return $this->accountService->changePassword($request);
     }
 
     public function resendCode(Request $request): JsonResponse
     {
-        return $this->account_service->resendCode($request);
+        return $this->accountService->resendCode($request);
     }
 }
