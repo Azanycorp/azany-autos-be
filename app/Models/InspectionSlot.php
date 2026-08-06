@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Database\Factories\InspectionSlotFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -51,6 +53,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InspectionSlot extends Model
 {
+    /** @use HasFactory<InspectionSlotFactory> */
+    use HasFactory;
+
     /**
      * @return BelongsTo<User, $this>
      */

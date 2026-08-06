@@ -3,10 +3,12 @@
 namespace App\Models\Traits;
 
 use App\Enum\SubscriptionStatus;
+use App\Models\BuyerPreference;
 use App\Models\Country;
 use App\Models\FeatureTag;
 use App\Models\InspectionLocation;
 use App\Models\InspectionSlot;
+use App\Models\SavedSearch;
 use App\Models\Subscription;
 use App\Models\Vehicle;
 use App\Models\Wallet;
@@ -61,6 +63,22 @@ trait UserRelationships
     public function inspectionSlots(): HasMany
     {
         return $this->hasMany(InspectionSlot::class, 'dealer_id', 'id');
+    }
+
+    /**
+     * @return HasOne<BuyerPreference, $this>
+     */
+    public function vehiclePreference(): HasOne
+    {
+        return $this->hasOne(BuyerPreference::class);
+    }
+
+    /**
+     * @return HasMany<SavedSearch, $this>
+     */
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class);
     }
 
     /**

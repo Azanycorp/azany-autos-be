@@ -50,7 +50,7 @@ class VehicleFactory extends Factory
             'engine_capacity' => $this->faker->randomElement(['1.8L', '2.0L', '2.5L', '3.0L', '4.5L']),
             'previous_owner' => $this->faker->randomElement(['1', '2', '3+']),
             'make' => $make,
-            'model' => $modelName,
+            'model' => 'Camry',
             'year' => $this->faker->year(),
             'variant' => $this->faker->randomElement(['LE', 'XLE', 'SE', 'Standard', 'Premium']),
             'body_type' => $this->faker->randomElement(['Sedan', 'SUV', 'Hatchback', 'Coupe', 'Truck']),

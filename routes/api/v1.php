@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\V1\AuthenticationController;
+use App\Http\Controllers\V1\BuyerController;
 use App\Http\Controllers\V1\DealerController;
 use App\Http\Controllers\V1\ForgotPasswordController;
 use App\Http\Controllers\V1\ProfileController;
@@ -27,12 +28,36 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::prefix('profile')
+        ->controller(ProfileController::class)
+        ->group(function () {
+            Route::get('/{user_id}', 'profile');
+            Route::post('/update-password', 'updatePassword');
+            Route::post('/update-profile', 'updateprofile');
+            Route::post('/update-2fa', 'enable2FA');
+            Route::post('/profile-photo', 'updateProfilePhoto');
+        });
 
-    // Dealer route
+    // Buyer route
+    Route::prefix('buyer')
+        ->controller(BuyerController::class)
+        ->group(function () {
+            Route::get('/get-preference', 'getVehiclePrefernce');
+            Route::post('/set-preference', 'setPreference');
+
+            Route::prefix('saved-searches')
+                ->group(function () {
+                    Route::get('/{user_id}', 'getSavedSearches');
+                    Route::post('/add', 'addSavedSearch');
+                    Route::get('/details/{id}', 'viewSavedSearch');
+                    Route::post('/update/{id}', 'updateSavedSearch');
+                    Route::delete('/delete/{id}', 'deleteSavedSearch');
+                    Route::get('/run-search/{id}', 'runSavedSearch');
+                });
+        });
+
     Route::prefix('dealer')
         ->group(function () {
-            Route::get('/profile/{user_id}', [ProfileController::class]);
-
             Route::prefix('vehicles')
                 ->controller(DealerController::class)
                 ->group(function () {
@@ -86,6 +111,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::post('/downgrade', 'downgrade');
                     Route::post('/cancel', 'cancel');
                     Route::get('/{id}', 'show');
+                });
+
+            Route::controller(DealerController::class)
+                ->group(function () {
+                    Route::get('/dashboard/{user_id}', 'dashboard');
                 });
         });
 });

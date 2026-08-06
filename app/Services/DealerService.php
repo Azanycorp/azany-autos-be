@@ -30,6 +30,29 @@ class DealerService
 {
     use HttpResponses;
 
+    public function dashboard(int $userId): JsonResponse
+    {
+        $user = User::where('id', $userId)->first();
+
+        if (! $user instanceof User) {
+            return $this->errorResponse(null, 'User not found', 404);
+        }
+
+        $activeListings = $user->vehicles()->where('status', VehicleStatus::ACTIVE->value)->count();
+        $pendingListings = $user->vehicles()->where('status', VehicleStatus::PENDING->value)->count();
+        $inspectionSlots = $user->inspectionSlots()->count();
+        $listingActivity = $user->vehicles()->latest()->get();
+
+        $data = [
+            'active_listings' => $activeListings,
+            'pending_listings' => $pendingListings,
+            'inspection_slots' => $inspectionSlots,
+            'listing_activity' => VehicleResource::collection($listingActivity),
+        ];
+
+        return $this->successResponse($data, 'Dashboard details');
+    }
+
     public function addVehicle(VehicleRequest $request): JsonResponse
     {
         if ($request->reserved_price > $request->price) {
@@ -44,13 +67,13 @@ class DealerService
 
         $frontPath = uploadImage($request->file('front_image'), 'vehicles');
         $backPath = uploadImage($request->file('back_image'), 'vehicles');
-        $rear_image = uploadImage($request->file('rear_image'), 'vehicles');
-        $passenger_side_image = uploadImage($request->file('passenger_side_image'), 'vehicles');
-        $dashboard_image = uploadImage($request->file('dashboard_image'), 'vehicles');
-        $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
+        $rearPath = uploadImage($request->file('rear_image'), 'vehicles');
+        $passengerSideImagePath = uploadImage($request->file('passenger_side_image'), 'vehicles');
+        $dashboardPath = uploadImage($request->file('dashboard_image'), 'vehicles');
+        $youtubeVideoPath = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : null;
 
         try {
-            return DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rear_image, $passenger_side_image, $dashboard_image, $youtube_video) {
+            return DB::transaction(function () use ($request, $user, $frontPath, $backPath, $rearPath, $passengerSideImagePath, $dashboardPath, $youtubeVideoPath) {
 
                 $vehicle = $user->vehicles()->create([
                     'make' => $request->make,
@@ -80,10 +103,10 @@ class DealerService
                     'service_history' => $request->service_history,
                     'front_image' => $frontPath,
                     'back_image' => $backPath,
-                    'rear_image' => $rear_image,
-                    'passenger_side_image' => $passenger_side_image,
-                    'dashboard_image' => $dashboard_image,
-                    'video_link' => $youtube_video,
+                    'rear_image' => $rearPath,
+                    'passenger_side_image' => $passengerSideImagePath,
+                    'dashboard_image' => $dashboardPath,
+                    'video_link' => $youtubeVideoPath,
                     'description' => $request->description,
                     'features' => $request->features,
                 ]);
@@ -155,10 +178,10 @@ class DealerService
 
         $frontPath = $request->hasFile('front_image') ? uploadImage($request->file('front_image'), 'vehicles') : $vehicle->front_image;
         $backPath = $request->hasFile('back_image') ? uploadImage($request->file('back_image'), 'vehicles') : $vehicle->back_image;
-        $rear_image = $request->hasFile('rear_image') ? uploadImage($request->file('rear_image'), 'vehicles') : $vehicle->rear_image;
-        $passenger_side_image = $request->hasFile('passenger_side_image') ? uploadImage($request->file('passenger_side_image'), 'vehicles') : $vehicle->passenger_side_image;
-        $dashboard_image = $request->hasFile('dashboard_image') ? uploadImage($request->file('dashboard_image'), 'vehicles') : $vehicle->dashboard_image;
-        $youtube_video = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : $vehicle->video_link;
+        $rearPath = $request->hasFile('rear_image') ? uploadImage($request->file('rear_image'), 'vehicles') : $vehicle->rear_image;
+        $passengerSideImagePath = $request->hasFile('passenger_side_image') ? uploadImage($request->file('passenger_side_image'), 'vehicles') : $vehicle->passenger_side_image;
+        $dashboardPath = $request->hasFile('dashboard_image') ? uploadImage($request->file('dashboard_image'), 'vehicles') : $vehicle->dashboard_image;
+        $youtubeVideoPath = $request->hasFile('video_link') ? uploadImage($request->file('video_link'), 'vehicles') : $vehicle->video_link;
 
         $vehicle->update([
             'make' => $request->make ?? $vehicle->make,
@@ -182,10 +205,10 @@ class DealerService
             'service_history' => $request->service_history ?? $vehicle->service_history,
             'front_image' => $frontPath,
             'back_image' => $backPath,
-            'rear_image' => $rear_image,
-            'passenger_side_image' => $passenger_side_image,
-            'dashboard_image' => $dashboard_image,
-            'video_link' => $youtube_video,
+            'rear_image' => $rearPath,
+            'passenger_side_image' => $passengerSideImagePath,
+            'dashboard_image' => $dashboardPath,
+            'video_link' => $youtubeVideoPath,
             'description' => $request->description ?? $vehicle->description,
             'features' => $request->features ?? $vehicle->features,
         ]);
@@ -197,10 +220,8 @@ class DealerService
         return $this->successResponse(new VehicleResource($vehicle), 'Vehicle updated successfully');
     }
 
-    public function updateVehicleStatus(Request $request, int $id): JsonResponse
+    public function updateVehicleStatus(Request $request, User $user, int $id): JsonResponse
     {
-        $user = $request->user();
-
         $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {
@@ -212,10 +233,8 @@ class DealerService
         return $this->successResponse(null, 'Vehicle status updated successfully');
     }
 
-    public function deleteVehicle(Request $request, int $id): JsonResponse
+    public function deleteVehicle(User $user, int $id): JsonResponse
     {
-        $user = $request->user();
-
         $vehicle = $user->vehicles->find($id);
 
         if (! $vehicle) {
@@ -254,9 +273,9 @@ class DealerService
         return $this->successResponse(new TagResource($tag), 'Custom tag added successfully');
     }
 
-    public function getTags(int $userId): JsonResponse
+    public function getTags(int $user_id): JsonResponse
     {
-        $user = User::with('customTags')->find($userId);
+        $user = User::with('customTags')->find($user_id);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);
@@ -303,7 +322,7 @@ class DealerService
 
     public function deleteTag(int $id, User $user): JsonResponse
     {
-        $tag = $tag = $user->customTags()->find($id);
+        $tag = $user->customTags()->find($id);
 
         if (! $tag instanceof FeatureTag) {
             return $this->errorResponse(null, 'Tag not found', 404);
@@ -329,9 +348,9 @@ class DealerService
         return $this->successResponse(new InspectionLocationResource($location), 'Location added successfully');
     }
 
-    public function getAllLocations(int $userId): JsonResponse
+    public function getAllLocations(int $user_id): JsonResponse
     {
-        $user = User::with('inspectionLocations')->find($userId);
+        $user = User::with('inspectionLocations')->find($user_id);
 
         if (! $user) {
             return $this->errorResponse(null, 'User not found', 404);

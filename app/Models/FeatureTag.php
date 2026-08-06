@@ -28,6 +28,7 @@ use Illuminate\Support\Carbon;
     'user_id',
     'name',
 ])]
+
 class FeatureTag extends Model
 {
     //

@@ -51,7 +51,7 @@ class AuthService
                 data: $requestData
             ));
 
-            $currency_code = getCurrencyCodeByCountryId($request->country_id);
+            $currencyCode = getCurrencyCodeByCountryId($request->country_id);
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -62,7 +62,7 @@ class AuthService
                 'business_name' => $request->business_name,
                 'contact_person' => $request->contact_person,
                 'country_id' => $request->country_id,
-                'default_currency' => $currency_code,
+                'default_currency' => $currencyCode,
                 'status' => UserStatus::PENDING->value,
                 'password' => bcrypt($request->password),
             ]);
@@ -107,11 +107,11 @@ class AuthService
 
             $type = MailingEnum::TWO_FA_OTP->value;
             $subject = 'Two-Factor Authentication Code';
-            $mail_class = TwoFACodeMail::class;
+            $mailClass = TwoFACodeMail::class;
             $data = [
                 'user' => $user,
             ];
-            mailSend($type, $user, $subject, $mail_class, $data);
+            mailSend($type, $user, $subject, $mailClass, $data);
 
             return $this->successResponse(null, '2FA code sent.');
         }
@@ -256,11 +256,11 @@ class AuthService
 
         $type = MailingEnum::RESET_OTP->value;
         $subject = 'Password Reset Request';
-        $mail_class = PasswordResetCodeMail::class;
+        $mailClass = PasswordResetCodeMail::class;
         $data = [
             'user' => $user,
         ];
-        mailSend($type, $user, $subject, $mail_class, $data);
+        mailSend($type, $user, $subject, $mailClass, $data);
 
         return $this->successResponse(null, 'A new code has been sent to you');
     }
@@ -278,12 +278,12 @@ class AuthService
 
         $type = MailingEnum::RESET_OTP->value;
         $subject = 'Password Reset Request';
-        $mail_class = PasswordResetCodeMail::class;
+        $mailClass = PasswordResetCodeMail::class;
         $data = [
             'user' => $user,
         ];
 
-        mailSend($type, $user, $subject, $mail_class, $data);
+        mailSend($type, $user, $subject, $mailClass, $data);
 
         return $this->successResponse(null, 'A verification code has been sent to your email');
     }
