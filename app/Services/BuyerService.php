@@ -71,12 +71,12 @@ class BuyerService
         );
 
         $data = [
-            'totalSaved' => $totalSaved,
-            'alertsOn' => $alertsOn,
-            'alertsPaused' => $alertsPaused,
-            'newMatchesToday' => $newMatchesToday,
-            'searchesWithNewMatches' => $searchesWithNewMatches,
-            'totalMatchesFound' => $totalMatchesFound,
+            'total_saved' => $totalSaved,
+            'alerts_on' => $alertsOn,
+            'alerts_paused' => $alertsPaused,
+            'new_matches_today' => $newMatchesToday,
+            'searches_with_new_matches' => $searchesWithNewMatches,
+            'total_matches_found' => $totalMatchesFound,
             'searches' => SavedSearchResource::collection($savedSearches),
         ];
 
